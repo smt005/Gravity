@@ -11,4 +11,7 @@ public:
 	Gravity();
 	bool Init(std::string_view params) override;
 	void Update() override;
+	void Draw() override;
+	void OnResize() override;
+	void OnClose() override;
 };

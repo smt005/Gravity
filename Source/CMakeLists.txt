@@ -22,6 +22,13 @@ set(MYSTL_NAME MyStl)
 set(MYSTL_DIR "${ENGINE_DIR}/ThirdParty/MyStl")
 set(MYSTL_SOURCE "${MYSTL_DIR}/Source")
 
+# GLFW
+set(GLFW_NAME glfw)
+set(GLFW_DIR "${ENGINE_DIR}/ThirdParty/glfw")
+set(GLFW_INCLUDES "${GLFW_DIR}/include")
+set(GLFW_SOURCE "${GLFW_DIR}/src")
+set(GLFW_LIB "${PROJECT_DIR}/../build/Win/Engine/ThirdParty/glfw/src")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,5 +60,11 @@ include_directories(${MYSTL_SOURCE})
 add_subdirectory(${MYSTL_DIR})
 target_link_libraries(${PROJECT_NAME} ${MYSTL_NAME})
 link_directories(${MYSTL_SOURCE})
+
+# glfw
+include_directories(${GLFW_INCLUDES})
+add_subdirectory(${GLFW_DIR})
+target_link_libraries(${PROJECT_NAME} ${GLFW_NAME})
+link_directories(${GLFW_LIB})
 
 message("End generate. . . . . . . . . . . . . . . .")

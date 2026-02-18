@@ -3,6 +3,8 @@
 #include "Gravity.h"
 #include <Log.h>
 
+Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
+
 Gravity::Gravity()
 {
 	LOG("Gravity::Gravity");
@@ -10,14 +12,23 @@ Gravity::Gravity()
 
 bool Gravity::Init(std::string_view params)
 {
-	LOG("Gravity::Init");
+	LOG("Gravity::Init params: {}", params);
 	return true;
 }
 
 void Gravity::Update()
 {
-	static size_t counter = 0;
-	LOG("Gravity::Update: {}", ++counter);
 }
 
-Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
+void Gravity::Draw()
+{
+}
+
+void Gravity::OnResize()
+{
+}
+
+void Gravity::OnClose()
+{
+	LOG("Gravity::OnClose");
+}

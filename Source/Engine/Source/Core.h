@@ -15,8 +15,8 @@ namespace Engine
 		virtual bool Init(std::string_view params) { return false; };
 		virtual void Update() {};
 		virtual void Draw() {};
-		virtual void Resize() {};
-		virtual void Close() {};
+		virtual void OnResize() {};
+		virtual void OnClose() {};
 
 		template<typename T>
 		static Uptr MakeProgram()
@@ -28,6 +28,10 @@ namespace Engine
 	class Core final {
 	public:
 		static int Execution(std::string_view params);
+
+	private:
+		static int Main(std::string_view params);
+		static void MainLoop();
 	};
 }
 
