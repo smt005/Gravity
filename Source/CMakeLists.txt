@@ -29,6 +29,13 @@ set(GLFW_INCLUDES "${GLFW_DIR}/include")
 set(GLFW_SOURCE "${GLFW_DIR}/src")
 set(GLFW_LIB "${PROJECT_DIR}/../build/Win/Engine/ThirdParty/glfw/src")
 
+# GLAD
+set(GLAD_NAME glad)
+set(GLAD_DIR "${ENGINE_DIR}/ThirdParty/glad")
+set(GLAD_INCLUDES "${GLAD_DIR}/include")
+set(GLAD_SOURCE "${GLAD_DIR}/src")
+set(GLAD_LIB "${PROJECT_DIR}/../lib")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -66,5 +73,11 @@ include_directories(${GLFW_INCLUDES})
 add_subdirectory(${GLFW_DIR})
 target_link_libraries(${PROJECT_NAME} ${GLFW_NAME})
 link_directories(${GLFW_LIB})
+
+# glad
+include_directories(${GLAD_INCLUDES})
+add_subdirectory(${GLAD_DIR})
+target_link_libraries(${PROJECT_NAME} ${GLAD_NAME})
+link_directories(${GLAD_LIB})
 
 message("End generate. . . . . . . . . . . . . . . .")

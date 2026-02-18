@@ -11,6 +11,7 @@ source_group(TREE ${ENGINE_SOURCE} TREE PREFIX "" FILES ${INCLUDES} ${SOURCES})
 
 include_directories(${MYSTL_SOURCE})
 include_directories(${GLFW_INCLUDES})
+include_directories(${GLAD_INCLUDES})
 
 add_library(${ENGINE_NAME} STATIC ${INCLUDES} ${SOURCES})
 
