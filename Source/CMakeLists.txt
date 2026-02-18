@@ -14,7 +14,13 @@ set(PROGRAM_SOURCE "${SOURCE_DIR}/Program")
 # Engine
 set(ENGINE_NAME Engine)
 set(ENGINE_DIR "${SOURCE_DIR}/Engine")
-set(ENGINE_SOURCE "${SOURCE_DIR}/Engine/Source")
+set(ENGINE_SOURCE "${ENGINE_DIR}/Source")
+
+# ThirdParty
+# MyStl
+set(MYSTL_NAME MyStl)
+set(MYSTL_DIR "${ENGINE_DIR}/ThirdParty/MyStl")
+set(MYSTL_SOURCE "${MYSTL_DIR}/Source")
 
 # properties
 set(CMAKE_CXX_STANDARD 23)
@@ -40,5 +46,12 @@ include_directories(${ENGINE_SOURCE})
 add_subdirectory(${ENGINE_DIR})
 target_link_libraries(${PROJECT_NAME} ${ENGINE_NAME})
 link_directories(${ENGINE_SOURCE})
+
+# ThirdParty
+# MyStl
+include_directories(${MYSTL_SOURCE})
+add_subdirectory(${MYSTL_DIR})
+target_link_libraries(${PROJECT_NAME} ${MYSTL_NAME})
+link_directories(${MYSTL_SOURCE})
 
 message("End generate. . . . . . . . . . . . . . . .")

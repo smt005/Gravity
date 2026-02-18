@@ -1,23 +1,23 @@
 // ◦ Xyz ◦
 
 #include "Gravity.h"
-#include <iostream>
+#include <Log.h>
 
 Gravity::Gravity()
 {
-	std::cout << "Gravity::Gravity" << std::endl;
+	LOG("Gravity::Gravity");
 }
 
 bool Gravity::Init(std::string_view params)
 {
-	std::cout << "Gravity::Init" << std::endl;
+	LOG("Gravity::Init");
 	return true;
 }
 
 void Gravity::Update()
 {
 	static size_t counter = 0;
-	std::cout << "Gravity::Update: " << ++counter << std::endl;
+	LOG("Gravity::Update: {}", ++counter);
 }
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();

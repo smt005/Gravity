@@ -9,6 +9,8 @@ file(GLOB_RECURSE INCLUDES ${ENGINE_SOURCE}/*.h)
 file(GLOB_RECURSE SOURCES ${ENGINE_SOURCE}/*.cpp)
 source_group(TREE ${ENGINE_SOURCE} TREE PREFIX "" FILES ${INCLUDES} ${SOURCES})
 
+include_directories(${MYSTL_SOURCE})
+
 add_library(${ENGINE_NAME} STATIC ${INCLUDES} ${SOURCES})
 
 message("End generate Engine. . . . . . . . . . . . . . . .")
