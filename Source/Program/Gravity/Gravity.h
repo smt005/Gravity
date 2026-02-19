@@ -1,7 +1,8 @@
 // ◦ Xyz ◦
 #pragma once
 
-#include "../../../Source/Engine/Source/Core.h"
+#include <Core.h>
+#include <Callback/Callback.h>
 
 class Gravity final : public Engine::Program
 {
@@ -14,4 +15,10 @@ public:
 	void Draw() override;
 	void OnResize() override;
 	void OnClose() override;
+
+private:
+	void InitCallback();
+
+private:
+	Engine::Callback _callback;
 };

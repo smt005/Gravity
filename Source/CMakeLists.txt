@@ -5,7 +5,6 @@ message("Begin generate. . . . . . . . . . . . . . . .")
 set(PROJECT_NAME Gravity)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(PROJECT_MAIN_FILE "${SOURCE_DIR}/Engine/Platforms/Win/main.cpp")
-	message("PROJECT_MAIN_FILE: ${PROJECT_MAIN_FILE}")
 
 # Game
 set(PROGRAM_NAME Program)

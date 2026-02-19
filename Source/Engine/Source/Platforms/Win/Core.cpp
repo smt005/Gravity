@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
+#include <Callback/Callback.h>
 #include <Log.h>
 
 using namespace Engine;
@@ -16,17 +17,17 @@ using namespace Engine;
 
 GLFWwindow* glfwWindow = nullptr;
 
-void cursorPositionCallback(GLFWwindow* Window, double x, double y);
-void mouseButtonCallback(GLFWwindow* Window, int Button, int Action, int mods);
-void keyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods);
-void windowSizeCallback(GLFWwindow* window, int width, int height);
-void windowPosCallback(GLFWwindow* window, int left, int top);
-void windowCloseCallback(GLFWwindow* window);
-void windowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+void CursorPosCallback(GLFWwindow* Window, double x, double y);
+void MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int mods);
+void KeyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods);
+void WindowSizeCallback(GLFWwindow* window, int width, int height);
+void WindowPosCallback(GLFWwindow* window, int left, int top);
+void WindowCloseCallback(GLFWwindow* window);
+void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 struct Settings {
 	const std::string_view title = "Gravity";
-	int screenLeft = 100;
+	int screenLeft = 1000;
 	int screenTop = 100;
 	int screenWidth = 600;
 	int screenHeight = 400;
@@ -63,13 +64,13 @@ int Core::Main(std::string_view params)
 	}
 
 	glfwSetWindowPos(glfwWindow, settings.screenLeft, settings.screenTop);
-	glfwSetCursorPosCallback(glfwWindow, cursorPositionCallback);
-	glfwSetMouseButtonCallback(glfwWindow, mouseButtonCallback);
-	glfwSetKeyCallback(glfwWindow, keyCallback);
-	glfwSetWindowSizeCallback(glfwWindow, windowSizeCallback);
-	glfwSetWindowPosCallback(glfwWindow, windowPosCallback);
-	glfwSetWindowCloseCallback(glfwWindow, windowCloseCallback);
-	glfwSetScrollCallback(glfwWindow, windowScrollCallback);
+	glfwSetCursorPosCallback(glfwWindow, CursorPosCallback);
+	glfwSetMouseButtonCallback(glfwWindow, MouseButtonCallback);
+	glfwSetKeyCallback(glfwWindow, KeyCallback);
+	glfwSetWindowSizeCallback(glfwWindow, WindowSizeCallback);
+	glfwSetWindowPosCallback(glfwWindow, WindowPosCallback);
+	glfwSetWindowCloseCallback(glfwWindow, WindowCloseCallback);
+	glfwSetScrollCallback(glfwWindow, WindowScrollCallback);
 
 	glfwMakeContextCurrent(glfwWindow);
 
@@ -132,57 +133,55 @@ void Core::MainLoop()
 	}
 }
 
-void cursorPositionCallback(GLFWwindow* Window, double x, double y)
+void CursorPosCallback(GLFWwindow* Window, double x, double y)
 {
-	LOG("cursorPositionCallback: [{}, {}]", static_cast<int>(x), static_cast<int>(y));
+	Engine::Callback::OnCursorPosCallback(x, y);
+	//LOG("CursorPosCallback: [{}, {}]", static_cast<int>(x), static_cast<int>(y));
 }
 
-void mouseButtonCallback(GLFWwindow* Window, int Button, int Action, int mods)
+void MouseButtonCallback(GLFWwindow* Window, int button, int action, int)
 {
-	switch (Action)
+	switch (action)
 	{
 	case GLFW_PRESS: {
-		LOG("mouseButtonCallback: GLFW_PRESS: {}", Button);
+		Engine::Callback::OnMouseButtonCallback(button);
 	} break;
 	case GLFW_RELEASE: {
-		LOG("mouseButtonCallback: GLFW_RELEASE: {}", Button);
+		//LOG("MouseButtonCallback: GLFW_RELEASE: {}", Button);
 	} break;
 	}
 }
 
-void keyCallback(GLFWwindow* Window, int Key, int Scancode, int Action, int Mods)
+void KeyCallback(GLFWwindow* Window, int key, int, int action, int)
 {
-	switch (Action)
+	switch (action)
 	{
 	case GLFW_PRESS: {
-		LOG("keyCallback: GLFW_PRESS: {}", Key);
+		Engine::Callback::OnKeyCallback(key);
 	} break;
 
 	case GLFW_RELEASE: {
-		LOG("keyCallback: GLFW_RELEASE: {}", Key);
+		//LOG("KeyCallback: GLFW_RELEASE: {}", Key);
 	} break;
 	}
 }
 
-void windowSizeCallback(GLFWwindow* window, int width, int height)
+void WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
 	instanceProgram->OnResize();
-	LOG("windowSizeCallback [{}, {}]", width, height);
 }
 
-void windowPosCallback(GLFWwindow* window, int left, int top)
+void WindowPosCallback(GLFWwindow* window, int left, int top)
 {
 	instanceProgram->OnResize();
-	LOG("windowPosCallback: [{}, {}]", left, top);
 }
 
-void windowCloseCallback(GLFWwindow* window)
+void WindowCloseCallback(GLFWwindow* window)
 {
 	instanceProgram->OnClose();
-	LOG("windowCloseCallback");
 }
 
-void windowScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	LOG("windowScrollCallback");
+	Engine::Callback::OnScrollCallback(yoffset);
 }
