@@ -15,14 +15,7 @@ public:
 	void Draw() override;
 	void OnResize() override;
 	void OnClose() override;
-	void Test();
 
 private:
 	void InitCallback();
-
-	void InitCallbackTest();
-	void DelCallback();
-
-private:
-	Engine::Callback* _callback = nullptr;
 };
