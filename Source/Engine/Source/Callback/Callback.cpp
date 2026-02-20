@@ -62,16 +62,16 @@ void Callback::OnCursorPosCallback(double x, double y)
 	IterationCallback(Type::MOVE, currentEventData);
 }
 
-void Callback::OnMouseButtonCallback(int button)
+void Callback::OnMouseButtonCallback(Type type, int button)
 {
 	currentEventData.button = button;
-	IterationCallback(Type::PRESS_TAP, currentEventData);
+	IterationCallback(type, currentEventData);
 }
 
-void Callback::OnKeyCallback(int key)
+void Callback::OnKeyCallback(Type type, int key)
 {
 	currentEventData.key = static_cast<char>(key);
-	IterationCallback(Type::PRESS_KEY, currentEventData);
+	IterationCallback(type, currentEventData);
 }
 
 void Callback::OnScrollCallback(double offset)

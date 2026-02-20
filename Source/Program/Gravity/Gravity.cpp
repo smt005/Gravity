@@ -93,27 +93,35 @@ void Gravity::InitCallbackTest()
 		LOG("										CALLBACK PRESS_KEY: {}", data.key);
 	});
 
+	_callback->Add(Callback::Type::RELEASE_KEY, [this](const Callback::EventData& data) {
+		LOG("										CALLBACK RELEASE_KEY: {}", data.key);
+	});
+
 	/*_callback->Add(Callback::Type::MOVE, [](const Callback::EventData& data) {
 		LOG("_callback MOVE: [{}, {}]", data.cursorPos.x, data.cursorPos.y);
 	});
 
 	_callback->Add(Callback::Type::SCROLL, [](const Callback::EventData& data) {
 		LOG("_callback SCROLL: {}", data.scrollOffset);
-	});
+	});*/
 
 	_callback->Add(Callback::Type::PRESS_TAP, [this](const Callback::EventData& data) {
 		if (data.button == VirtualTap::LEFT) {
-			LOG("_callback PRESS_TAP: LEFT == {}", data.button);
-		}
-		else if (data.button == VirtualTap::RIGHT) {
-				_callback->Add(Callback::Type::PRESS_KEY, [](const Callback::EventData& data) {
-					LOG("FROM_MOUSE _callback PRESS_KEY: {}", data.key);
-					});
+			LOG("PRESS_TAP: LEFT == {}", data.button);
 		}
 		else {
-			LOG("_callback PRESS_TAP: {}", data.button);
+			LOG("PRESS_TAP: {}", data.button);
 		}
-	});*/
+	});
+
+	_callback->Add(Callback::Type::RELEASE_TAP, [this](const Callback::EventData& data) {
+		if (data.button == VirtualTap::LEFT) {
+			LOG("RELEASE_TAP: LEFT == {}", data.button);
+		}
+		else {
+			LOG("RELEASE_TAP: {}", data.button);
+		}
+		});
 }
 
 void Gravity::DelCallback()

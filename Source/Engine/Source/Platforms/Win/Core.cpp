@@ -134,7 +134,6 @@ void Core::MainLoop()
 void CursorPosCallback(GLFWwindow* Window, double x, double y)
 {
 	Engine::Callback::OnCursorPosCallback(x, y);
-	//LOG("CursorPosCallback: [{}, {}]", static_cast<int>(x), static_cast<int>(y));
 }
 
 void MouseButtonCallback(GLFWwindow* Window, int button, int action, int)
@@ -142,10 +141,10 @@ void MouseButtonCallback(GLFWwindow* Window, int button, int action, int)
 	switch (action)
 	{
 	case GLFW_PRESS: {
-		Engine::Callback::OnMouseButtonCallback(button);
+		Engine::Callback::OnMouseButtonCallback(Callback::Type::PRESS_TAP, button);
 	} break;
 	case GLFW_RELEASE: {
-		//LOG("MouseButtonCallback: GLFW_RELEASE: {}", Button);
+		Engine::Callback::OnMouseButtonCallback(Callback::Type::RELEASE_TAP, button);
 	} break;
 	}
 }
@@ -155,13 +154,18 @@ void KeyCallback(GLFWwindow* Window, int key, int, int action, int)
 	switch (action)
 	{
 	case GLFW_PRESS: {
-		Engine::Callback::OnKeyCallback(key);
+		Engine::Callback::OnKeyCallback(Callback::Type::PRESS_KEY, key);
 	} break;
 
 	case GLFW_RELEASE: {
-		//LOG("KeyCallback: GLFW_RELEASE: {}", Key);
+		Engine::Callback::OnKeyCallback(Callback::Type::RELEASE_KEY, key);
 	} break;
 	}
+}
+
+void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	Engine::Callback::OnScrollCallback(yoffset);
 }
 
 void WindowSizeCallback(GLFWwindow* window, int width, int height)
@@ -177,9 +181,4 @@ void WindowPosCallback(GLFWwindow* window, int left, int top)
 void WindowCloseCallback(GLFWwindow* window)
 {
 	instanceProgram->OnClose();
-}
-
-void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	Engine::Callback::OnScrollCallback(yoffset);
 }

@@ -43,6 +43,10 @@ namespace Engine
 
 		Callback() = default;
 		virtual ~Callback();
+		Callback(const Callback&) = delete;
+		Callback(Callback&&) = delete;
+		void operator = (const Callback&) = delete;
+		void operator = (Callback&&) = delete;
 
 		FunId Add(Type type, Fun&& fun);
 		void Remove(FunId funId);
@@ -51,8 +55,8 @@ namespace Engine
 
 	public:
 		static void OnCursorPosCallback(double x, double y);
-		static void OnMouseButtonCallback(int button);
-		static void OnKeyCallback(int key);
+		static void OnMouseButtonCallback(Type type, int button);
+		static void OnKeyCallback(Type type, int key);
 		static void OnScrollCallback(double offset);
 		static void IterationCallback(Type type, EventData eventData);
 
