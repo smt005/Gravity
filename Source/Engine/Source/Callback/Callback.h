@@ -33,7 +33,7 @@ namespace Engine
 		union EventData {
 			CursorPos cursorPos;
 			char key;
-			int button;
+			int mouseButton;
 			float scrollOffset;
 		};
 
@@ -48,7 +48,7 @@ namespace Engine
 		void operator = (Callback&&) = delete;
 
 		bool KeyPressed(char ch);
-		bool ButtonPressed(int button);
+		bool MouseButtonPressed(int button);
 
 		FunId Add(Type type, Fun&& fun);
 		void Remove(FunId funId);
@@ -69,7 +69,7 @@ namespace Engine
 	private:
 		inline static std::array<std::vector<Callback*>, static_cast<size_t>(Type::COUNT)> callbacksByEvent;
 		inline static std::unordered_set<char> callbackPinchKey;
-		inline static std::unordered_set<int> callbackPinchButton;
+		inline static std::unordered_set<int> callbackPinchMouseButton;
 		inline static EventData currentEventData;
 	};
 }

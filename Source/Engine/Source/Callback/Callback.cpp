@@ -12,9 +12,9 @@ bool Callback::KeyPressed(char ch)
 	return callbackPinchKey.contains(ch);
 }
 
-bool Callback::ButtonPressed(int button)
+bool Callback::MouseButtonPressed(int button)
 {
-	return callbackPinchButton.contains(button);
+	return callbackPinchMouseButton.contains(button);
 }
 
 Callback::FunId Callback::Add(Type type, Fun&& fun)
@@ -74,13 +74,13 @@ void Callback::OnCursorPosCallback(double x, double y)
 
 void Callback::OnMouseButtonCallback(Type type, int button)
 {
-	currentEventData.button = button;
+	currentEventData.mouseButton = button;
 
 	if (type == Type::PRESS_TAP) {
-		callbackPinchButton.emplace(currentEventData.button);
+		callbackPinchMouseButton.emplace(currentEventData.mouseButton);
 	}
 	else if (type == Type::RELEASE_TAP) {
-		callbackPinchButton.erase(currentEventData.button);
+		callbackPinchMouseButton.erase(currentEventData.mouseButton);
 	}
 
 	IterationCallback(type, currentEventData);
@@ -150,8 +150,8 @@ void Callback::Update()
 		IterationCallback(Type::PINCH_KEY, currentEventData);
 	}
 
-	for (auto button : callbackPinchButton) {
-		currentEventData.button = button;
+	for (auto button : callbackPinchMouseButton) {
+		currentEventData.mouseButton = button;
 		IterationCallback(Type::PINCH_TAP, currentEventData);
 	}
 }
