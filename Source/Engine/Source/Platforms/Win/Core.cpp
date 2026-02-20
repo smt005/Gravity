@@ -126,6 +126,8 @@ void Core::MainLoop()
 		instanceProgram->Update();
 		instanceProgram->Draw();
 		
+		Callback::Update();
+
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();
 	}

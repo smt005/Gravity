@@ -56,16 +56,13 @@ void Gravity::InitCallbackTest()
 		_callback = new Callback();
 	}
 
-	_callback->Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
-		
-		if (data.key == VirtualKey::ESCAPE) {
-			LOG("										_callback PRESS_KEY: ESCAPE {}", data.key);
-			exit(0);
+	/*_callback->Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
+		if (_callback->KeyPressed('Q') && data.key == 'W') {
+			LOG("CALLBACK COMBINE PRESS_KEY: {}", data.key);
 		}
-		
-		if (data.key == VirtualKey::ENTER) {
-			
 
+
+		if (data.key == VirtualKey::ENTER) {
 			Callback::FunId funId = _callback->Add(Callback::Type::PRESS_KEY, [count = funIds.size()](const Callback::EventData& data) {
 					LOG("										NEW CALLBACK[{}] PRESS_KEY: {}", count, data.key);
 			});
@@ -91,19 +88,27 @@ void Gravity::InitCallbackTest()
 		}
 
 		LOG("										CALLBACK PRESS_KEY: {}", data.key);
-	});
+	});*/
+
+	_callback->Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
+		LOG("CALLBACK PRESS_KEY: {} >>>>>>>>>>>>>>>>>>>>>>>", data.key);
+		});
+
+	_callback->Add(Callback::Type::PINCH_KEY, [this](const Callback::EventData& data) {
+		LOG("CALLBACK PINCH_KEY: {}", data.key);
+		});
 
 	_callback->Add(Callback::Type::RELEASE_KEY, [this](const Callback::EventData& data) {
-		LOG("										CALLBACK RELEASE_KEY: {}", data.key);
-	});
+		LOG("CALLBACK RELEASE_KEY: {} <<<<<<<<<<<<<<<<<<<<<<<", data.key);
+		});
 
-	/*_callback->Add(Callback::Type::MOVE, [](const Callback::EventData& data) {
+	_callback->Add(Callback::Type::MOVE, [](const Callback::EventData& data) {
 		LOG("_callback MOVE: [{}, {}]", data.cursorPos.x, data.cursorPos.y);
 	});
 
 	_callback->Add(Callback::Type::SCROLL, [](const Callback::EventData& data) {
 		LOG("_callback SCROLL: {}", data.scrollOffset);
-	});*/
+	});
 
 	_callback->Add(Callback::Type::PRESS_TAP, [this](const Callback::EventData& data) {
 		if (data.button == VirtualTap::LEFT) {
@@ -112,7 +117,16 @@ void Gravity::InitCallbackTest()
 		else {
 			LOG("PRESS_TAP: {}", data.button);
 		}
-	});
+		});
+
+	_callback->Add(Callback::Type::PINCH_TAP, [this](const Callback::EventData& data) {
+		if (data.button == VirtualTap::LEFT) {
+			LOG("PINCH_TAP: LEFT == {}", data.button);
+		}
+		else {
+			LOG("PREPINCH_TAPSS_TAP: {}", data.button);
+		}
+		});
 
 	_callback->Add(Callback::Type::RELEASE_TAP, [this](const Callback::EventData& data) {
 		if (data.button == VirtualTap::LEFT) {

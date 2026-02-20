@@ -1,12 +1,11 @@
 #pragma once
 
 #include <memory>
-#include <array>
-#include <deque>
-#include <unordered_map>
-#include <unordered_set>
 #include <functional>
-#include <Log.h>
+#include <array>
+#include <list>
+#include <unordered_set>
+#include <unordered_map>
 
 namespace Engine
 {
@@ -48,6 +47,9 @@ namespace Engine
 		void operator = (const Callback&) = delete;
 		void operator = (Callback&&) = delete;
 
+		bool KeyPressed(char ch);
+		bool ButtonPressed(int button);
+
 		FunId Add(Type type, Fun&& fun);
 		void Remove(FunId funId);
 		void Remove(Type type, FunId funId);
@@ -59,12 +61,15 @@ namespace Engine
 		static void OnKeyCallback(Type type, int key);
 		static void OnScrollCallback(double offset);
 		static void IterationCallback(Type type, EventData eventData);
+		static void Update();
 
 	private:
 		std::unordered_map<Type, std::list<Fun>> _callbackFuns;
 
 	private:
-		inline static std::array<std::vector<Callback*>, static_cast<size_t>(Type::COUNT) > callbacksByEvent;
+		inline static std::array<std::vector<Callback*>, static_cast<size_t>(Type::COUNT)> callbacksByEvent;
+		inline static std::unordered_set<char> callbackPinchKey;
+		inline static std::unordered_set<int> callbackPinchButton;
 		inline static EventData currentEventData;
 	};
 }

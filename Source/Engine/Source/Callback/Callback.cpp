@@ -7,6 +7,16 @@ Callback::~Callback()
 	Clear();
 }
 
+bool Callback::KeyPressed(char ch)
+{
+	return callbackPinchKey.contains(ch);
+}
+
+bool Callback::ButtonPressed(int button)
+{
+	return callbackPinchButton.contains(button);
+}
+
 Callback::FunId Callback::Add(Type type, Fun&& fun)
 {
 	Fun* newFun = &_callbackFuns[type].emplace_back(std::forward<Fun>(fun));
@@ -34,7 +44,7 @@ void Callback::Remove(Type type, FunId funId)
 
 	if (itCallback != callbacks.end()) {
 		auto& funs = (*itCallback)->_callbackFuns[type];
-		auto itFun = std::find_if(funs.begin(), funs.end(), [funId](const Fun& fun) {
+		const auto itFun = std::find_if(funs.begin(), funs.end(), [funId](const Fun& fun) {
 			return reinterpret_cast<FunId>(&fun) == funId;
 		});
 
@@ -65,12 +75,28 @@ void Callback::OnCursorPosCallback(double x, double y)
 void Callback::OnMouseButtonCallback(Type type, int button)
 {
 	currentEventData.button = button;
+
+	if (type == Type::PRESS_TAP) {
+		callbackPinchButton.emplace(currentEventData.button);
+	}
+	else if (type == Type::RELEASE_TAP) {
+		callbackPinchButton.erase(currentEventData.button);
+	}
+
 	IterationCallback(type, currentEventData);
 }
 
 void Callback::OnKeyCallback(Type type, int key)
 {
 	currentEventData.key = static_cast<char>(key);
+
+	if (type == Type::PRESS_KEY) {
+		callbackPinchKey.emplace(currentEventData.key);
+	}
+	else if (type == Type::RELEASE_KEY) {
+		callbackPinchKey.erase(currentEventData.key);
+	}
+
 	IterationCallback(type, currentEventData);
 }
 
@@ -115,4 +141,17 @@ void Callback::IterationCallback(Type type, EventData eventData)
 	}
 
 	callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), nullptr), callbacks.end());
+}
+
+void Callback::Update()
+{
+	for (auto key : callbackPinchKey) {
+		currentEventData.key = static_cast<char>(key);
+		IterationCallback(Type::PINCH_KEY, currentEventData);
+	}
+
+	for (auto button : callbackPinchButton) {
+		currentEventData.button = button;
+		IterationCallback(Type::PINCH_TAP, currentEventData);
+	}
 }
