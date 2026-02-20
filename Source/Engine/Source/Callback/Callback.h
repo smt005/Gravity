@@ -1,18 +1,20 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <array>
+#include <deque>
+#include <unordered_map>
+#include <unordered_set>
 #include <functional>
-#include "VirtualKey.h"
+#include <Log.h>
 
 namespace Engine
 {
-	class Callback final
+	class Callback
 	{
 	public:
 		enum class Type
 		{
-			NONE,
 			PRESS_TAP,
 			PINCH_TAP,
 			RELEASE_TAP,
@@ -20,50 +22,45 @@ namespace Engine
 			PINCH_KEY,
 			RELEASE_KEY,
 			MOVE,
-			SCROLL
+			SCROLL,
+			COUNT
 		};
 
 		struct CursorPos {
-			double x;
-			double y;
+			float x;
+			float y;
 		};
 
 		union EventData {
 			CursorPos cursorPos;
 			char key;
 			int button;
-			double scrollOffset;
+			float scrollOffset;
 		};
 
 		using Fun = std::function<void(const EventData&)>;
+		using FunId = std::uintptr_t;
 
 		Callback() = default;
-		~Callback();
+		virtual ~Callback();
 
-		void Add(Type type, Fun&& fun);
+		FunId Add(Type type, Fun&& fun);
+		void Remove(FunId funId);
+		void Remove(Type type, FunId funId);
 		void Clear();
-
-	private:
-		void AddTo(Fun&& fun, Fun& callback, std::vector<Fun*>& globalCallbacks);
-		void RemoveFrom(Fun& fun, std::vector<Fun*>& globalCallbacks);
 
 	public:
 		static void OnCursorPosCallback(double x, double y);
 		static void OnMouseButtonCallback(int button);
 		static void OnKeyCallback(int key);
 		static void OnScrollCallback(double offset);
+		static void IterationCallback(Type type, EventData eventData);
 
 	private:
-		Fun _cursorPosCallback = 0;
-		Fun _mouseButtonCallback = 0;
-		Fun _keyCallback = 0;
-		Fun _scrollCallback = 0;
+		std::unordered_map<Type, std::list<Fun>> _callbackFuns;
 
 	private:
-		inline static std::vector<Fun*> cursorPosCallbacks;
-		inline static std::vector<Fun*> mouseButtonCallbacks;
-		inline static std::vector<Fun*> keyCallbacks;
-		inline static std::vector<Fun*> scrollCallbacks;
-		inline static EventData eventData;
+		inline static std::array<std::vector<Callback*>, static_cast<size_t>(Type::COUNT) > callbacksByEvent;
+		inline static EventData currentEventData;
 	};
 }

@@ -27,7 +27,7 @@ void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 struct Settings {
 	const std::string_view title = "Gravity";
-	int screenLeft = 1000;
+	int screenLeft = 1600;
 	int screenTop = 100;
 	int screenWidth = 600;
 	int screenHeight = 400;
@@ -71,7 +71,6 @@ int Core::Main(std::string_view params)
 	glfwSetWindowPosCallback(glfwWindow, WindowPosCallback);
 	glfwSetWindowCloseCallback(glfwWindow, WindowCloseCallback);
 	glfwSetScrollCallback(glfwWindow, WindowScrollCallback);
-
 	glfwMakeContextCurrent(glfwWindow);
 
 	const int version = gladLoadGL(glfwGetProcAddress);
@@ -124,10 +123,9 @@ void Core::MainLoop()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 
-
 		instanceProgram->Update();
 		instanceProgram->Draw();
-
+		
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();
 	}

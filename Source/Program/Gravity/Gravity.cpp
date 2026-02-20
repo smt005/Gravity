@@ -1,6 +1,7 @@
 // ◦ Xyz ◦
 
 #include "Gravity.h"
+#include <Callback/VirtualKey.h>
 #include <Log.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
@@ -37,53 +38,89 @@ void Gravity::OnClose()
 void Gravity::InitCallback()
 {
 	using namespace Engine;
-
-	_callback.Add(Callback::Type::PRESS_KEY, [callback = &_callback](const Callback::EventData& data) {
-		
+	Callback::Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
 		if (data.key == VirtualKey::ESCAPE) {
-			LOG("_callback PRESS_KEY: ESCAPE {}", data.key);
-			//exit(0);
-		}
-		else if (data.key == VirtualKey::ENTER) {
-			LOG("_callback PRESS_KEY: ENTER == {}", data.key);
-
-			{
-				callback->Add(Callback::Type::PRESS_KEY, [](const Callback::EventData& data) {
-						LOG("DEFF _callback PRESS_KEY: {}", data.key);
-					});
-			}
-		}
-		else if (data.key == 'Q') {
-			LOG("_callback PRESS_KEY: Q == {}", data.key);
-		}
-		else if (data.key == 'q') {
-			LOG("_callback PRESS_KEY: q == {}", data.key);
-		}
-		else if (data.key == VirtualKey::VK_1) {
-			LOG("_callback PRESS_KEY: VK_1 == {}", data.key);
-		}
-		else if (data.key == '1') {
-			LOG("_callback PRESS_KEY: 1 == {}", data.key);
-		}
-		else {
-			LOG("_callback PRESS_KEY: {}", data.key);
+			exit(0);
 		}
 	});
 
-	_callback.Add(Callback::Type::MOVE, [](const Callback::EventData& data) {
+	InitCallbackTest();
+}
+
+void Gravity::InitCallbackTest()
+{
+	using namespace Engine;
+	static std::vector<Callback::FunId> funIds;
+
+	if (!_callback) {
+		_callback = new Callback();
+	}
+
+	_callback->Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
+		
+		if (data.key == VirtualKey::ESCAPE) {
+			LOG("										_callback PRESS_KEY: ESCAPE {}", data.key);
+			exit(0);
+		}
+		
+		if (data.key == VirtualKey::ENTER) {
+			
+
+			Callback::FunId funId = _callback->Add(Callback::Type::PRESS_KEY, [count = funIds.size()](const Callback::EventData& data) {
+					LOG("										NEW CALLBACK[{}] PRESS_KEY: {}", count, data.key);
+			});
+
+			funIds.emplace_back(funId);
+			LOG("										ADD CALLBACK PRESS_KEY: ENTER == {} funId: {}", data.key, funId);
+		}
+
+		if (data.key >= '0' && data.key <= '9') {
+			if (!funIds.empty()) {
+				LOG("										REMOVE CALLBACK PRESS_KEY: NUM == {} funId: {} funIds: {}", data.key, funIds.back(), funIds.size());
+				_callback->Remove(funIds.back());
+				funIds.pop_back();
+			}
+			else {
+				LOG("										REMOVE CALLBACK PRESS_KEY: NUM == {} funIds: EMPTY", data.key, funIds.size());
+			}
+		}
+
+		if (data.key == 'D') {
+			LOG("										REMOVE ALL CALLBACK PRESS_KEY: NUM == {}", data.key);
+			DelCallback();
+		}
+
+		LOG("										CALLBACK PRESS_KEY: {}", data.key);
+	});
+
+	/*_callback->Add(Callback::Type::MOVE, [](const Callback::EventData& data) {
 		LOG("_callback MOVE: [{}, {}]", data.cursorPos.x, data.cursorPos.y);
 	});
 
-	_callback.Add(Callback::Type::SCROLL, [](const Callback::EventData& data) {
+	_callback->Add(Callback::Type::SCROLL, [](const Callback::EventData& data) {
 		LOG("_callback SCROLL: {}", data.scrollOffset);
 	});
 
-	_callback.Add(Callback::Type::PRESS_TAP, [](const Callback::EventData& data) {
+	_callback->Add(Callback::Type::PRESS_TAP, [this](const Callback::EventData& data) {
 		if (data.button == VirtualTap::LEFT) {
 			LOG("_callback PRESS_TAP: LEFT == {}", data.button);
+		}
+		else if (data.button == VirtualTap::RIGHT) {
+				_callback->Add(Callback::Type::PRESS_KEY, [](const Callback::EventData& data) {
+					LOG("FROM_MOUSE _callback PRESS_KEY: {}", data.key);
+					});
 		}
 		else {
 			LOG("_callback PRESS_TAP: {}", data.button);
 		}
-	});
+	});*/
+}
+
+void Gravity::DelCallback()
+{
+	LOG("_callback: {} // 0", _callback);
+	delete _callback;
+	LOG("_callback: {} // 1", _callback);
+	_callback = nullptr;
+	LOG("_callback: {} // 2", _callback);
 }

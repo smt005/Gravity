@@ -7,74 +7,112 @@ Callback::~Callback()
 	Clear();
 }
 
-void Callback::Add(Type type, Fun&& fun)
+Callback::FunId Callback::Add(Type type, Fun&& fun)
 {
-	switch (type) {
-	case Type::PRESS_KEY: { AddTo(std::forward<Fun>(fun), _keyCallback, keyCallbacks); } break;
-	case Type::MOVE: { AddTo(std::forward<Fun>(fun), _cursorPosCallback, cursorPosCallbacks); } break;
-	case Type::SCROLL: { AddTo(std::forward<Fun>(fun), _scrollCallback, scrollCallbacks); } break;
-	case Type::PRESS_TAP: { AddTo(std::forward<Fun>(fun), _mouseButtonCallback, mouseButtonCallbacks); } break;
-	default: {};
-	};
+	Fun* newFun = &_callbackFuns[type].emplace_back(std::forward<Fun>(fun));
+	auto& callbacks = callbacksByEvent[static_cast<size_t>(type)];
+	const auto itCallback = std::find(callbacks.begin(), callbacks.end(), this);
+
+	if (itCallback == callbacks.end()) {
+		callbacks.emplace_back(this);
+	}
+
+	return reinterpret_cast<FunId>(newFun);
+}
+
+void Callback::Remove(FunId funId)
+{
+	for (int type = 0; type < static_cast<short int>(Type::COUNT); ++type) {
+		Remove(static_cast<Type>(type), funId);
+	}
+}
+
+void Callback::Remove(Type type, FunId funId)
+{
+	auto& callbacks = callbacksByEvent[static_cast<size_t>(type)];
+	const auto itCallback = std::find(callbacks.begin(), callbacks.end(), this);
+
+	if (itCallback != callbacks.end()) {
+		auto& funs = (*itCallback)->_callbackFuns[type];
+		auto itFun = std::find_if(funs.begin(), funs.end(), [funId](const Fun& fun) {
+			return reinterpret_cast<FunId>(&fun) == funId;
+		});
+
+		if (itFun != funs.end()) {
+			*itFun = nullptr;
+		}
+	}
 }
 
 void Callback::Clear()
 {
-	RemoveFrom(_cursorPosCallback, cursorPosCallbacks);
-	RemoveFrom(_mouseButtonCallback, mouseButtonCallbacks);
-	RemoveFrom(_keyCallback, keyCallbacks);
-	RemoveFrom(_scrollCallback, scrollCallbacks);
-}
+	for (auto& callbacks : callbacksByEvent) {
+		const auto itCallback = std::find(callbacks.begin(), callbacks.end(), this);
 
-void Callback::AddTo(Fun&& fun, Fun& callback, std::vector<Fun*>& globalCallbacks)
-{
-	callback = std::forward<Fun>(fun);
-	globalCallbacks.emplace_back(&callback);
-}
-
-void Callback::RemoveFrom(Fun& fun, std::vector<Fun*>& globalCallbacks)
-{
-	const auto it = std::find(globalCallbacks.begin(), globalCallbacks.end(), &fun);
-	if (it != globalCallbacks.end()) {
-		globalCallbacks.erase(it);
+		if (itCallback != callbacks.end()) {
+			*itCallback = nullptr;
+		}
 	}
-
-	fun = 0;
 }
 
 void Callback::OnCursorPosCallback(double x, double y)
 {
-	eventData.cursorPos.x = x;
-	eventData.cursorPos.y = y;
-
-	for (Fun* callback : cursorPosCallbacks) {
-		(*callback)(eventData);
-	}
+	currentEventData.cursorPos.x = x;
+	currentEventData.cursorPos.y = y;
+	IterationCallback(Type::MOVE, currentEventData);
 }
 
 void Callback::OnMouseButtonCallback(int button)
 {
-	eventData.button = button;
-	
-	for (Fun* callback : mouseButtonCallbacks) {
-		(*callback)(eventData);
-	}
+	currentEventData.button = button;
+	IterationCallback(Type::PRESS_TAP, currentEventData);
 }
 
 void Callback::OnKeyCallback(int key)
 {
-	eventData.key = static_cast<char>(key);
-
-	for (Fun* callback : keyCallbacks) {
-		(*callback)(eventData);
-	}
+	currentEventData.key = static_cast<char>(key);
+	IterationCallback(Type::PRESS_KEY, currentEventData);
 }
 
 void Callback::OnScrollCallback(double offset)
 {
-	eventData.scrollOffset = offset;
+	currentEventData.scrollOffset = offset;
+	IterationCallback(Type::SCROLL, currentEventData);
+}
 
-	for (Fun* callback : scrollCallbacks) {
-		(*callback)(eventData);
+void Callback::IterationCallback(Type type, EventData eventData)
+{
+	auto& callbacks = callbacksByEvent[static_cast<size_t>(type)];
+	const size_t countCallback = callbacks.size();
+
+	for (size_t iCallback = 0; iCallback < countCallback; ++iCallback) {
+		Callback*& callback = callbacks[iCallback];
+		if (!callback) {
+			continue;
+		}
+
+		auto& listFun = callback->_callbackFuns[type];
+		const size_t countFun = listFun.size();
+		size_t iFun = 0;
+
+		for (auto it = listFun.begin(); it != listFun.end(); ++it) {
+			if (iFun++ < countFun && *it) {
+				(*it)(eventData);
+			}
+
+			if (!callback) {
+				break;
+			}
+		}
+		
+		if (callback) {
+			listFun.erase(std::remove(listFun.begin(), listFun.end(), nullptr), listFun.end());
+			
+			if (listFun.empty()) {
+				callback = nullptr;
+			}
+		}
 	}
+
+	callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), nullptr), callbacks.end());
 }

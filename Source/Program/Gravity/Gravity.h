@@ -4,7 +4,7 @@
 #include <Core.h>
 #include <Callback/Callback.h>
 
-class Gravity final : public Engine::Program
+class Gravity final : public Engine::Program, Engine::Callback
 {
 public:
 	using Uptr = std::unique_ptr<Gravity>;
@@ -15,10 +15,14 @@ public:
 	void Draw() override;
 	void OnResize() override;
 	void OnClose() override;
+	void Test();
 
 private:
 	void InitCallback();
 
+	void InitCallbackTest();
+	void DelCallback();
+
 private:
-	Engine::Callback _callback;
+	Engine::Callback* _callback = nullptr;
 };
