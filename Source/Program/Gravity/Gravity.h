@@ -9,12 +9,14 @@ class Gravity final : public Engine::Program, Engine::Callback
 public:
 	using Uptr = std::unique_ptr<Gravity>;
 
-	Gravity();
+	Gravity() = default;
 	bool Init(std::string_view params) override;
 	void Update() override;
 	void Draw() override;
 	void OnResize() override;
 	void OnClose() override;
+
+	void FileManagerTests();
 
 private:
 	void InitCallback();

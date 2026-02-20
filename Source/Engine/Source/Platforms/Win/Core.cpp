@@ -39,12 +39,7 @@ int Core::Execution(std::string_view params)
 		LOG("[Core::Execution] Engine::instanceProgram nullptr. {}", 0);
 		return 1;
 	}
-	
-	if (!instanceProgram->Init(params)) {
-		LOG("[Core::Execution] Program::Init fail. {}", 0);
-		return 2;
-	}
-	
+		
 	return Main(params);
 }
 
@@ -74,12 +69,16 @@ int Core::Main(std::string_view params)
 	glfwMakeContextCurrent(glfwWindow);
 
 	const int version = gladLoadGL(glfwGetProcAddress);
-	LOG("GL GLAD_VERSION_MAJOR: {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	//LOG("GL GLAD_VERSION_MAJOR: {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
 	glfwGetFramebufferSize(glfwWindow, &settings.screenWidth, &settings.screenHeight);
 	glViewport(0, 0, settings.screenWidth, settings.screenHeight);
 
-	instanceProgram->Init(params);
+	if (!instanceProgram->Init(params)) {
+		LOG("[Core::Execution] Program::Init fail. {}", 0);
+		return 2;
+	}
+
 	instanceProgram->OnResize();
 
 	MainLoop();
