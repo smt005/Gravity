@@ -9,7 +9,7 @@ class Gravity final : public Engine::Program, Engine::Callback
 public:
 	using Uptr = std::unique_ptr<Gravity>;
 
-	Gravity();
+	Gravity() = default;
 	bool Init(std::string_view params) override;
 	void Update() override;
 	void Draw() override;
@@ -17,5 +17,9 @@ public:
 	void OnClose() override;
 
 private:
+	void InitFileManagers();
 	void InitCallback();
+
+private:
+	void JsonTest();
 };
