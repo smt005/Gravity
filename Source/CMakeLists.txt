@@ -35,6 +35,10 @@ set(GLAD_INCLUDES "${GLAD_DIR}/include")
 set(GLAD_SOURCE "${GLAD_DIR}/src")
 set(GLAD_LIB "${PROJECT_DIR}/../lib")
 
+# JSON (nlohmann/json)
+set(JSON_DIR "${ENGINE_DIR}/ThirdParty/json")
+set(JSON_INCLUDES "${JSON_DIR}/include")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -78,5 +82,10 @@ include_directories(${GLAD_INCLUDES})
 add_subdirectory(${GLAD_DIR})
 target_link_libraries(${PROJECT_NAME} ${GLAD_NAME})
 link_directories(${GLAD_LIB})
+
+# json (nlohmann/json)
+include_directories(${JSON_INCLUDES})
+add_subdirectory(${JSON_DIR} EXCLUDE_FROM_ALL)
+target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
 
 message("End generate. . . . . . . . . . . . . . . .")
