@@ -45,6 +45,11 @@ set(GLM_NAME glm)
 set(GLM_DIR "${ENGINE_DIR}/ThirdParty/${GLM_NAME}")
 set(GLM_INCLUDES "${GLM_DIR}")
 
+# ImGui
+set(IMGUI_NAME imgui)
+set(IMGUI_DIR "${ENGINE_DIR}/ThirdParty/${IMGUI_NAME}")
+set(IMGUI_INCLUDES "${IMGUI_DIR}")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -94,6 +99,10 @@ include_directories(${JSON_INCLUDES})
 add_subdirectory(${JSON_DIR} EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
 
+# GLM
 include_directories(${GLM_INCLUDES})
+
+# ImGui
+include_directories(${IMGUI_INCLUDES})
 
 message("End generate. . . . . . . . . . . . . . . .")
