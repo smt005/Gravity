@@ -22,37 +22,48 @@ namespace Engine
 		const std::filesystem::path& GetRoot() const;
 		const std::filesystem::path& SetRoot(const std::filesystem::path& path);
 
-		std::string ReadFileText(const std::filesystem::path& filePath) const;
+		template<std::ranges::range T>
+		T ReadFile(const std::filesystem::path& filePath) const
+		{
+			T buffer;
+			if (!ReadFile(buffer, filePath)) {
+				LOG("[FileManager::ReadFile] Error read file: '{}': '{}'", filePath, fullFilepath);
+			}
+			return buffer;
+		}
 
-		template<typename T>
-		std::vector<T> ReadFile(const std::filesystem::path& filePath) const {
+		template<std::ranges::range T>
+		bool ReadFile(T& buffer, const std::filesystem::path& filePath) const
+		{
 			const std::filesystem::path fullFilepath = _rootPath / filePath;
 
 			if (!std::filesystem::exists(fullFilepath)) {
-				LOG("[FileManager::ReadFileBinary] File not found: '{}': '{}'", filePath, fullFilepath);
-				return {};
+				LOG("[FileManager::ReadFile] File not found: '{}': '{}'", filePath, fullFilepath);
+				return false;
 			}
 
 			const std::uintmax_t byteSize = std::filesystem::file_size(fullFilepath);
-			if (byteSize % sizeof(T) != 0) {
-				LOG("[FileManager::ReadFileBinary] File size ({} bytes) is not aligned to '{}' sizeof: {}. File: '{}'", byteSize, typeid(T).name(), sizeof(T), filePath);
-				return {};
+			using TypeElement = std::ranges::range_value_t<T>;
+
+			if (byteSize % sizeof(TypeElement) != 0) {
+				LOG("[FileManager::ReadFile] File size ({} bytes) is not aligned to '{}' sizeof: {}. File: '{}'", byteSize, typeid(TypeElement).name(), sizeof(TypeElement), filePath);
+				return false;
 			}
 
-			const std::uintmax_t size = byteSize / sizeof(T);
-			std::vector<T> buffer(size);
-
+			const std::uintmax_t size = byteSize / sizeof(TypeElement);
+			buffer.resize(size, {});
 			std::ifstream file(fullFilepath, std::ios::binary);
+
 			if (!file) {
-				LOG("[FileManager::ReadFileBinary] Failed to open file: '{}': '{}'", filePath, fullFilepath);
-				return {};
+				LOG("[FileManager::ReadFile] Failed to open file: '{}': '{}'", filePath, fullFilepath);
+				return false;
 			}
 
 			file.read(reinterpret_cast<char*>(buffer.data()), byteSize);
 
-			return buffer;
+			return true;
 		}
-		
+
 		bool WriteFile(const void* const data, size_t size, const std::filesystem::path& filePath) const;
 		bool WriteFile(const std::string& text, const std::filesystem::path& filePath) const;
 

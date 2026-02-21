@@ -31,7 +31,7 @@ const std::filesystem::path& FileManager::SetRoot(const std::filesystem::path& p
     return GetRoot();
 }
 
-std::string FileManager::ReadFileText(const std::filesystem::path& filePath) const
+/*std::string FileManager::ReadFileText(const std::filesystem::path& filePath) const
 {
     const std::filesystem::path fullFilepath = _rootPath / filePath;
 
@@ -42,7 +42,7 @@ std::string FileManager::ReadFileText(const std::filesystem::path& filePath) con
     }
 
     return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-}
+}*/
 
 bool FileManager::WriteFile(const void* const data, size_t size, const std::filesystem::path& filePath) const
 {

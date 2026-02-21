@@ -32,7 +32,7 @@ void Gravity::InitCallback()
 	});
 }
 
-template <typename T, typename U>
+template <typename T>
 T Read(const std::string& filePath, const std::string& fsName) {
 	using namespace Engine;
 
@@ -44,20 +44,11 @@ T Read(const std::string& filePath, const std::string& fsName) {
 	}
 
 	auto& fs = FileManager::Get(fsName);
+	data = fs.ReadFile<T>(filePath);
+	//fs.ReadFile(data, filePath);
 
-	if constexpr (std::is_same_v<T, std::string>) {
-		data = fs.ReadFileText(filePath);
-	}
-	else if constexpr (std::is_same_v<T, std::vector<typename T::value_type>>) {
-		data = fs.ReadFile<U>(filePath);
-	}
-	else {
-		static_assert(!sizeof(T), "ERROR 1");
-		data.clear();
-		return data;
-	}
-
-	LOG("READ: '{}' '{}' '{}\n\t\t\tdata: '{}'", typeid(T).name(), fs.GetName(), fs.GetRoot(), data);
+	//LOG("READ: '{}' '{}' '{}\n\t\t\tdata: '{}'", typeid(T).name(), fs.GetName(), fs.GetRoot(), data);
+	LOG("READ: '{}' '{}\n\t\t\tdata: '{}'", fs.GetName(), fs.GetRoot(), data);
 	return data;
 }
 
@@ -102,17 +93,21 @@ void Gravity::FileManagerTests()
 		LOG("EXCEPTION");
 	}*/
 
-	{
-		auto data = Read<std::string, std::string>("Data.data", "base");
-		data = "01234567";
-		Write(data, "Data.data", "base");
-	}
+	/*{
+		auto data = Read<std::string>("Text.txt", "base");
+		char ch = data.empty() ? '0' : data.back();
+		++ch;
+		data += ch;
+		Write(data, "Text.txt", "base");
+	}*/
 
 	{
-		auto data = Read<std::vector<int>, int>("Data.data", "base");
-		data.emplace_back(100);
-		data.emplace_back(200);
-		data.emplace_back(200);
+		auto data = Read<std::vector<int>>("Data.data", "base");
+		//auto data = FileManager::Get("base").ReadFile<std::string>("Data.data");
+		// auto data = FileManager::Get("base").ReadFile<std::vector<int>>("Data.data");
+		//std::vector<double> data;
+		//FileManager::Get("base").ReadFile(data, "Data.data");
+		data.emplace_back(data.size());
 		Write(data, "Data.data", "base");
 	}
 }
