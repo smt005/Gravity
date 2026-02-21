@@ -40,11 +40,6 @@ int Core::Execution(std::string_view params)
 		return 1;
 	}
 	
-	if (!instanceProgram->Init(params)) {
-		LOG("[Core::Execution] Program::Init fail. {}", 0);
-		return 2;
-	}
-	
 	return Main(params);
 }
 
@@ -79,7 +74,11 @@ int Core::Main(std::string_view params)
 	glfwGetFramebufferSize(glfwWindow, &settings.screenWidth, &settings.screenHeight);
 	glViewport(0, 0, settings.screenWidth, settings.screenHeight);
 
-	instanceProgram->Init(params);
+	if (!instanceProgram->Init(params)) {
+		LOG("[Core::Execution] Program::Init fail. {}", 0);
+		return 2;
+	}
+
 	instanceProgram->OnResize();
 
 	MainLoop();
