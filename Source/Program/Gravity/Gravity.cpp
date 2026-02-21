@@ -1,6 +1,7 @@
 // ◦ Xyz ◦
 
 #include "Gravity.h"
+#include <filesystem>
 #include <Callback/VirtualKey.h>
 #include <FileManager/FileManager.h>
 #include "Temp/LogSpecification.h"
@@ -31,31 +32,87 @@ void Gravity::InitCallback()
 	});
 }
 
+template <typename T, typename U>
+T Read(const std::string& filePath, const std::string& fsName) {
+	using namespace Engine;
+
+	T data;
+	
+	if (!FileManager::IsExist(fsName)) {
+		LOG("sf: {} not exist.", fsName);
+		return data;
+	}
+
+	auto& fs = FileManager::Get(fsName);
+
+	if constexpr (std::is_same_v<T, std::string>) {
+		data = fs.ReadFileText(filePath);
+	}
+	else if constexpr (std::is_same_v<T, std::vector<typename T::value_type>>) {
+		data = fs.ReadFile<U>(filePath);
+	}
+	else {
+		static_assert(!sizeof(T), "ERROR 1");
+		data.clear();
+		return data;
+	}
+
+	LOG("READ: '{}' '{}' '{}\n\t\t\tdata: '{}'", typeid(T).name(), fs.GetName(), fs.GetRoot(), data);
+	return data;
+}
+
+template <typename T>
+void Write(const T& data, const std::string& filePath, const std::string& fsName)
+{
+	using namespace Engine;
+
+	if (!FileManager::IsExist(fsName)) {
+		LOG("sf: {} not exist.", fsName);
+		return;
+	}
+
+	auto& fs = FileManager::Get(fsName);
+
+	if (!fs.WriteFile(data, filePath)) {
+		LOG("WRITE fail: {}", data);
+		return;
+	}
+
+	LOG("WRITE OK: {}", data);
+}
+
 void Gravity::FileManagerTests()
 {
 	using namespace Engine;
-	
-	static FileManager fm;
 
-	LOG("FILE_MANAGER: root: {}", fm.GetRoot());
+	FileManager::Make("base", "../../Source/Resources/Files");
+	FileManager::Make("write");
 
-	const std::string filePath = "TestFile.txt";
+	/*LOG("FILE_MANAGER: name: '{}' root: {}\n", FileManager::Get("base").GetName(), FileManager::Get("base").GetRoot());
+
+	try {
+		LOG("FILE_MANAGER: name: '{}' root: {}\n", FileManager::Get("write").GetName(), FileManager::Get("write").GetRoot());
+	}
+	catch (const std::range_error& err) {
+		LOG(err);
+		FileManager::Make("write");
+		LOG("FILE_MANAGER: name: '{}' root: {}\n", FileManager::Get("write").GetName(), FileManager::Get("write").GetRoot());
+	}
+	catch (...) {
+		LOG("EXCEPTION");
+	}*/
+
 	{
-		std::string textFromFile = fm.ReadFileText(filePath);
-		LOG("string '{}': '{}'", filePath, textFromFile);
+		auto data = Read<std::string, std::string>("Data.data", "base");
+		data = "01234567";
+		Write(data, "Data.data", "base");
 	}
 
 	{
-		std::vector<std::byte> arrBytes = fm.ReadFileBinary(filePath);
-		LOG("vector<std::byte> '{}': {}", filePath, arrBytes);
-	}
-
-	{
-		auto arr = fm.ReadFile<int>(filePath);
-		LOG("vector<int> '{}': {}", filePath, arr);
-	}
-	{
-		auto arr = fm.ReadFile<double>(filePath);
-		LOG("vector<double> '{}': {}", filePath, arr);
+		auto data = Read<std::vector<int>, int>("Data.data", "base");
+		data.emplace_back(100);
+		data.emplace_back(200);
+		data.emplace_back(200);
+		Write(data, "Data.data", "base");
 	}
 }

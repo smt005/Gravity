@@ -14,9 +14,16 @@
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
+#include <exception>
 
 namespace mystd
 {
+	std::ostream& operator << (std::ostream& os, const std::exception& exc)
+	{
+		os << "EXCEPTION: " << typeid(exc).name() << ": " << exc.what();
+		return os;
+	}
+
 	std::ostream& operator << (std::ostream& os, std::byte byte)
 	{
 		os << static_cast<unsigned char>(byte);
