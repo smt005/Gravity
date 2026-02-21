@@ -4,3 +4,6 @@
 [submodule "Source/Engine/ThirdParty/glad"]
 	path = Source/Engine/ThirdParty/glad
 	url = https://github.com/smt005/glad.git
+[submodule "Source/Engine/ThirdParty/json"]
+	path = Source/Engine/ThirdParty/json
+	url = https://github.com/nlohmann/json.git
