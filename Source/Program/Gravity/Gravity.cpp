@@ -2,6 +2,8 @@
 
 #include "Gravity.h"
 #include <Callback/VirtualKey.h>
+
+#include "../Temp/LogSpecification.h"
 #include <Log.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
