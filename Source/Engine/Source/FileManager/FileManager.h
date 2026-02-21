@@ -27,7 +27,7 @@ namespace Engine
 		{
 			T buffer;
 			if (!ReadFile(buffer, filePath)) {
-				LOG("[FileManager::ReadFile] Error read file: '{}': '{}'", filePath, fullFilepath);
+				LOG("[FileManager::ReadFile] Error read file: '{}': '{}'", filePath);
 			}
 			return buffer;
 		}
@@ -64,13 +64,23 @@ namespace Engine
 			return true;
 		}
 
-		bool WriteFile(const void* const data, size_t size, const std::filesystem::path& filePath) const;
-		bool WriteFile(const std::string& text, const std::filesystem::path& filePath) const;
-
-		template<typename T>
-		bool WriteFile(const std::vector<T>& data, const std::filesystem::path& filePath) const
+		template<std::ranges::range T>
+		bool WriteFile(const T& data, const std::filesystem::path& filePath)
 		{
-			return WriteFile(data.data(), data.size() * sizeof(T), filePath);
+			const std::filesystem::path fullFilepath = _rootPath / filePath;
+			std::filesystem::create_directories(fullFilepath.parent_path());
+			std::ofstream out(fullFilepath);
+
+			if (!out) {
+				LOG("[FileManager::WriteTextFile] Failed write file: '{}': '{}'", filePath, fullFilepath);
+				return false;
+			}
+
+			using TypeElement = std::ranges::range_value_t<T>;
+;			const std::uintmax_t size = data.size() * sizeof(TypeElement);
+			out.write(reinterpret_cast<const char*>(data.data()), size);
+
+			return out.good();
 		}
 
 	public:

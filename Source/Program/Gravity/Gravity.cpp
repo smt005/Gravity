@@ -93,21 +93,23 @@ void Gravity::FileManagerTests()
 		LOG("EXCEPTION");
 	}*/
 
-	/*{
-		auto data = Read<std::string>("Text.txt", "base");
+	{
+		LOG("\nSTRING");
+		auto data = Read<std::string>("Text.txt", "write");
 		char ch = data.empty() ? '0' : data.back();
 		++ch;
 		data += ch;
-		Write(data, "Text.txt", "base");
-	}*/
+		Write(data, "Text.txt", "write");
+	}
 
 	{
-		auto data = Read<std::vector<int>>("Data.data", "base");
+		LOG("\nVECTOR<INT>");
+		auto data = Read<std::vector<int>>("Data.data", "write");
 		//auto data = FileManager::Get("base").ReadFile<std::string>("Data.data");
 		// auto data = FileManager::Get("base").ReadFile<std::vector<int>>("Data.data");
 		//std::vector<double> data;
 		//FileManager::Get("base").ReadFile(data, "Data.data");
 		data.emplace_back(data.size());
-		Write(data, "Data.data", "base");
+		Write(data, "Data.data", "write");
 	}
 }
