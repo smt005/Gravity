@@ -12,6 +12,7 @@ source_group(TREE ${PROGRAM_SOURCE} TREE PREFIX "" FILES ${INCLUDES} ${SOURCES})
 include_directories(${MYSTL_SOURCE})
 include_directories(${JSON_INCLUDES})
 include_directories(${ENGINE_SOURCE})
+include_directories(${IMGUI_INCLUDES})
 
 add_library(${PROGRAM_NAME} STATIC ${INCLUDES} ${SOURCES})
 

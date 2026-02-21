@@ -39,6 +39,11 @@ set(GLAD_LIB "${PROJECT_DIR}/../lib")
 set(JSON_DIR "${ENGINE_DIR}/ThirdParty/json")
 set(JSON_INCLUDES "${JSON_DIR}/include")
 
+# ImGui
+set(IMGUI_NAME imgui)
+set(IMGUI_DIR "${ENGINE_DIR}/ThirdParty/${IMGUI_NAME}")
+set(IMGUI_INCLUDES "${IMGUI_DIR}")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,5 +92,8 @@ link_directories(${GLAD_LIB})
 include_directories(${JSON_INCLUDES})
 add_subdirectory(${JSON_DIR} EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
+
+# ImGui
+include_directories(${IMGUI_INCLUDES})
 
 message("End generate. . . . . . . . . . . . . . . .")
