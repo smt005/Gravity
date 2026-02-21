@@ -1,6 +1,7 @@
 // ◦ Xyz ◦
 
 #include "Gravity.h"
+#include <FileManager/FileManager.h>
 #include <Callback/VirtualKey.h>
 
 #include "../Temp/LogSpecification.h"
@@ -8,33 +9,22 @@
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
-Gravity::Gravity()
-{
-	InitCallback();
-	LOG("Gravity::Gravity");
-}
-
 bool Gravity::Init(std::string_view params)
 {
-	LOG("Gravity::Init params: {}", params);
+	InitFileManagers();
+	InitCallback();
 	return true;
 }
 
-void Gravity::Update()
-{
-}
+void Gravity::Update() {}
+void Gravity::Draw() {}
+void Gravity::OnResize() {}
+void Gravity::OnClose() {}
 
-void Gravity::Draw()
+void Gravity::InitFileManagers()
 {
-}
-
-void Gravity::OnResize()
-{
-}
-
-void Gravity::OnClose()
-{
-	LOG("Gravity::OnClose");
+	Engine::FileManager::Make("write");
+	Engine::FileManager::Make("base", "../../Source/Resources/Files");
 }
 
 void Gravity::InitCallback()
