@@ -47,9 +47,6 @@ namespace Engine
 		void operator = (const Callback&) = delete;
 		void operator = (Callback&&) = delete;
 
-		bool KeyPressed(char ch);
-		bool MouseButtonPressed(int button);
-
 		FunId Add(Type type, Fun&& fun);
 		void Remove(FunId funId);
 		void Remove(Type type, FunId funId);
@@ -62,6 +59,8 @@ namespace Engine
 		static void OnScrollCallback(double offset);
 		static void IterationCallback(Type type, EventData eventData);
 		static void Update();
+		static bool KeyPressed(char ch);
+		static bool MouseButtonPressed(int button);
 
 	private:
 		std::unordered_map<Type, std::list<Fun>> _callbackFuns;

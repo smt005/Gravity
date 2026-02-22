@@ -7,16 +7,6 @@ Callback::~Callback()
 	Clear();
 }
 
-bool Callback::KeyPressed(char ch)
-{
-	return callbackPinchKey.contains(ch);
-}
-
-bool Callback::MouseButtonPressed(int button)
-{
-	return callbackPinchMouseButton.contains(button);
-}
-
 Callback::FunId Callback::Add(Type type, Fun&& fun)
 {
 	Fun* newFun = &_callbackFuns[type].emplace_back(std::forward<Fun>(fun));
@@ -154,4 +144,14 @@ void Callback::Update()
 		currentEventData.mouseButton = button;
 		IterationCallback(Type::PINCH_TAP, currentEventData);
 	}
+}
+
+bool Callback::KeyPressed(char ch)
+{
+	return callbackPinchKey.contains(ch);
+}
+
+bool Callback::MouseButtonPressed(int button)
+{
+	return callbackPinchMouseButton.contains(button);
 }

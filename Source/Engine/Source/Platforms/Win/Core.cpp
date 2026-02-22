@@ -4,7 +4,10 @@
 #include <windows.h>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
+#include <Screen.h>
 #include <Callback/Callback.h>
+#include <ImGuiWindow/ImGuiWindow.h>
+
 #include <Log.h>
 
 using namespace Engine;
@@ -15,6 +18,7 @@ using namespace Engine;
 #define ApplicationInfo ""
 #endif
 
+const std::string_view windowTitle = "Gravity";
 GLFWwindow* glfwWindow = nullptr;
 
 void CursorPosCallback(GLFWwindow* Window, double x, double y);
@@ -24,14 +28,6 @@ void WindowSizeCallback(GLFWwindow* window, int width, int height);
 void WindowPosCallback(GLFWwindow* window, int left, int top);
 void WindowCloseCallback(GLFWwindow* window);
 void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-struct Settings {
-	const std::string_view title = "Gravity";
-	int screenLeft = 1600;
-	int screenTop = 100;
-	int screenWidth = 600;
-	int screenHeight = 400;
-} settings;
 
 int Core::Execution(std::string_view params)
 {
@@ -47,18 +43,18 @@ int Core::Main(std::string_view params)
 {
 	if (!glfwInit()) {
 		LOG("[Core::Main] glfwInit fail.");
-		return 1;
+		return 2;
 	}
 
-	const std::string title = TO_STRING("{}_{}", settings.title, ApplicationInfo);
-	glfwWindow = glfwCreateWindow(settings.screenWidth, settings.screenHeight, title.c_str(), nullptr, nullptr);
+	const std::string title = TO_STRING("{}_{}", windowTitle, ApplicationInfo);
+	glfwWindow = glfwCreateWindow(ScreenParams::width, ScreenParams::height, title.c_str(), nullptr, nullptr);
 	if (!glfwWindow) {
 		glfwTerminate();
 		LOG("[Core::Main] glfwCreateWindow fail.");
-		return 1;
+		return 3;
 	}
 
-	glfwSetWindowPos(glfwWindow, settings.screenLeft, settings.screenTop);
+	glfwSetWindowPos(glfwWindow, ScreenParams::left, ScreenParams::top);
 	glfwSetCursorPosCallback(glfwWindow, CursorPosCallback);
 	glfwSetMouseButtonCallback(glfwWindow, MouseButtonCallback);
 	glfwSetKeyCallback(glfwWindow, KeyCallback);
@@ -68,21 +64,26 @@ int Core::Main(std::string_view params)
 	glfwSetScrollCallback(glfwWindow, WindowScrollCallback);
 	glfwMakeContextCurrent(glfwWindow);
 
-	const int version = gladLoadGL(glfwGetProcAddress);
-	LOG("GL GLAD_VERSION_MAJOR: {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	gladLoadGL(glfwGetProcAddress);
+	glfwGetFramebufferSize(glfwWindow, &ScreenParams::width, &ScreenParams::height);
+	glViewport(0, 0, ScreenParams::width, ScreenParams::height);
 
-	glfwGetFramebufferSize(glfwWindow, &settings.screenWidth, &settings.screenHeight);
-	glViewport(0, 0, settings.screenWidth, settings.screenHeight);
+	if (!ImGuiWindow::Init(glfwWindow)) {
+		LOG("[Core::Main] ImGuiWindow::Init fail.");
+		return 4;
+	}
 
 	if (!instanceProgram->Init(params)) {
-		LOG("[Core::Execution] Program::Init fail. {}", 0);
-		return 2;
+		LOG("[Core::Main] Program::Init fail.");
+		return 5;
 	}
 
 	instanceProgram->OnResize();
 
 	MainLoop();
 
+	instanceProgram->OnClose();
+	ImGuiWindow::Cleanup();
 	glfwTerminate();
 	glfwWindow = nullptr;
 
@@ -122,10 +123,12 @@ void Core::MainLoop()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 
-		instanceProgram->Update();
 		instanceProgram->Draw();
-		
+		ImGuiWindow::RenderWindows();
+
 		Callback::Update();
+		instanceProgram->Update();
+		ImGuiWindow::UpdateWindows(0); // TODO: dTime
 
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();
@@ -171,12 +174,21 @@ void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 void WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
+	ScreenParams::width = width;
+	ScreenParams::height = height;
+
+	glViewport(0, 0, width, height);
 	instanceProgram->OnResize();
+	ImGuiWindow::ResizeWindows();
 }
 
 void WindowPosCallback(GLFWwindow* window, int left, int top)
 {
+	ScreenParams::left = left;
+	ScreenParams::top = top;
+
 	instanceProgram->OnResize();
+	ImGuiWindow::ResizeWindows();
 }
 
 void WindowCloseCallback(GLFWwindow* window)
