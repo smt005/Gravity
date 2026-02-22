@@ -8,17 +8,29 @@
 
 using namespace Engine;
 
-ImGuiWindow::ImGuiWindow(std::string_view name)
-	: _visible(true)
-    , _fullScreen(false)
-    , _name(name)
-{
-    OnOpen();
-}
+ImGuiWindow::ImGuiWindow()
+    : _name(std::to_string(reinterpret_cast<uint64_t>(this)))
+    , _title(TO_STRING("##{}", _name))
+{}
+
+ImGuiWindow::ImGuiWindow(const std::string& name)
+    : _name(name)
+    , _title(TO_STRING("##{}", name, std::to_string(reinterpret_cast<uint64_t>(this))))
+{}
 
 const std::string& ImGuiWindow::GetName() const
 {
 	return _name;
+}
+
+const std::string& ImGuiWindow::GetTitle() const
+{
+    return _title;
+}
+
+void ImGuiWindow::SetTitle(std::string_view title)
+{
+    _title = title;
 }
 
 bool ImGuiWindow::IsVisible() const
@@ -39,7 +51,18 @@ bool ImGuiWindow::IsFullScreen() const
 void ImGuiWindow::SetFullScreen(bool state)
 {
     _fullScreen = state;
-    Resize();
+
+    if (_fullScreen) {
+        constexpr ImGuiWindowFlags fullScreenFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        _flags = _flags | fullScreenFlags;
+    }
+    else {
+        constexpr ImGuiWindowFlags noFullScreenFlags = ImGuiWindowFlags_NoTitleBar;
+        _flags = _flags ^ noFullScreenFlags;
+    }
+
+    Resize(); // TODO:
 }
 
 void ImGuiWindow::Close()
@@ -72,20 +95,21 @@ void ImGuiWindow::RenderWindows()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    for (const auto& [name, window] : _windows) {
-        if (window && window->IsVisible()) {
-            if (window->IsFullScreen()) {
+    auto it = _windows.begin();
+    while (it != _windows.end()) {
+        const auto windowPtr = it->second;
+        auto& window = *windowPtr;
+        ++it;
+
+        if (window.IsVisible()) {
+            if (window.IsFullScreen()) {
                 ImGui::SetNextWindowPos(ImVec2(0, 0));
                 ImGui::SetNextWindowSize(ImVec2(static_cast<float>(ScreenParams::width), static_cast<float>(ScreenParams::height)));
-                ImGui::Begin(window->GetName().c_str(), nullptr,
-                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                    ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoBringToFrontOnFocus);
             }
-            else {
-                ImGui::Begin(window->GetName().c_str());
-            }
-            window->Render();
+            
+            ImGui::Begin(window.GetTitle().c_str(), nullptr, window._flags);
+            
+            window.Render();
             ImGui::End();
         }
     }
