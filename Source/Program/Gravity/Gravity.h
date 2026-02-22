@@ -19,4 +19,5 @@ public:
 private:
 	void InitFileManagers();
 	void InitCallback();
+	void TestWindows();
 };
