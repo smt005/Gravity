@@ -13,6 +13,7 @@ include_directories(${MYSTL_SOURCE})
 include_directories(${GLFW_INCLUDES})
 include_directories(${GLAD_INCLUDES})
 include_directories(${JSON_INCLUDES})
+include_directories(${GLM_INCLUDES})
 
 add_library(${ENGINE_NAME} STATIC ${INCLUDES} ${SOURCES})
 
