@@ -8,36 +8,42 @@ set(PROJECT_MAIN_FILE "${SOURCE_DIR}/Engine/Platforms/Win/main.cpp")
 
 # Game
 set(PROGRAM_NAME Program)
-set(PROGRAM_SOURCE "${SOURCE_DIR}/Program")
+set(PROGRAM_SOURCE "${SOURCE_DIR}/${PROGRAM_NAME}")
 
 # Engine
 set(ENGINE_NAME Engine)
-set(ENGINE_DIR "${SOURCE_DIR}/Engine")
+set(ENGINE_DIR "${SOURCE_DIR}/${ENGINE_NAME}")
 set(ENGINE_SOURCE "${ENGINE_DIR}/Source")
 
 # ThirdParty
 # MyStl
 set(MYSTL_NAME MyStl)
-set(MYSTL_DIR "${ENGINE_DIR}/ThirdParty/MyStl")
+set(MYSTL_DIR "${ENGINE_DIR}/ThirdParty/${MYSTL_NAME}")
 set(MYSTL_SOURCE "${MYSTL_DIR}/Source")
 
 # GLFW
 set(GLFW_NAME glfw)
-set(GLFW_DIR "${ENGINE_DIR}/ThirdParty/glfw")
+set(GLFW_DIR "${ENGINE_DIR}/ThirdParty/${GLFW_NAME}")
 set(GLFW_INCLUDES "${GLFW_DIR}/include")
 set(GLFW_SOURCE "${GLFW_DIR}/src")
 set(GLFW_LIB "${PROJECT_DIR}/../build/Win/Engine/ThirdParty/glfw/src")
 
 # GLAD
 set(GLAD_NAME glad)
-set(GLAD_DIR "${ENGINE_DIR}/ThirdParty/glad")
+set(GLAD_DIR "${ENGINE_DIR}/ThirdParty/${GLAD_NAME}")
 set(GLAD_INCLUDES "${GLAD_DIR}/include")
 set(GLAD_SOURCE "${GLAD_DIR}/src")
 set(GLAD_LIB "${PROJECT_DIR}/../lib")
 
 # JSON (nlohmann/json)
-set(JSON_DIR "${ENGINE_DIR}/ThirdParty/json")
+set(JSON_NAME json)
+set(JSON_DIR "${ENGINE_DIR}/ThirdParty/${JSON_NAME}")
 set(JSON_INCLUDES "${JSON_DIR}/include")
+
+# GLM
+set(GLM_NAME glm)
+set(GLM_DIR "${ENGINE_DIR}/ThirdParty/${GLM_NAME}")
+set(GLM_INCLUDES "${GLM_DIR}")
 
 # properties
 set(CMAKE_CXX_STANDARD 23)
@@ -87,5 +93,7 @@ link_directories(${GLAD_LIB})
 include_directories(${JSON_INCLUDES})
 add_subdirectory(${JSON_DIR} EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
+
+include_directories(${GLM_INCLUDES})
 
 message("End generate. . . . . . . . . . . . . . . .")
