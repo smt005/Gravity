@@ -7,3 +7,6 @@
 [submodule "Source/Engine/ThirdParty/json"]
 	path = Source/Engine/ThirdParty/json
 	url = https://github.com/nlohmann/json.git
+[submodule "Source/Engine/ThirdParty/glm"]
+	path = Source/Engine/ThirdParty/glm
+	url = https://github.com/g-truc/glm.git
