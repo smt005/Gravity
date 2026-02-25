@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
+#include <FileManager/FileManager.h>
 
 namespace mystd
 {
@@ -34,6 +35,12 @@ namespace mystd
 		os << "\n|" << vec[1][0] << ",\t" << vec[1][1] << ",\t" << vec[1][2] << ",\t" << vec[1][3] << '|';
 		os << "\n|" << vec[2][0] << ",\t" << vec[2][1] << ",\t" << vec[2][2] << ",\t" << vec[2][3] << '|';
 		os << "\n|" << vec[3][0] << ",\t" << vec[3][1] << ",\t" << vec[3][2] << ",\t" << vec[3][3] << '|';
+		return os;
+	}
+
+	std::ostream& operator << (std::ostream& os, const Engine::FileManager& fm)
+	{
+		os << "'" << fm.GetName() << "'\n" << fm.GetRoot();
 		return os;
 	}
 }
