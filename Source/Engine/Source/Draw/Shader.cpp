@@ -4,27 +4,22 @@
 #include <exception>
 #include <FileManager/FileManager.h>
 #include <glad/gl.h>
+#include <Common/Common.h>
 
 using namespace Engine;
-
-Shader::Shader(const std::string& vertexFilePath, const std::string& fragmentFilePath)
-{
-    if (!Load(vertexFilePath, fragmentFilePath)) {
-        throw std::invalid_argument(TO_STRING("[Shader] Fail load shader '{}', '{}'.", vertexFilePath, fragmentFilePath));
-    }
-}
 
 Shader::~Shader()
 {
     glDeleteProgram(_program);
 }
 
-bool Shader::Load(const std::string& vertexFilePath, const std::string& fragmentFilePath)
+void Shader::Load(const std::string& vertexFilePath, const std::string& fragmentFilePath)
 {
     GLint params;
     glDeleteProgram(_program);
-
+    _program = 0;
     const auto& fm = FileManager::Get("base");
+
     std::string vertexShaderSourceStr = fm.ReadTextFile(vertexFilePath);
     const char* vertexShaderSource = vertexShaderSourceStr.c_str();
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -34,13 +29,12 @@ bool Shader::Load(const std::string& vertexFilePath, const std::string& fragment
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &params);
     if (!params) {
         int infoLogLength, charactersWritten;
-        std::string infoLog(infoLogLength + 1, '\0');
         glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
         glGetShaderInfoLog(vertexShader, infoLogLength, &charactersWritten, infoLog.data());
-        LOG("[Shader::Load] Shader compiled fragment ERROR: {}", infoLog);
-        return false;
-    }
 
+        throw std::invalid_argument(TO_STRING("[Shader::Load] Shader compiled vertex ERROR: {}", infoLog));
+    }
 
     std::string fragmentShaderSourceStr = fm.ReadTextFile(fragmentFilePath);
     const char* fragmentShaderSource = fragmentShaderSourceStr.c_str();
@@ -56,8 +50,7 @@ bool Shader::Load(const std::string& vertexFilePath, const std::string& fragment
         glGetShaderInfoLog(fragmentShader, infoLogLength, &charactersWritten, infoLog.data());
         glDeleteShader(vertexShader);
 
-        LOG("[Shader::Load] Shader compiled fragment ERROR: {}", infoLog);
-        return false;
+        throw std::invalid_argument(TO_STRING("[Shader::Load] Shader compiled fragment ERROR: {}", infoLog));
     }
 
     _program = glCreateProgram();
@@ -74,36 +67,18 @@ bool Shader::Load(const std::string& vertexFilePath, const std::string& fragment
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
-        LOG("[Shader::Load] Shader linked ERROR: {}", infoLog);
-        return false;
+        throw std::invalid_argument(TO_STRING("[Shader::Load] Shader linked ERROR: {}", infoLog));
     }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    return true;
+    GetLocation();
 }
 
-void Shader::UseProgram()
+void Shader::LoadByName(const std::string& name)
 {
-    glUseProgram(_program);
-}
-
-void Shader::UseProgram(const std::string& name)
-{
-    try {
-        auto& shader = shaders.at(name);
-        if (!shader) {
-            throw std::invalid_argument(TO_STRING("[Shader::UseProgram]: fail UseProgram {}", name));
-        }
-
-        shader->UseProgram();
-    }
-    catch (const std::invalid_argument& exc) {
-        throw exc;
-    }
-    catch (...) {
-        throw std::invalid_argument(TO_STRING("[Shader::UseProgram]: fail UseProgram {}", name));
-    }
-
+    const std::string vertexFilePath = TO_STRING("Shaders/{}.vert", name);
+    const std::string fragmentFilePath = TO_STRING("Shaders/{}.frag", name);
+    Load(vertexFilePath, fragmentFilePath);
 }
