@@ -5,6 +5,11 @@
 #include <Draw/Camera.h>
 #include <glad/gl.h>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <Temp/LogSpecification.h>
+#include <Log.h>
 
 using namespace shaders;
 
@@ -15,24 +20,7 @@ void ColorShader::UseProgram()
 	}
 
 	glUseProgram(_program);
-	//glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::GetLink().ProjectViewFloat());
-
-	static float fov = 45.f;
-	static glm::mat4x4 matProject(1.f);
-	static glm::mat4x4 matView(1.f);
-
-	static glm::vec3 pos = { 0.f, 0.f, 1.f };
-	static glm::vec3 direct = { 0.f, 0.f, -1.f };
-	static glm::vec3 up = { 0.f, 1.f, 0.f };
-
-	matProject = glm::perspective(fov, 0.5f, 100000.f, 1.f);
-	matView = glm::lookAt(pos, pos + direct, up);
-	
-	glm::mat4x4 mat =  matProject * matView;
-
-	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, glm::value_ptr(mat));
-	//mat = glm::rotate(mat, 0.01f, {0.f, 0.f, 1.f});
-
+	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::CurrentMatProjectView());
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -45,14 +33,21 @@ void ColorShader::GetLocation()
 	}
 
 	uMatProjectionView = glGetUniformLocation(_program, "uMatProjectionView");
-	//uMatViewModel = glGetUniformLocation(_program, "uMatViewModel");
+	uMatViewModel = glGetUniformLocation(_program, "uMatViewModel");
 	uColor = glGetUniformLocation(_program, "uColor");
 }
 
-void ColorShader::SetColor(const float* const color)
+void ColorShader::SetColor(const float* const color) const
 {
 	if (color) {
 		glUniform4fv(uColor, 1, color);
+	}
+}
+
+void ColorShader::SetModelMatrix(const float* const mat) const
+{
+	if (mat) {
+		glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, mat);
 	}
 }
 
@@ -61,6 +56,10 @@ void shaders::InitShaders()
 	auto& colorShader = shaders::ColorShader::Instance();
 	colorShader.LoadByName("Color");
 	colorShader.UseProgram();
-	float color[] = { 0.f, 0.f, 1.f, 1.f };
-	colorShader.SetColor(color);
+
+	glm::vec4 color{ 0.f, 0.f, 1.f, 1.f };
+	colorShader.SetColor(glm::value_ptr(color));
+
+	glm::mat4x4 mat{1.f};
+	colorShader.SetModelMatrix(glm::value_ptr(mat));
 }

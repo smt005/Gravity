@@ -1,134 +1,120 @@
 ﻿// ◦ Xyz ◦
 
 #include "Camera.h"
-//#include <glm/ext/matrix_clip_space.inl>
-#include "Callback/Callback.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "Screen.h"
 
 using namespace Engine;
 
-void Camera::Init() {
-	_matView = glm::lookAt(_pos, _pos + _direct, _up);
-	Resize();
-}
-
-void Camera::SetPerspective(const float zFar, const float zNear, const float fov) {
-	const float aspect = ScreenParams::Height() != 0 ? ScreenParams::Width() / ScreenParams::Height() : 1.0f;
-	_matProject = glm::perspective(fov, aspect, zNear, zFar);
-	MakeProjectView();
-}
-
-void Camera::SetOrtho(const float size, float zNear, float zFar) {
-	const float aspect = ScreenParams::Height() != 0 ? ScreenParams::Width() / ScreenParams::Height() : 1.0f;
-
-	if (aspect > 1.f) {
-		_matProject = glm::ortho(-size * aspect, size * aspect, -size, size, zNear, zFar);
+/*Camera::Camera(const Type type = Type::PERSPECTIVE)
+	: _fov(45.f)
+	, _type(type)
+	, _matProject(glm::mat4x4(1.f))
+	, _matView(glm::mat4x4(1.f))
+	, _matProjectView(glm::mat4x4(1.f))
+	, _pos(0.f, 0.f, 1.f)
+	, _direct(0.f, 0.f, -1.f)
+	, _up(0.f, 1.f, 0.f)
+	
+{
+	if (type == Type::PERSPECTIVE) {
+		SetPerspective(10000.f, 1.f, _fov);
 	}
 	else {
-		_matProject = glm::ortho(-size, size, -size / aspect, size / aspect, zNear, zFar);
-	}
-
-	MakeProjectView();
-}
-
-/*glm::vec3 Camera::corsorCoord() {
-	glm::vec2 mousePos = Engine::Callback::mousePos();
-	mousePos.x += ScreenParams::left();
-	mousePos.y += Screen::top();
-
-	glm::vec3 wincoord = glm::vec3(mousePos.x - Screen::left(), (Screen::height() - mousePos.y) + Screen::top(), 1.0f);
-	glm::vec4 viewport = glm::vec4(0, 0, Screen::width(), Screen::height());
-
-	glm::vec3 coord = glm::unProject(wincoord, _matView, _matProject, viewport);
-
-	glm::vec3 vecCursor(_pos.x - coord.x, _pos.y - coord.y, _pos.z - coord.z);
-	vecCursor = normalize(vecCursor);
-
-	PhysicPlane plane;
-	plane.set(vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
-
-	glm::vec3 objcoord = plane.crossVector(vecCursor, _pos);
-
-	return objcoord;
-}*/
-
-/*void Camera::Load(const Json::Value& data) {
-	const Json::Value& typeData = data["type"];
-	if (typeData.isString()) {
-		const std::string typeStr = typeData.asString();
-
-		if (typeStr == "ortho" || typeStr == "Ortho" || typeStr == "ORTHO") { // TODO:
-			_type = Type::ORTHO;
-		} else if (typeStr == "perspective" || typeStr == "Perspective" || typeStr == "PERSPECTIVE") {
-			_type = Type::PERSPECTIVE;
-		}
-	}
-
-	const Json::Value& posData = data["pos"];
-	if (posData.isArray()) {
-		_pos.x = posData[0].asFloat();
-		_pos.y = posData[1].asFloat();
-		_pos.z = posData[2].asFloat();
-	}
-
-	const Json::Value& directData = data["direct"];
-	if (directData.isArray()) {
-		_direct.x = directData[0].asFloat();
-		_direct.y = directData[1].asFloat();
-		_direct.z = directData[2].asFloat();
-	}
-
-	const Json::Value& upData = data["up"];
-	if (upData.isArray()) {
-		_up.x = upData[0].asFloat();
-		_up.y = upData[1].asFloat();
-		_up.z = upData[2].asFloat();
-	}
-
-	//...
-	_matView = glm::lookAt(_pos, _pos + _direct, _up);
-	Resize();
-}
-
-void Camera::Save(Json::Value& data) {
-	data["type"] = _type == Type::PERSPECTIVE ? "perspective" : "ortho";
-
-	if (_pos.x == 0.f && _pos.y == 0.f && _pos.z == 0.f) {
-		data.removeMember("pos");
-	}
-	else {
-		Json::Value& posData = data["pos"];
-		posData.append(_pos.x);
-		posData.append(_pos.y);
-		posData.append(_pos.z);
-	}
-
-	if (_direct.x == 1.f && _direct.y == 0.f && _direct.z == 0.f) {
-		data.removeMember("direct");
-	}
-	else {
-		Json::Value& directData = data["direct"];
-		directData.append(_direct.x);
-		directData.append(_direct.y);
-		directData.append(_direct.z);
-	}
-
-	if (_up.x == 0.f && _up.y == 0.f && _up.z == 1.f) {
-		data.removeMember("up");
-	}
-	else {
-		Json::Value& upData = data["up"];
-		upData.append(_up.x);
-		upData.append(_up.y);
-		upData.append(_up.z);
+		SetOrtho();
 	}
 }*/
 
-// STATIC
-Camera::Ptr Camera::_currentCameraPtr;
+Camera::Camera()
+{
+	SetPerspective(10000.f, 1.f, _fov);
+}
 
-Camera& Camera::GetLink() {
-	if (!_currentCameraPtr) {
-		_currentCameraPtr = std::make_shared<Camera>();
+Camera::Camera(const Type type)
+	: _type(type)
+{
+	if (type == Type::PERSPECTIVE) {
+		SetPerspective(10000.f, 1.f, _fov);
 	}
-	return *_currentCameraPtr;
+	else {
+		SetOrtho();
+	}
+}
+
+void Camera::SetPerspective(float zFar, float zNear, float fov) {
+	_zFar = zFar;
+	_zNear = zNear;
+	_fov = fov;
+	
+	_matProject = glm::perspective(fov, ScreenParams::Aspect(), _zNear, _zFar);
+	_matView = glm::lookAt(_pos, _pos + _direct, _up);
+	MakeProjectView();
+}
+
+void Camera::SetOrtho(float size, float zNear, float zFar) {
+	if (ScreenParams::Aspect() > 1.f) {
+		_matProject = glm::ortho(-size * ScreenParams::Aspect(), size * ScreenParams::Aspect(), -size, size, zNear, zFar);
+	}
+	else {
+		_matProject = glm::ortho(-size, size, -size / ScreenParams::Aspect(), size / ScreenParams::Aspect(), zNear, zFar);
+	}
+
+	MakeProjectView();
+}
+
+void Camera::Resize()
+{
+	_matProject = glm::perspective(_fov, ScreenParams::Aspect(), _zNear, _zFar);
+	_matView = glm::lookAt(_pos, _pos + _direct, _up);
+	MakeProjectView();
+}
+
+void Camera::MakeProjectView() {
+	_matProjectView = _matProject * _matView;
+}
+
+const glm::mat4x4& Camera::GetMatProjectView() const
+{
+	return _matProjectView;
+}
+
+Camera& Camera::GetCurrentCameraRef()
+{
+	if (!currentCamera) {
+		currentCamera = std::make_shared<Camera>();
+	}
+	return *currentCamera;
+}
+
+Camera::Ptr& Camera::GetCamera(const std::string& name)
+{
+	return cameras.at(name);
+}
+
+Camera& Camera::GetCameraRef(const std::string& name)
+{
+	const auto& ptr = GetCamera(name);
+	if (!ptr) {
+		throw std::invalid_argument(TO_STRING("[Camera::GetCameraRef] fail by name: {}", name));
+	}
+	return *ptr;
+}
+
+void Camera::SetCurrentCamera(const std::string& name)
+{
+	currentCamera = GetCamera(name);
+	currentCamera->Resize();
+}
+
+void Camera::SetCurrentCamera(const Ptr& camera)
+{
+	currentCamera = camera;
+	currentCamera->Resize();
+}
+
+const float* Camera::CurrentMatProjectView()
+{
+	return glm::value_ptr(GetCurrentCameraRef()._matProjectView);
 }

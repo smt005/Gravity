@@ -1,4 +1,4 @@
-﻿// ◦ Xyz ◦
+// ◦ Xyz ◦
 
 #include "FileManager.h"
 #include <exception>
@@ -66,4 +66,13 @@ FileManager& FileManager::Get(const std::string& name)
 bool FileManager::IsExist(const std::string& name)
 {
     return fileManagers.contains(name);
+}
+
+namespace Engine
+{
+    std::ostream& operator << (std::ostream& os, const FileManager& fm)
+    {
+        os << "'" << fm.GetName() << "'\n" << fm.GetRoot();
+        return os;
+    }
 }

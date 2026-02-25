@@ -11,7 +11,8 @@ namespace shaders
 	public:
 		void UseProgram() override;
 		void GetLocation() override;
-		void SetColor(const float* const color);
+		void SetColor(const float* const color) const;
+		void SetModelMatrix(const float* const mat) const;
 
 	private:
 		unsigned int uMatProjectionView = 0;

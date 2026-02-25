@@ -97,4 +97,6 @@ namespace Engine
 	private:
 		inline static std::unordered_map<std::string, FileManager> fileManagers;
 	};
+
+	std::ostream& operator << (std::ostream& os, const FileManager& fm);
 }
