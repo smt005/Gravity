@@ -26,9 +26,14 @@ bool Gravity::Init(std::string_view params)
 	return true;
 }
 
-void Gravity::Update() {}
-void Gravity::OnResize() {}
 void Gravity::OnClose() {}
+
+void Gravity::Update() {}
+
+void Gravity::OnResize()
+{
+	Engine::Draw::Viewport();
+}
 
 void Gravity::InitFileManagers()
 {
@@ -55,10 +60,19 @@ void Gravity::InitCallback()
 void Gravity::InitDraw()
 {
 	using namespace Engine;
-
-	Draw::Init();
-	Draw::SetClearColor(0.3f, 0.6f, 0.9f);
-
+	try {
+		Draw::Init();
+		Engine::Shader::MakeShader<Shader>("test");
+		Engine::Shader::UseProgram("test");
+		Draw::SetClearColor(0.3f, 0.6f, 0.9f);
+	}
+	catch (const std::exception& exc) {
+		LOG("EXCEPTION: {}", exc);
+		__debugbreak();
+	}
+	catch (...) {
+		__debugbreak();
+	}
 }
 
 void Gravity::TestDraw()

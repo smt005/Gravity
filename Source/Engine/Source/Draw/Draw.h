@@ -1,13 +1,18 @@
 ﻿// ◦ Xyz ◦
 #pragma once
+
+#include <string>
+#include "Shader.h"
+
 namespace Engine
 {
 	class Draw final {
 	public:
 		static void SetClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearColor();
-		void ClearDepth();
-		void DepthTest(bool enable);
+		static void ClearDepth();
+		static void DepthTest(bool enable);
+		static void Viewport();
 
 		static void Init();
 		static void Render();

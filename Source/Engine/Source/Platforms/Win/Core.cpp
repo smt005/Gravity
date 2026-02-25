@@ -47,14 +47,14 @@ int Core::Main(std::string_view params)
 	}
 
 	const std::string title = TO_STRING("{}_{}", windowTitle, ApplicationInfo);
-	glfwWindow = glfwCreateWindow(ScreenParams::width, ScreenParams::height, title.c_str(), nullptr, nullptr);
+	glfwWindow = glfwCreateWindow(ScreenParams::Width(), ScreenParams::Height(), title.c_str(), nullptr, nullptr);
 	if (!glfwWindow) {
 		glfwTerminate();
 		LOG("[Core::Main] glfwCreateWindow fail.");
 		return 3;
 	}
 
-	glfwSetWindowPos(glfwWindow, ScreenParams::left, ScreenParams::top);
+	glfwSetWindowPos(glfwWindow, ScreenParams::Left(), ScreenParams::Top());
 	glfwSetCursorPosCallback(glfwWindow, CursorPosCallback);
 	glfwSetMouseButtonCallback(glfwWindow, MouseButtonCallback);
 	glfwSetKeyCallback(glfwWindow, KeyCallback);
@@ -65,8 +65,10 @@ int Core::Main(std::string_view params)
 	glfwMakeContextCurrent(glfwWindow);
 
 	gladLoadGL(glfwGetProcAddress);
-	glfwGetFramebufferSize(glfwWindow, &ScreenParams::width, &ScreenParams::height);
-	glViewport(0, 0, ScreenParams::width, ScreenParams::height);
+	int width = ScreenParams::Width();
+	int height = ScreenParams::Height();
+	glfwGetFramebufferSize(glfwWindow, &width, &height);
+	glViewport(0, 0, width, height);
 
 	if (!ImGuiWindow::Init(glfwWindow)) {
 		LOG("[Core::Main] ImGuiWindow::Init fail.");
@@ -93,36 +95,6 @@ int Core::Main(std::string_view params)
 void Core::MainLoop()
 {
 	while (!glfwWindowShouldClose(glfwWindow)) {
-		{
-			static float color[] = { 0.3f, 0.6f, 0.9f };
-			static float direct[] = { 0.001f, 0.001f, 0.001f };
-
-			color[0] += direct[0];
-			color[1] += direct[1];
-			color[2] += direct[2];
-			if (color[0] > 1.f) {
-				color[0] = 1.f; direct[0] = -0.001f;
-			}
-			else if (color[0] < 0.f) {
-				color[0] = 0.f; direct[0] = 0.001f;
-			}
-			if (color[1] > 1.f) {
-				color[1] = 1.f; direct[1] = -0.001f;
-			}
-			else if (color[1] < 0.f) {
-				color[1] = 0.f; direct[1] = 0.001f;
-			}
-			if (color[2] > 1.f) {
-				color[2] = 1.f; direct[2] = -0.001f;
-			}
-			else if (color[2] < 0.f) {
-				color[2] = 0.f; direct[2] = 0.001f;
-			}
-
-			glClearColor(color[0], color[1], color[2], 1.f); 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		}
-
 		instanceProgram->Draw();
 		ImGuiWindow::RenderWindows();
 
@@ -174,8 +146,8 @@ void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 void WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
-	ScreenParams::width = width;
-	ScreenParams::height = height;
+	ScreenParams::SetWidth(width);
+	ScreenParams::SetHeight(height);
 
 	glViewport(0, 0, width, height);
 	instanceProgram->OnResize();
@@ -184,8 +156,8 @@ void WindowSizeCallback(GLFWwindow* window, int width, int height)
 
 void WindowPosCallback(GLFWwindow* window, int left, int top)
 {
-	ScreenParams::left = left;
-	ScreenParams::top = top;
+	ScreenParams::SetLeft(left);
+	ScreenParams::SetTop(top);
 
 	instanceProgram->OnResize();
 	ImGuiWindow::ResizeWindows();

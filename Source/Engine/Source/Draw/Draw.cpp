@@ -31,6 +31,11 @@ void Draw::DepthTest(bool enable) {
     }
 }
 
+void Draw::Viewport() {
+    int widthScreen = ScreenParams::Width();
+    int heightScreen = ScreenParams::Height();
+    glViewport(0, 0, widthScreen, heightScreen);
+}
 
 void Draw::Init()
 {
@@ -64,7 +69,7 @@ void Draw::Init()
     glBindVertexArray(0);
 
     //...
-    const auto& fm = FileManager::Get("base");
+    /*const auto& fm = FileManager::Get("base");
     std::string vertexShaderSourceStr = fm.ReadFile<std::string>("test.vert");
     const char* vertexShaderSource = vertexShaderSourceStr.c_str();
 
@@ -85,16 +90,18 @@ void Draw::Init()
     glLinkProgram(shaderProgram);
 
     glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(fragmentShader);*/
+
+
 }
 
 void Draw::Render()
 {
-    glViewport(0, 0, ScreenParams::width, ScreenParams::height);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glViewport(0, 0, ScreenParams::width, ScreenParams::height);
+    //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    //glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shaderProgram);
+    
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }

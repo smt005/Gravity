@@ -31,6 +31,11 @@ const std::filesystem::path& FileManager::SetRoot(const std::filesystem::path& p
     return GetRoot();
 }
 
+std::string FileManager::ReadTextFile(const std::filesystem::path& filePath) const
+{
+    return ReadFile<std::string>(filePath);
+}
+
 FileManager& FileManager::Make(const std::string& name, const std::filesystem::path& relativePath) {
     auto it = fileManagers.find(name);
 
