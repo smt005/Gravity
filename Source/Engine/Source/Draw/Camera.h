@@ -31,7 +31,13 @@ namespace Engine
 		void SetOrtho(float size = 1.f, float zNear = -1000000.f, float zFar = 1000000.f);
 		void Resize();
 		void MakeProjectView();
+
 		const glm::mat4x4& GetMatProjectView() const;
+		const glm::mat4x4& GetMatView() const;
+		void SetPos(const glm::vec3& pos);
+		const glm::vec3& GetPos() const;
+		const glm::vec3& GetDirect() const;
+		void SetDirect(const glm::vec3& direct);
 
 	public:
 		static Camera& GetCurrentCameraRef();

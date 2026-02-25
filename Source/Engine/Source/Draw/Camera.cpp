@@ -8,25 +8,6 @@
 
 using namespace Engine;
 
-/*Camera::Camera(const Type type = Type::PERSPECTIVE)
-	: _fov(45.f)
-	, _type(type)
-	, _matProject(glm::mat4x4(1.f))
-	, _matView(glm::mat4x4(1.f))
-	, _matProjectView(glm::mat4x4(1.f))
-	, _pos(0.f, 0.f, 1.f)
-	, _direct(0.f, 0.f, -1.f)
-	, _up(0.f, 1.f, 0.f)
-	
-{
-	if (type == Type::PERSPECTIVE) {
-		SetPerspective(10000.f, 1.f, _fov);
-	}
-	else {
-		SetOrtho();
-	}
-}*/
-
 Camera::Camera()
 {
 	SetPerspective(10000.f, 1.f, _fov);
@@ -78,6 +59,35 @@ void Camera::MakeProjectView() {
 const glm::mat4x4& Camera::GetMatProjectView() const
 {
 	return _matProjectView;
+}
+
+const glm::mat4x4& Camera::GetMatView() const
+{
+	return _matView;
+}
+
+void Camera::SetPos(const glm::vec3& pos)
+{
+	_pos = pos;
+	_matView = glm::lookAt(pos, pos + _direct, _up);
+	MakeProjectView();
+}
+
+const glm::vec3& Camera::GetPos() const
+{
+	return _pos;
+}
+
+const glm::vec3& Camera::GetDirect() const
+{
+	return _direct;
+}
+
+void Camera::SetDirect(const glm::vec3& direct)
+{
+	_direct = direct;
+	_matView = glm::lookAt(_pos, _pos + _direct, _up);
+	MakeProjectView();
 }
 
 Camera& Camera::GetCurrentCameraRef()

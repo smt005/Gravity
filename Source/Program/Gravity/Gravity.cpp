@@ -6,6 +6,7 @@
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
 #include "GravityShader.h"
+#include "GravityCameras.h"
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../Temp/LogSpecification.h"
@@ -14,17 +15,10 @@
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
-float vertices[] = {
-     0.0f,  0.5f, 0.0f,  // верх
-    -0.5f, -0.5f, 0.0f,  // левый низ
-     0.5f, -0.5f, 0.0f   // правый низ
-};
-
 bool Gravity::Init(std::string_view params)
 {
 	InitFileManagers();
 	InitCallback();
-
     InitDraw();
 	return true;
 }
@@ -77,7 +71,7 @@ void Gravity::InitCallback()
 		}
 		});
 
-	Callback::Add(Callback::Type::PINCH_KEY, [mat = glm::mat4x4(1.f)](const Callback::EventData&) mutable {
+	/*Callback::Add(Callback::Type::PINCH_KEY, [mat = glm::mat4x4(1.f)](const Callback::EventData&) mutable {
 		const float speed = Callback::KeyPressed(VirtualKey::SHIFT) ? 0.025f : 0.005f;
 
 		if (Callback::KeyPressed('W')) {
@@ -115,7 +109,7 @@ void Gravity::InitCallback()
 			mat = glm::rotate(mat, -speed, { 0.f, 0.f, 1.f });
 			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
 		}
-		});
+		});*/
 }
 
 void Gravity::InitDraw()
@@ -127,9 +121,7 @@ void Gravity::InitDraw()
 		Draw::SetClearColor(0.3f, 0.6f, 0.9f);
 
 		shaders::InitShaders();
-
-		Engine::Camera::MakeCamera<Engine::Camera>("Main");
-		Engine::Camera::SetCurrentCamera("Main");
+		cameras::MakeCameras();
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);
