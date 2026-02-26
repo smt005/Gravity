@@ -7,4 +7,5 @@ uniform mat4 uMatViewModel;
 void main()
 {
     gl_Position = uMatProjectionView * uMatViewModel * vec4(aPos, 1.0);
+	//gl_Position = uMatViewModel * vec4(aPos, 1.0);
 }

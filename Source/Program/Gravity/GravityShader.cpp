@@ -20,7 +20,8 @@ void ColorShader::UseProgram()
 	}
 
 	glUseProgram(_program);
-	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::CurrentMatProjectView());
+	//glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::CurrentMatProjectView());
+	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::GetLink().ProjectViewFloat());
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

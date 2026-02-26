@@ -47,10 +47,10 @@ namespace Engine
 		}
 
 	private:
-		inline static int left = 1600;
+		inline static int left = 1400;
 		inline static int top = 100;
-		inline static int width = 600;
-		inline static int height = 400;
+		inline static int width = 1000;
+		inline static int height = 600;
 		inline static float aspect = 1.f;
 	};
 }

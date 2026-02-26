@@ -7,6 +7,7 @@
 #include <Draw/Draw.h>
 #include "GravityShader.h"
 #include "GravityCameras.h"
+#include "GravitySpace.h"
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../Temp/LogSpecification.h"
@@ -25,12 +26,13 @@ bool Gravity::Init(std::string_view params)
 
 void Gravity::OnClose() {}
 
-void Gravity::Update() {}
+void Gravity::Update() {
+}
 
 void Gravity::OnResize()
 {
 	Engine::Draw::Viewport();
-	Engine::Camera::GetCurrentCameraRef().Resize();
+	Engine::Camera::GetLink().Resize();
 }
 
 void Gravity::InitFileManagers()
@@ -130,6 +132,8 @@ void Gravity::InitDraw()
 	catch (...) {
 		__debugbreak();
 	}
+
+	//Space::MakeItem<Space>("First");
 }
 
 void Gravity::TestDraw()
@@ -138,5 +142,7 @@ void Gravity::TestDraw()
 
 	Draw::ClearColor();
 	shaders::ColorShader::Instance().UseProgram();
+
+
 	Draw::Render();
 }
