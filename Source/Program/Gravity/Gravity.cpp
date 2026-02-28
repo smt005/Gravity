@@ -102,7 +102,7 @@ void Gravity::InitDraw()
 	}
 
 	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
-		space->Generate(100, 10);
+		space->Generate(200, 10);
 	}
 }
 

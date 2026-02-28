@@ -175,7 +175,7 @@ void CameraControl::Rotate(const glm::vec2& angles) {
 	directVector.x = static_cast<float>(sin(angleX) * cos(angleY));
 	directVector.y = static_cast<float>(cos(angleX) * cos(angleY));
 	directVector.z = static_cast<float>(sin(angleY));
-	glm::normalize(directVector);
+	directVector = glm::normalize(directVector);
 
 
 	SetDirect(directVector);
