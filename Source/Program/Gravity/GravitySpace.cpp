@@ -129,7 +129,7 @@ void Space::UpdateForce()
 			}
 
 			const float dist = glm::distance(pos, _objects[j].pos);
-			const float valueForce = Object::gForce * weight * _objects[j].weight / std::powf(dist, 2);
+			const float valueForce = Object::gForce * weight * _objects[j].weight / std::powf(dist / 2.f, 2);
 
 			force += glm::normalize(_objects[j].pos - pos) * valueForce;
 		}
