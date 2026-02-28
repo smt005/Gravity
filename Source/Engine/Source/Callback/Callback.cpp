@@ -1,6 +1,5 @@
 #include "Callback.h"
-//#include <ctime>
-//chrono
+#include <Log.h>
 
 #include <chrono>
 
@@ -61,12 +60,14 @@ void Callback::Clear()
 
 void Callback::OnCursorPosCallback(double x, double y)
 {
-	currentEventData.cursorPos.deltaX = x - mousePos[0];
-	currentEventData.cursorPos.deltaY = y - mousePos[1];
+	deltaMousePos[0] = x - mousePos[0];
+	deltaMousePos[1] = y - mousePos[1];
 	mousePos[0] = x;
 	mousePos[1] = y;
 	currentEventData.cursorPos.x = x;
 	currentEventData.cursorPos.y = y;
+	currentEventData.cursorPos.deltaX = deltaMousePos[0];
+	currentEventData.cursorPos.deltaY = deltaMousePos[1];
 
 	IterationCallback(Type::MOVE, currentEventData);
 }
@@ -172,6 +173,10 @@ void Callback::Update()
 		currentEventData.mouseButton = button;
 		IterationCallback(Type::PINCH_TAP, currentEventData);
 	}
+
+	deltaMousePos[0] = 0;
+	deltaMousePos[1] = 0;
+
 }
 
 bool Callback::KeyPressed(char ch)
@@ -187,4 +192,9 @@ bool Callback::MouseButtonPressed(int button)
 const float* const Callback::GetMousePos()
 {
 	return mousePos;
+}
+
+const float* const Callback::GetDeltaMousePos()
+{
+	return deltaMousePos;
 }

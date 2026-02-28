@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Shader.h"
+#include "Mesh.h"
 
 namespace Engine
 {
@@ -15,7 +16,7 @@ namespace Engine
 		static void Viewport();
 
 		static void Init();
-		static void Render();
+		static void Render(Mesh& mesh);
 
 	private:
 		inline static float clearColor;

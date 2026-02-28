@@ -21,11 +21,6 @@ const Item::Ptr& Item::GetCurrent()
 	return currentItem;
 }
 
-Item& Item::GetCurrentRef()
-{
-	return *GetCurrent();
-}
-
 const Item::Ptr& Item::GetItem(std::string_view name, bool setSurrent)
 {
 	const auto it = items.find(name);

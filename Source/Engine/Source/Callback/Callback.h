@@ -64,6 +64,7 @@ namespace Engine
 		static bool KeyPressed(char ch);
 		static bool MouseButtonPressed(int button);
 		static const float* const GetMousePos();
+		static const float* const GetDeltaMousePos();
 		static double GetCurrentTime();
 		static double GetDeltaTime();
 
@@ -75,6 +76,7 @@ namespace Engine
 		inline static std::unordered_set<char> callbackPinchKey;
 		inline static std::unordered_set<int> callbackPinchMouseButton;
 		inline static float mousePos[2];
+		inline static float deltaMousePos[2];
 		inline static double lastTime;
 		inline static double deltaTime;
 		inline static EventData currentEventData;

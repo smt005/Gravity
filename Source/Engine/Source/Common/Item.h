@@ -23,19 +23,18 @@ namespace Engine
 
 	public:
 		static const Item::Ptr& GetCurrent();
-		static Item& GetCurrentRef();
 		static const Ptr& GetItem(std::string_view name, bool setSurrent = false);
 		static bool IsExist(std::string_view name);
 
 		template <typename T, typename ...Args>
-		static const Item::Ptr& MakeItem(std::string_view name, Args&&... args)
+		static const Ptr& MakeItem(std::string_view name, Args&&... args)
 		{
 			const auto it = items.find(name);
 			if (it != items.end()) {
 				return *it;
 			}
 
-			auto newItem = std::make_shared<T>(name, std::forward<Args>(args)...);
+			const std::shared_ptr<T> newItem = std::make_shared<T>(name, std::forward<Args>(args)...);
 			items.emplace(newItem);
 			return newItem;
 		}

@@ -2,6 +2,7 @@
 #include "CameraControl.h"
 #include <Core.h>
 #include <Callback/VirtualKey.h>
+#include <Log.h>
 
 using namespace Engine;
 
@@ -80,13 +81,13 @@ void CameraControl::MakeCallback() {
 	);
 
 	Add(Callback::Type::PINCH_TAP, [this](const Engine::Callback::EventData& data) {
-		if (Engine::Callback::MouseButtonPressed(VirtualTap::RIGHT)) {
-				glm::vec2 delta(data.cursorPos.deltaX, data.cursorPos.deltaY);
+		if (Callback::MouseButtonPressed(VirtualTap::RIGHT)) {
+				glm::vec2 delta(Callback::GetDeltaMousePos()[0], Callback::GetDeltaMousePos()[1]);
 				Rotate(delta);
 			}
 
 			if (Engine::Callback::MouseButtonPressed(VirtualTap::MIDDLE)) {
-				glm::vec2 delta(data.cursorPos.deltaX, data.cursorPos.deltaY);
+				glm::vec2 delta(Callback::GetDeltaMousePos()[0], Callback::GetDeltaMousePos()[1]);
 				Move(delta * static_cast<float>(Callback::GetDeltaTime()));
 			}
 		}
@@ -148,6 +149,9 @@ void CameraControl::Move(const T& directVector, const float kForce) {
 }
 
 void CameraControl::Rotate(const glm::vec2& angles) {
+	if (angles.length() == 0) {
+		LOG("DELTA: {}, {}", angles.x, angles.y);
+	}
 	glm::vec3 directVector = Direct();
 
 	float angleY = asinf(directVector.z);

@@ -45,6 +45,17 @@ void ColorShader::SetColor(const float* const color) const
 	}
 }
 
+void ColorShader::SetModelPos(const float* const pos) const
+{
+	if (pos) {
+		glm::mat4x4 mat(1.f);
+		mat[3][0] = pos[0];
+		mat[3][1] = pos[1];
+		mat[3][2] = pos[2];
+		glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, glm::value_ptr(mat));
+	}
+}
+
 void ColorShader::SetModelMatrix(const float* const mat) const
 {
 	if (mat) {

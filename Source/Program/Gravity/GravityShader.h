@@ -12,6 +12,7 @@ namespace shaders
 		void UseProgram() override;
 		void GetLocation() override;
 		void SetColor(const float* const color) const;
+		void SetModelPos(const float* const pos) const;
 		void SetModelMatrix(const float* const mat) const;
 
 	private:

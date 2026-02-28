@@ -4,10 +4,12 @@
 #include <FileManager/FileManager.h>
 #include <Callback/VirtualKey.h>
 #include <Draw/Camera.h>
+#include <Draw/Mesh.h>
 #include <Draw/Draw.h>
 #include "GravityShader.h"
 #include "GravityCameras.h"
 #include "GravitySpace.h"
+#include "Object.h"
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../Temp/LogSpecification.h"
@@ -15,6 +17,7 @@
 #include <Log.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
+Engine::Mesh mesh;
 
 bool Gravity::Init(std::string_view params)
 {
@@ -27,6 +30,9 @@ bool Gravity::Init(std::string_view params)
 void Gravity::OnClose() {}
 
 void Gravity::Update() {
+	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
+		space->Update();
+	}
 }
 
 void Gravity::OnResize()
@@ -72,46 +78,6 @@ void Gravity::InitCallback()
 			}
 		}
 		});
-
-	/*Callback::Add(Callback::Type::PINCH_KEY, [mat = glm::mat4x4(1.f)](const Callback::EventData&) mutable {
-		const float speed = Callback::KeyPressed(VirtualKey::SHIFT) ? 0.025f : 0.005f;
-
-		if (Callback::KeyPressed('W')) {
-			mat[3][1] += speed;
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-		if (Callback::KeyPressed('S')) {
-			mat[3][1] -= speed;
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-
-		if (Callback::KeyPressed('A')) {
-			mat[3][0] -= speed;
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-		if (Callback::KeyPressed('D')) {
-			mat[3][0] += speed;
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-
-		if (Callback::KeyPressed('R')) {
-			mat[3][2] -= speed;
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-		if (Callback::KeyPressed('F')) {
-			mat[3][2] += speed;
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-
-		if (Callback::KeyPressed('Q')) {
-			mat = glm::rotate(mat, speed, {0.f, 0.f, 1.f});
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-		if (Callback::KeyPressed('E')) {
-			mat = glm::rotate(mat, -speed, { 0.f, 0.f, 1.f });
-			shaders::ColorShader::Instance().SetModelMatrix(glm::value_ptr(mat));
-		}
-		});*/
 }
 
 void Gravity::InitDraw()
@@ -124,6 +90,8 @@ void Gravity::InitDraw()
 
 		shaders::InitShaders();
 		cameras::MakeCameras();
+
+		mesh.Load(true);
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);
@@ -133,7 +101,9 @@ void Gravity::InitDraw()
 		__debugbreak();
 	}
 
-	//Space::MakeItem<Space>("First");
+	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
+		space->Generate(100, 10);
+	}
 }
 
 void Gravity::TestDraw()
@@ -141,8 +111,14 @@ void Gravity::TestDraw()
 	using namespace Engine;
 
 	Draw::ClearColor();
-	shaders::ColorShader::Instance().UseProgram();
+	auto& shader = shaders::ColorShader::Instance();
+	shader.UseProgram();
 
+	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
+		for (auto& object : space->Objects()) {
+			shader.SetModelPos(glm::value_ptr(object.pos));
+			Draw::Render(mesh);
+		}
+	}
 
-	Draw::Render();
 }
