@@ -16,12 +16,13 @@ namespace mystd
 
 		static void Clrean()
 		{
-			delete ptr;
-			ptr = nullptr;
+			if (ptr) {
+				delete ptr;
+				ptr = nullptr;
+			}
 		}
 
 	private:
 		inline static T* ptr = nullptr;
-
 	};
 }

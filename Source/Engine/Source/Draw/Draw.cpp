@@ -37,12 +37,8 @@ void Draw::Viewport() {
     glViewport(0, 0, widthScreen, heightScreen);
 }
 
-void Draw::Init()
+void Draw::Render(unsigned int vao, int count)
 {
-}
-
-void Draw::Render(Mesh& mesh)
-{
-    glBindVertexArray(mesh.Vao());
-    glDrawArrays(GL_TRIANGLES, 0, mesh.Count());
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, count);
 }

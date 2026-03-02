@@ -14,12 +14,14 @@ namespace Engine
 		static void ClearDepth();
 		static void DepthTest(bool enable);
 		static void Viewport();
+		static void Render(unsigned int vao, int count);
 
-		static void Init();
-		static void Render(Mesh& mesh);
+		template <typename T>
+		static void Render(const T& mesh) {
+			Render(mesh.Vao(), mesh.Count());
+		}
 
 	private:
 		inline static float clearColor;
-
 	};
 }

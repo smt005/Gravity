@@ -6,10 +6,13 @@
 #include <Draw/Camera.h>
 #include <Draw/Mesh.h>
 #include <Draw/Draw.h>
+#include <Object/Shape.h>
 #include "GravityShader.h"
 #include "GravityCameras.h"
 #include "GravitySpace.h"
 #include "Object.h"
+#include "Handler.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../Temp/LogSpecification.h"
@@ -85,7 +88,6 @@ void Gravity::InitDraw()
 	using namespace Engine;
 
 	try {
-		Draw::Init();
 		Draw::SetClearColor(0.3f, 0.6f, 0.9f);
 
 		shaders::InitShaders();
@@ -104,6 +106,28 @@ void Gravity::InitDraw()
 	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
 		space->Generate(200, 10);
 	}
+
+	Shape shape("Test");
+	Shape sh2 = *Shape::Get("Second");
+	Shape& sh3 = Shape::GetRef("Third");
+	Shape& sh33 = *Shape::Get("Third");
+	Shape& sh4 = Shape::Ins()["Third"];
+
+	//LOG("{}, {}, {}, {}", shape.Name(), sh2.Name(), sh3.Name(), sh33.Name(), sh4.Name());
+	LOG("{}", Shape::Ins());
+	//Shape sh = Shape["For"];
+	//Shape
+
+	/*try {
+		Shape::Get("Star");
+	}
+	catch (const std::exception& exc) {
+		LOG("EXCEPTION: {}", exc);
+		__debugbreak();
+	}
+	catch (...) {
+		__debugbreak();
+	}*/
 }
 
 void Gravity::TestDraw()
