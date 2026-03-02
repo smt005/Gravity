@@ -85,6 +85,19 @@ namespace Engine
 			return *it;
 		}
 
+		template <typename Name>
+		static void Erase(Name&& name) {
+			data.erase(std::forward<Name>(name));
+		}
+
+		//static void Erase(const Ptr& ptr) {
+			//data.erase(ptr);
+		//}
+
+		static bool Contains(std::string_view name) {
+			return data.contains(name);
+		}
+
 		static StorageClass& Data() {
 			return data;
 		}
