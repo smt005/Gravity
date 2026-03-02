@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <string>
 #include <ostream>
+#include <Singletone.h>
 
 namespace Engine
 {
@@ -26,7 +27,7 @@ namespace Engine
 	*/
 
 	template <typename T>
-	class Storage
+	class Storage : public mystd::Singletone<Storage<T>>
 	{
 	public:
 		using Ptr = std::shared_ptr<T>;
@@ -90,21 +91,12 @@ namespace Engine
 			data.erase(std::forward<Name>(name));
 		}
 
-		//static void Erase(const Ptr& ptr) {
-			//data.erase(ptr);
-		//}
-
 		static bool Contains(std::string_view name) {
 			return data.contains(name);
 		}
 
-		static StorageClass& Data() {
+		static const StorageClass& Data() {
 			return data;
-		}
-
-		static Storage<T>& Ins() {
-			static Storage<T> instance;
-			return instance;
 		}
 
 	private:

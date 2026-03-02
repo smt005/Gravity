@@ -4,9 +4,11 @@ namespace mystd
 {
 	template <typename T>
 	class Singletone {
+	protected:
+		Singletone() = default;
+
 	public:
-		static T& Instance()
-		{
+		static T& Instance() {
 			if (!ptr) {
 				ptr = new T();
 			}
@@ -14,8 +16,11 @@ namespace mystd
 			return *ptr;
 		}
 
-		static void Clrean()
-		{
+		inline static T& Inst() {
+			return Instance();
+		}
+
+		static void Clrean() {
 			if (ptr) {
 				delete ptr;
 				ptr = nullptr;
