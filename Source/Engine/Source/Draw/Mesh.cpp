@@ -5,28 +5,41 @@
 
 using namespace Engine;
 
-Mesh::Mesh(bool load, bool bindBuffers)
+Mesh::Mesh(Mesh&& mesh) noexcept
 {
-    if (load) {
-        Load(bindBuffers);
-    }
+	std::swap(*this, mesh);
+}
+
+void Mesh::operator = (Mesh&& mesh) noexcept
+{
+	std::swap(vertexes, mesh.vertexes);
+	std::swap(normals, mesh.normals);
+	std::swap(textures, mesh.textures);
+	std::swap(_count, mesh._count);
+	std::swap(_VBO, mesh._VBO);
+	std::swap(_VAO, mesh._VAO);
 }
 
 Mesh::~Mesh()
 {
-	delete[] _vertices;
+
 
     // TODO: Удалить _VBO, _VAO
 }
 
 const float* Mesh::Data() const
 {
-	return _vertices;
+	return vertexes;
 }
 
-int Mesh::Count() const
+int Mesh::CountVertexes() const
 {
 	return _count;
+}
+
+int Mesh::SizeData() const
+{
+    return _count * 3;
 }
 
 unsigned int Mesh::Vbo() const
@@ -39,80 +52,9 @@ unsigned int Mesh::Vao() const
     return _VAO;
 }
 
-bool Mesh::Load(bool bindBuffers)
-{
-    delete[] _vertices;
-    _vertices = nullptr;
-
-    _vertices = new float[] {
-        // Передняя грань
-        -0.1f,  0.1f,  0.1f,
-        -0.1f, -0.1f,  0.1f,
-         0.1f, -0.1f,  0.1f,
-
-        -0.1f,  0.1f,  0.1f,
-         0.1f, -0.1f,  0.1f,
-         0.1f,  0.1f,  0.1f,
-
-         // Задняя грань
-         -0.1f,  0.1f, -0.1f,
-         -0.1f, -0.1f, -0.1f,
-          0.1f, -0.1f, -0.1f,
-
-         -0.1f,  0.1f, -0.1f,
-          0.1f, -0.1f, -0.1f,
-          0.1f,  0.1f, -0.1f,
-
-          // Боковые грани (каждый набор — два треугольника)
-          // Левая боковая грань
-          -0.1f,  0.1f,  0.1f,
-          -0.1f, -0.1f,  0.1f,
-          -0.1f, -0.1f, -0.1f,
-
-          -0.1f,  0.1f,  0.1f,
-          -0.1f, -0.1f, -0.1f,
-          -0.1f,  0.1f, -0.1f,
-
-          // Правая боковая грань
-           0.1f,  0.1f,  0.1f,
-           0.1f, -0.1f,  0.1f,
-           0.1f, -0.1f, -0.1f,
-
-           0.1f,  0.1f,  0.1f,
-           0.1f, -0.1f, -0.1f,
-           0.1f,  0.1f, -0.1f,
-
-           // Верхняя боковая грань
-           -0.1f,  0.1f,  0.1f,
-            0.1f,  0.1f,  0.1f,
-            0.1f,  0.1f, -0.1f,
-
-           -0.1f,  0.1f,  0.1f,
-            0.1f,  0.1f, -0.1f,
-           -0.1f,  0.1f, -0.1f,
-
-           // Нижняя боковая грань
-           -0.1f, -0.1f,  0.1f,
-            0.1f, -0.1f,  0.1f,
-            0.1f, -0.1f, -0.1f,
-
-           -0.1f, -0.1f,  0.1f,
-            0.1f, -0.1f, -0.1f,
-           -0.1f, -0.1f, -0.1f
-    };
-
-    _count = 108;// 36;
-
-    if (bindBuffers) {
-        BindBuffers();
-    }
-
-    return true;
-}
-
 void Mesh::BindBuffers()
 {
-    if (_count <= 0 || _vertices == nullptr) {
+    if (SizeData() <= 0 || vertexes == nullptr) {
         return;
     }
 
@@ -122,7 +64,7 @@ void Mesh::BindBuffers()
     glBindVertexArray(_VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, _count * sizeof(float), _vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, SizeData() * sizeof(float), vertexes, GL_STATIC_DRAW);
 
     glVertexAttribPointer(
         0,                  // layout location
@@ -136,4 +78,42 @@ void Mesh::BindBuffers()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+std::ostream& operator << (std::ostream& os, const Engine::Mesh& mesh)
+{
+	{
+		const size_t size = mesh.CountVertexes();
+		os << "VERTEX [";
+
+		for (int i = 0; i < size; ++i) {
+			try {
+				float value = mesh.Data()[i];
+				os << value << ',';
+			}
+			catch (...) {
+				os << "VERTEX STOP i: " << i << " / " << size;
+			}
+		}
+
+		os << "]\n";
+	}
+	{
+		const size_t size = mesh.SizeData();
+		os << "DATA [";
+
+		for (int i = 0; i < size; ++i) {
+			try {
+				float value = mesh.Data()[i];
+				os << value << ',';
+			}
+			catch (...) {
+				os << "DATA STOP i: " << i << " / " << size;
+			}
+		}
+
+		os << "]\n";
+	}
+
+	return os;
 }
