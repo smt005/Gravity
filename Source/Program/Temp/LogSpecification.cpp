@@ -28,3 +28,41 @@ std::ostream& operator << (std::ostream& os, const glm::vec2& vec)
 	os << '[' << vec.x << ", " << vec.y << ']';
 	return os;
 }
+
+/*std::ostream& operator << (std::ostream& os, const Engine::Mesh& mesh)
+{
+	{
+		const size_t size = mesh.CountVertexes();
+		os << '[';
+
+		for (int i = 0; i < size; ++i) {
+			try {
+				float value = mesh.Data()[i];
+				os << value << ',';
+			}
+			catch (...) {
+				os << "VERTEX STOP i: " << i << " / " << size;
+			}
+		}
+
+		os << ']';
+	}
+	{
+		const size_t size = mesh.SizeData();
+		os << '[';
+
+		for (int i = 0; i < size; ++i) {
+			try {
+				float value = mesh.Data()[i];
+				os << value << ',';
+			}
+			catch (...) {
+				os << "DATA STOP i: " << i << " / " << size;
+			}
+		}
+
+		os << ']';
+	}
+
+	return os;
+}*/
