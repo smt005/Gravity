@@ -113,8 +113,8 @@ namespace mystd
 		size_t * _counter = nullptr;
 	};
 
-	//template <typename T>
-	//using shared_ptr = simple_shared_ptr;
+	template <typename T>
+	using shared_ptr = simple_shared_ptr<T>;
 
 	template <typename T, typename... Args>
 	simple_shared_ptr<T> make_shared(Args&&... args)
