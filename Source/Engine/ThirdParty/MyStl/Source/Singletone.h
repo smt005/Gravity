@@ -6,6 +6,11 @@ namespace mystd
 	class Singletone {
 	protected:
 		Singletone() = default;
+		Singletone(Singletone&) = default;
+		Singletone(Singletone&&) = default;
+		void operator = (Singletone&) {};
+		void operator = (Singletone&&) {};
+		~Singletone() = default;
 
 	public:
 		static T& Instance() {
