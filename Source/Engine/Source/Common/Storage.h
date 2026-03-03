@@ -10,9 +10,10 @@
 namespace Engine
 {
 	/* Example
-	class Resource final : public Storage<Resource>
+	class Resource : public Storage<Resource>
 	{
 	public:
+		Resource = delete;
 		Resource(std::string_view name)
 			: _name(name)
 		{}
@@ -48,7 +49,7 @@ namespace Engine
 			using is_transparent = void;
 
 			bool operator()(const Ptr& left, const Ptr& right) const noexcept {
-				return (!left && !right || left.get() == right.get());
+				return (left.get() == right.get());
 			}
 			bool operator()(std::string_view leftName, const Ptr& right) const noexcept {
 				return leftName == (right ? right->Name() : std::string_view());
