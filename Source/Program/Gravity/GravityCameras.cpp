@@ -10,10 +10,7 @@ namespace cameras
 {
 	void MakeCameras()
 	{
-		using namespace Engine;
-
-
-		camera = Camera::MakeAndSet<CameraControl>();
+		camera = Engine::Camera::MakeAndSet<CameraControl>();
 		camera->Init();
 		camera->SetPerspective(10000000.f, 1.f, 45.f);
 		camera->SetPos({ 2.f, 2.f, 1.f });

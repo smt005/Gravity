@@ -6,40 +6,65 @@
 using namespace Engine;
 
 Mesh::Mesh(Mesh&& mesh) noexcept
+	: _count(mesh._count)
+	, _vertexes(mesh._vertexes)
+	, _normals(mesh._normals)
+	, _texCoords(mesh._texCoords)
+	, _VBO(mesh._VBO)
+	, _VAO(mesh._VAO)
 {
-	std::swap(*this, mesh);
+	mesh._count = 0;
+	mesh._vertexes = nullptr;
+	mesh._normals = nullptr;
+	mesh._texCoords = nullptr;
+	mesh._VBO = 0;
+	mesh._VAO = 0;
 }
+
+Mesh::Mesh(int count, float* vertexes, float* normals, float* texCoords)
+	: _count(count)
+	, _vertexes(vertexes)
+	, _normals(normals)
+	, _texCoords(texCoords)
+{}
 
 void Mesh::operator = (Mesh&& mesh) noexcept
 {
-	std::swap(vertexes, mesh.vertexes);
-	std::swap(normals, mesh.normals);
-	std::swap(textures, mesh.textures);
 	std::swap(_count, mesh._count);
+	std::swap(_vertexes, mesh._vertexes);
+	std::swap(_normals, mesh._normals);
+	std::swap(_texCoords, mesh._texCoords);
 	std::swap(_VBO, mesh._VBO);
 	std::swap(_VAO, mesh._VAO);
 }
 
 Mesh::~Mesh()
 {
-
+	delete[] _vertexes;
+	delete[] _normals;
+	delete[] _texCoords;
 
     // TODO: Удалить _VBO, _VAO
 }
 
-const float* Mesh::Data() const
+const float* Mesh::Vertexes() const
 {
-	return vertexes;
+	return _vertexes;
 }
 
-int Mesh::CountVertexes() const
+const float* Mesh::Normals() const
+{
+	return _vertexes;
+}
+
+const float* Mesh::TexCoords() const
+{
+	return _vertexes;
+}
+
+int Mesh::Count() const
 {
 	return _count;
-}
-
-int Mesh::SizeData() const
-{
-    return _count * 3;
 }
 
 unsigned int Mesh::Vbo() const
@@ -47,14 +72,18 @@ unsigned int Mesh::Vbo() const
     return _VBO;
 }
 
-unsigned int Mesh::Vao() const
+/*unsigned int Mesh::Vao() const
 {
     return _VAO;
+}*/
+
+unsigned int Mesh::Vao() const {
+	return _VAO;
 }
 
 void Mesh::BindBuffers()
 {
-    if (SizeData() <= 0 || vertexes == nullptr) {
+    if (_count <= 0 || _vertexes == nullptr) {
         return;
     }
 
@@ -64,7 +93,7 @@ void Mesh::BindBuffers()
     glBindVertexArray(_VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, SizeData() * sizeof(float), vertexes, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _count * 3 * sizeof(float), _vertexes, GL_STATIC_DRAW);
 
     glVertexAttribPointer(
         0,                  // layout location
@@ -82,38 +111,17 @@ void Mesh::BindBuffers()
 
 std::ostream& operator << (std::ostream& os, const Engine::Mesh& mesh)
 {
-	{
-		const size_t size = mesh.CountVertexes();
-		os << "VERTEX [";
+	const size_t size = mesh.Count() * 3;
+	os << "VERTEX [" << size << "]:\n[";
 
-		for (int i = 0; i < size; ++i) {
-			try {
-				float value = mesh.Data()[i];
-				os << value << ',';
-			}
-			catch (...) {
-				os << "VERTEX STOP i: " << i << " / " << size;
-			}
+	for (int i = 0; i < size; i += 3) {
+		// TODO: Проверка на выход за пределы массива
+		os << '{' << mesh.Vertexes()[i] << ',' << mesh.Vertexes()[i + 1] << ',' << mesh.Vertexes()[i + 2] << '}';
+		if (i + 3 < size) {
+			os << ',';
 		}
-
-		os << "]\n";
-	}
-	{
-		const size_t size = mesh.SizeData();
-		os << "DATA [";
-
-		for (int i = 0; i < size; ++i) {
-			try {
-				float value = mesh.Data()[i];
-				os << value << ',';
-			}
-			catch (...) {
-				os << "DATA STOP i: " << i << " / " << size;
-			}
-		}
-
-		os << "]\n";
 	}
 
+	os << "]\n";
 	return os;
 }

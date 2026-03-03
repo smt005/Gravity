@@ -20,7 +20,6 @@ void ColorShader::UseProgram()
 	}
 
 	glUseProgram(_program);
-	//glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::CurrentMatProjectView());
 	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::GetLink().ProjectViewFloat());
 
 	glEnable(GL_BLEND);
@@ -69,7 +68,7 @@ void shaders::InitShaders()
 	colorShader.LoadByName("Color");
 	colorShader.UseProgram();
 
-	glm::vec4 color{ 0.f, 0.f, 1.f, 1.f };
+	glm::vec4 color{ 1.f, 0.6f, 0.f, 1.f };
 	colorShader.SetColor(glm::value_ptr(color));
 
 	glm::mat4x4 mat{1.f};

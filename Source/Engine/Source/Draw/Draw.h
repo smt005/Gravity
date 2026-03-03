@@ -18,7 +18,7 @@ namespace Engine
 
 		template <typename T>
 		static void Render(const T& mesh) {
-			Render(mesh.Vao(), mesh.SizeData());
+			Render(mesh.Vao(), mesh.Count());
 		}
 
 	private:

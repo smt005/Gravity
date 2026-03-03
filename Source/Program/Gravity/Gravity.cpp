@@ -12,21 +12,26 @@
 #include "GravitySpace.h"
 #include "Object.h"
 #include "Handler.h"
-
+#include <mystd_memory.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Examples/TestClass.h>
 #include "../Temp/LogSpecification.h"
+#include "../Temp/LogMyStlSpecification.h"
 #include "../Temp/LogStlSpecification.h"
 #include <Log.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
-Engine::Mesh mesh;
+
+using namespace mystd::Examples;
+mystd::simple_shared_ptr<TestClass> testShader;
 
 bool Gravity::Init(std::string_view params)
 {
 	InitFileManagers();
 	InitCallback();
     InitDraw();
+	TestSimpleShared();
 	return true;
 }
 
@@ -88,12 +93,9 @@ void Gravity::InitDraw()
 	using namespace Engine;
 
 	try {
-		Draw::SetClearColor(0.3f, 0.6f, 0.9f);
-
+		Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 		shaders::InitShaders();
 		cameras::MakeCameras();
-
-		mesh.Load(true);
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);
@@ -106,28 +108,6 @@ void Gravity::InitDraw()
 	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
 		space->Generate(200, 10);
 	}
-
-	Shape shape("Test");
-	Shape sh2 = *Shape::Get("Second");
-	Shape& sh3 = Shape::GetRef("Third");
-	Shape& sh33 = *Shape::Get("Third");
-	Shape& sh4 = Shape::Ins()["Third"];
-
-	//LOG("{}, {}, {}, {}", shape.Name(), sh2.Name(), sh3.Name(), sh33.Name(), sh4.Name());
-	LOG("{}", Shape::Ins());
-	//Shape sh = Shape["For"];
-	//Shape
-
-	/*try {
-		Shape::Get("Star");
-	}
-	catch (const std::exception& exc) {
-		LOG("EXCEPTION: {}", exc);
-		__debugbreak();
-	}
-	catch (...) {
-		__debugbreak();
-	}*/
 }
 
 void Gravity::TestDraw()
@@ -141,8 +121,47 @@ void Gravity::TestDraw()
 	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
 		for (auto& object : space->Objects()) {
 			shader.SetModelPos(glm::value_ptr(object.pos));
-			Draw::Render(mesh);
+			//Draw::Render(SHAPES["Star", true, true].mesh);
+			Draw::Render(SHAPES["Sphere", true, true].mesh);
 		}
 	}
 
+}
+
+void Gravity::TestSimpleShared()
+{
+	LOG("BEGIN");
+	{
+		mystd::simple_shared_ptr<TestClass> firstShader;
+		mystd::simple_shared_ptr<TestClass> secondShader = mystd::make_shared<TestClass>(111, "Test111");
+
+		TestClass* testClassPtr = nullptr;
+		{
+			mystd::simple_shared_ptr<TestClass> thirdShader(testClassPtr);
+			LOG("[{}], [{}], [{}]", firstShader, *secondShader, thirdShader);
+		}
+
+		testClassPtr = new TestClass(222, "222Test");
+		mystd::simple_shared_ptr<TestClass> thirdShader(testClassPtr);
+		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
+
+		thirdShader = secondShader;
+		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
+
+		firstShader = std::move(secondShader);
+		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
+
+		mystd::simple_shared_ptr<TestClass> forShader(firstShader);
+		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
+
+		forShader->_val = 999;
+		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
+
+		firstShader = mystd::make_shared<TestClass>(333, "333Test333");
+		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
+
+		mystd::simple_shared_ptr<TestClass> fiveShader(std::move(firstShader));
+		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader, fiveShader);
+	}
+	LOG("END");
 }
