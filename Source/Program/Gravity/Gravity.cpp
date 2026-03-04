@@ -11,7 +11,6 @@
 #include "GravityCameras.h"
 #include "GravitySpace.h"
 #include "Object.h"
-#include "Handler.h"
 #include <mystd_memory.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -24,7 +23,7 @@
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
 using namespace mystd::Examples;
-mystd::simple_shared_ptr<TestClass> testShader;
+mystd::shared_ptr<TestClass> testShader;
 
 bool Gravity::Init(std::string_view params)
 {
@@ -96,6 +95,12 @@ void Gravity::InitDraw()
 		Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 		shaders::InitShaders();
 		cameras::MakeCameras();
+
+		{
+			Shape::Ptr sp = mystd::make_shared<Shape>("qwe");
+			Resource<Shape>::Ptr res = sp;
+		}
+
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);
@@ -130,19 +135,19 @@ void Gravity::TestDraw()
 
 void Gravity::TestSimpleShared()
 {
-	LOG("BEGIN");
+	/*LOG("BEGIN");
 	{
-		mystd::simple_shared_ptr<TestClass> firstShader;
-		mystd::simple_shared_ptr<TestClass> secondShader = mystd::make_shared<TestClass>(111, "Test111");
+		mystd::shared_ptr<TestClass> firstShader;
+		mystd::shared_ptr<TestClass> secondShader = mystd::make_shared<TestClass>(111, "Test111");
 
 		TestClass* testClassPtr = nullptr;
 		{
-			mystd::simple_shared_ptr<TestClass> thirdShader(testClassPtr);
+			mystd::shared_ptr<TestClass> thirdShader(testClassPtr);
 			LOG("[{}], [{}], [{}]", firstShader, *secondShader, thirdShader);
 		}
 
 		testClassPtr = new TestClass(222, "222Test");
-		mystd::simple_shared_ptr<TestClass> thirdShader(testClassPtr);
+		mystd::shared_ptr<TestClass> thirdShader(testClassPtr);
 		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
 
 		thirdShader = secondShader;
@@ -151,7 +156,7 @@ void Gravity::TestSimpleShared()
 		firstShader = std::move(secondShader);
 		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
 
-		mystd::simple_shared_ptr<TestClass> forShader(firstShader);
+		mystd::shared_ptr<TestClass> forShader(firstShader);
 		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
 
 		forShader->_val = 999;
@@ -163,5 +168,5 @@ void Gravity::TestSimpleShared()
 		mystd::simple_shared_ptr<TestClass> fiveShader(std::move(firstShader));
 		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader, fiveShader);
 	}
-	LOG("END");
+	LOG("END");*/
 }

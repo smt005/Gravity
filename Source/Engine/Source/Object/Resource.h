@@ -2,38 +2,51 @@
 #pragma once
 
 #include <memory>
+#include <mystd_memory.h>
 #include <unordered_set>
 #include <string>
 #include <ostream>
 #include <Singletone.h>
+#include <Common/Common.h>
 
 namespace Engine
 {
-	/* Example
-	class Resource : public Storage<Resource>
+	/* Пример класса для использования Resource
+	class ExampleClass : public Resource<ExampleClass>
 	{
 	public:
-		Resource = delete;
-		Resource(std::string_view name)
-			: _name(name)
+		ExampleClass = delete;
+		ExampleClass(std::string_view name)
+			: Resource::_name(name)
 		{}
+	};
+	*/
 
-		std::string_view Name() const {
+	template <typename T>
+	class Resource : public mystd::Singletone<Resource<T>>
+	{
+		friend mystd::Singletone<Resource<T>>;
+
+		Resource() = default;
+		Resource(const Resource&) = delete;
+		Resource(Resource&&) = delete;
+		Resource& operator = (const Resource&) = delete;
+		Resource& operator = (Resource&&) = delete;
+
+	protected:
+		Resource(std::string_view name) : _name(name) {}
+		~Resource() = default;
+
+	public:
+		using Ptr = mystd::shared_ptr<T>;
+
+		const std::string& GetName() const {
 			return _name;
 		}
 
 	private:
 		std::string _name;
-	};
-	*/
 
-	template <typename T>
-	class Storage : public mystd::Singletone<Storage<T>>
-	{
-	public:
-		using Ptr = std::shared_ptr<T>;
-
-	private:
 		struct Hash {
 			using is_transparent = void;
 
@@ -41,7 +54,7 @@ namespace Engine
 				return std::hash<std::string_view>{}(name);
 			}
 			size_t operator()(const Ptr& ptr) const noexcept {
-				return ptr ? std::hash<std::string_view>{}(ptr->Name()) : 0;
+				return ptr ? std::hash<std::string_view>{}(ptr->_name) : 0;
 			}
 		};
 
@@ -52,23 +65,23 @@ namespace Engine
 				return (left.get() == right.get());
 			}
 			bool operator()(std::string_view leftName, const Ptr& right) const noexcept {
-				return leftName == (right ? right->Name() : std::string_view());
+				return leftName == (right ? right->_name : std::string_view());
 			}
 			bool operator()(const Ptr& left, std::string_view rightName) const noexcept {
-				return (left ? left->Name() : std::string_view()) == rightName;
+				return (left ? left->_name : std::string_view()) == rightName;
 			}
 		};
 
 	public:
-		using StorageClass = std::unordered_set<Ptr, Hash, IsEqual>;
+		using ResourceContainer = std::unordered_set<Ptr, Hash, IsEqual>;
 
 		template <typename ...Args>
-		inline static T& operator[](Args&&... args) {
+		static T& operator[](Args&&... args) {
 			return *Get(std::forward<Args>(args)...);
 		}
 
 		template <typename ...Args>
-		inline static T& GetRef(Args&&... args) {
+		static T& GetRef(Args&&... args) {
 			return *Get(std::forward<Args>(args)...);
 		}
 
@@ -76,9 +89,9 @@ namespace Engine
 		static const Ptr& Get(std::string_view name, Args&&... args) {
 			auto it = data.find(name);
 			if (it == data.end()) {
-				const auto emplaceResult = data.emplace(std::make_shared<T>(name, std::forward<Args>(args)...));
+				const auto emplaceResult = data.emplace(mystd::make_shared<T>(name, std::forward<Args>(args)...));
 				if (!emplaceResult.second || !*emplaceResult.first) {
-					throw std::logic_error(TO_STRING("[{}::Storage::Get] nullptr by name: {}", typeid(T).name(), name));
+					throw std::logic_error(TO_STRING("[{}::Resource::Get] nullptr by name: {}", typeid(T).name(), name));
 				}
 
 				it = emplaceResult.first;
@@ -96,18 +109,18 @@ namespace Engine
 			return data.contains(name);
 		}
 
-		static const StorageClass& Data() {
+		static const ResourceContainer& Data() {
 			return data;
 		}
 
 	private:
-		inline static StorageClass data;
+		inline static ResourceContainer data;
 	};
 
 	template <typename T>
-	static std::ostream& operator << (std::ostream& os, const Storage<T>& storage)
+	static std::ostream& operator << (std::ostream& os, const Resource<T>& storage)
 	{
-		const Storage<T>::StorageClass& data = storage.Data();
+		const Resource<T>::ResourceContainer& data = storage.Data();
 		const size_t size = data.size();
 		size_t number = 0;
 		os << '[';

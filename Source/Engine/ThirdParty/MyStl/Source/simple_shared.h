@@ -56,15 +56,23 @@ namespace mystd
 			return _dataPtr;
 		}
 
+		T* get() const {
+			return _dataPtr;
+		}
+
 		T& operator * () {
 			return *_dataPtr;
 		}
 		
-		const T& operator * () const {
+		T& operator * () const {
 			return *_dataPtr;
 		}
-
+		
 		T* operator -> () {
+			return _dataPtr;
+		}
+
+		T* operator -> () const {
 			return _dataPtr;
 		}
 

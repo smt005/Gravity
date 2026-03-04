@@ -72,11 +72,6 @@ unsigned int Mesh::Vbo() const
     return _VBO;
 }
 
-/*unsigned int Mesh::Vao() const
-{
-    return _VAO;
-}*/
-
 unsigned int Mesh::Vao() const {
 	return _VAO;
 }

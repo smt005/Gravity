@@ -3,7 +3,6 @@
 
 #include <string>
 #include <random>
-//#include <corecrt_math_defines.h>
 
 namespace Engine
 {
@@ -11,7 +10,16 @@ namespace Engine
 	std::string GetClassName()
 	{
 		const std::string_view typeName = typeid(T).name();
-		const size_t pos = typeName.find_last_of("::") + 1;
+		size_t pos = typeName.find_last_of("::");
+
+		if (pos == typeName.npos) {
+			pos = typeName.find_last_of("class");
+		}
+		if (pos == typeName.npos) {
+			pos = typeName.find_last_of("struct");
+		}
+
+		++pos;
 
 		if (pos != typeName.npos) {
 			return std::string(typeName.substr(pos, typeName.size() - pos));

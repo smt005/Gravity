@@ -8,7 +8,7 @@
 using namespace Engine;
 
 Shape::Shape(std::string_view name, bool load, bool bindVao)
-	: _name(name)
+	: Resource(name)
 {
 	if (load) {
 		Load(bindVao);
@@ -16,6 +16,7 @@ Shape::Shape(std::string_view name, bool load, bool bindVao)
 }
 
 Shape::Shape(std::string_view name, std::string_view fileNamePath, bool load, bool bindVao)
+	: Resource(name)
 {
 	if (load) {
 		Load(fileNamePath, bindVao);
@@ -24,7 +25,7 @@ Shape::Shape(std::string_view name, std::string_view fileNamePath, bool load, bo
 
 bool Shape::Load(bool createBuffer)
 {
-	const std::string fileNamePath = TO_STRING("Shapes/{}.obj", _name);
+	const std::string fileNamePath = TO_STRING("Shapes/{}.obj", GetName());
 	return Load(fileNamePath, createBuffer);
 }
 
