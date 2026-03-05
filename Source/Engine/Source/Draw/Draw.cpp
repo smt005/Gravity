@@ -42,3 +42,7 @@ void Draw::Render(unsigned int vao, int count)
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, count);
 }
+
+void Draw::BindTexture(unsigned int textureId) {
+    glBindTexture(GL_TEXTURE_2D, textureId);
+}

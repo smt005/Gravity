@@ -22,8 +22,9 @@ namespace Engine
 		const float* Normals() const;
 		const float* TexCoords() const;
 		int Count() const;
-		unsigned int Vbo() const;
 		unsigned int Vao() const;
+		unsigned int Vbo() const;
+		unsigned int Tbo() const;
 		void BindBuffers();
 
 	private:
@@ -34,8 +35,11 @@ namespace Engine
 
 		// TODO: Вынести из класса?
 	public:
-		unsigned int _VBO = 0;
 		unsigned int _VAO = 0;
+		unsigned int _VBO = 0;
+		unsigned int _TBO = 0;
+		//unsigned int _NBO = 0;
+
 	};
 }
 

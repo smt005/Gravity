@@ -32,7 +32,7 @@ void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 int Core::Execution(std::string_view params)
 {
 	if (!instanceProgram) {
-		LOG("[Core::Execution] Engine::instanceProgram nullptr. {}", 0);
+		LOG("[Core::Execution] Engine::instanceProgram nullptr.");
 		return 1;
 	}
 	
@@ -100,7 +100,7 @@ void Core::MainLoop()
 
 		Callback::Update();
 		instanceProgram->Update();
-		ImGuiWindow::UpdateWindows(0); // TODO: dTime
+		ImGuiWindow::UpdateWindows(Callback::GetDeltaTime());
 
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();

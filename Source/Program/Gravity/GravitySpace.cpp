@@ -1,13 +1,11 @@
 ﻿// ◦ Xyz ◦
 
 #include "GravitySpace.h"
-#include <Common/Common.h>
 #include <glm/ext/quaternion_geometric.hpp>
+#include <glm/vec3.hpp>
 #include <deque>
-
-Space::Space(std::string_view name)
-	: Engine::Item(name)
-{}
+#include <Common/Common.h>
+#include <Log.h>
 
 void Space::Generate(size_t count, size_t radius)
 {
@@ -45,7 +43,7 @@ void Space::UpdateForce()
 	};
 
 	Object::gForce = 0.001f;
-	float colapseDist = 0.1f;
+	float colapseDist = 2.f; // 1.f; // 0.1f;
 	
 	size_t size = _objects.size();
 
@@ -129,7 +127,7 @@ void Space::UpdateForce()
 			}
 
 			const float dist = glm::distance(pos, _objects[j].pos);
-			const float valueForce = Object::gForce * weight * _objects[j].weight / std::powf(dist / 2.f, 2);
+			const float valueForce = Object::gForce * weight * _objects[j].weight / std::powf(dist, 2);
 
 			force += glm::normalize(_objects[j].pos - pos) * valueForce;
 		}

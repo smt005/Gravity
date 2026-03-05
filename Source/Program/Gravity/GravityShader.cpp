@@ -13,38 +13,42 @@
 
 using namespace shaders;
 
-void ColorShader::UseProgram()
+bool BaseShader::UseProgram()
 {
 	if (!_program) {
-		return;
+		return false;
 	}
 
 	glUseProgram(_program);
 	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::GetLink().ProjectViewFloat());
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+
+	return true;
 }
 
-void ColorShader::GetLocation()
+bool BaseShader::GetLocation()
 {
 	if (!_program) {
-		return;
+		return false;
 	}
 
 	uMatProjectionView = glGetUniformLocation(_program, "uMatProjectionView");
 	uMatViewModel = glGetUniformLocation(_program, "uMatViewModel");
 	uColor = glGetUniformLocation(_program, "uColor");
+
+	return true;
 }
 
-void ColorShader::SetColor(const float* const color) const
+void BaseShader::SetColor(const float* const color) const
 {
 	if (color) {
 		glUniform4fv(uColor, 1, color);
 	}
 }
 
-void ColorShader::SetModelPos(const float* const pos) const
+void BaseShader::SetModelPos(const float* const pos) const
 {
 	if (pos) {
 		glm::mat4x4 mat(1.f);
@@ -55,7 +59,7 @@ void ColorShader::SetModelPos(const float* const pos) const
 	}
 }
 
-void ColorShader::SetModelMatrix(const float* const mat) const
+void BaseShader::SetModelMatrix(const float* const mat) const
 {
 	if (mat) {
 		glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, mat);
@@ -64,13 +68,27 @@ void ColorShader::SetModelMatrix(const float* const mat) const
 
 void shaders::InitShaders()
 {
-	auto& colorShader = shaders::ColorShader::Instance();
-	colorShader.LoadByName("Color");
-	colorShader.UseProgram();
+	/*{
+		auto& colorShader = shaders::BaseShader::Instance();
+		colorShader.LoadByName("Color");
+		colorShader.UseProgram();
 
-	glm::vec4 color{ 1.f, 0.6f, 0.f, 1.f };
-	colorShader.SetColor(glm::value_ptr(color));
+		glm::vec4 color{ 1.f, 0.6f, 0.f, 1.f };
+		colorShader.SetColor(glm::value_ptr(color));
 
-	glm::mat4x4 mat{1.f};
-	colorShader.SetModelMatrix(glm::value_ptr(mat));
+		glm::mat4x4 mat{ 1.f };
+		colorShader.SetModelMatrix(glm::value_ptr(mat));
+	}*/
+
+	{
+		auto& colorShader = shaders::BaseShader::Instance();
+		colorShader.LoadByName("Texture");
+		colorShader.UseProgram();
+
+		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
+		colorShader.SetColor(glm::value_ptr(color));
+
+		glm::mat4x4 mat{ 1.f };
+		colorShader.SetModelMatrix(glm::value_ptr(mat));
+	}
 }

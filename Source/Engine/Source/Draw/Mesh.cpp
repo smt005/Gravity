@@ -67,13 +67,17 @@ int Mesh::Count() const
 	return _count;
 }
 
+unsigned int Mesh::Vao() const {
+	return _VAO;
+}
+
 unsigned int Mesh::Vbo() const
 {
     return _VBO;
 }
 
-unsigned int Mesh::Vao() const {
-	return _VAO;
+unsigned int Mesh::Tbo() const {
+	return _TBO;
 }
 
 void Mesh::BindBuffers()
@@ -82,7 +86,7 @@ void Mesh::BindBuffers()
         return;
     }
 
-    glGenVertexArrays(1, &_VAO);
+    /*glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
 
     glBindVertexArray(_VAO);
@@ -101,7 +105,31 @@ void Mesh::BindBuffers()
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glBindVertexArray(0);*/
+
+	//......................
+
+	glGenVertexArrays(1, &_VAO);
+	glGenBuffers(1, &_VBO);
+	glGenBuffers(1, &_TBO);
+	//glGenBuffers(1, &_EBO);
+
+	glBindVertexArray(_VAO);
+
+	//...
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+	glBufferData(GL_ARRAY_BUFFER, _count * 3 * sizeof(GLfloat), _vertexes, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	//...
+	glBindBuffer(GL_ARRAY_BUFFER, _TBO);
+	glBufferData(GL_ARRAY_BUFFER, _count * 2 * sizeof(GLfloat), _texCoords, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 std::ostream& operator << (std::ostream& os, const Engine::Mesh& mesh)

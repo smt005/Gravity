@@ -7,6 +7,7 @@
 #include <Draw/Mesh.h>
 #include <Draw/Draw.h>
 #include <Object/Shape.h>
+#include <Object/Texture.h>
 #include "GravityShader.h"
 #include "GravityCameras.h"
 #include "GravitySpace.h"
@@ -37,9 +38,7 @@ bool Gravity::Init(std::string_view params)
 void Gravity::OnClose() {}
 
 void Gravity::Update() {
-	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
-		space->Update();
-	}
+	Space::Instance().Update();
 }
 
 void Gravity::OnResize()
@@ -52,7 +51,6 @@ void Gravity::InitFileManagers()
 {
 	Engine::FileManager::Make("write");
 	Engine::FileManager::Make("base", "../../Source/Resources/Files");
-	LOG("FileManager: {}", Engine::FileManager::Get("base"));
 }
 
 void Gravity::Draw() {
@@ -68,23 +66,6 @@ void Gravity::InitCallback()
 			exit(0);
 		}
 	});
-
-	Callback::Add(Callback::Type::PRESS_KEY, [](const Callback::EventData& data) {
-		if (Callback::KeyPressed(VirtualKey::CONTROL)) {
-			if (data.key == 'R') {
-				float color[] = { 1.f, 0.f, 0.f, 1.f };
-				shaders::ColorShader::Instance().SetColor(color);
-			}
-			if (data.key == 'G') {
-				float color[] = { 0.f, 1.f, 0.f, 1.f };
-				shaders::ColorShader::Instance().SetColor(color);
-			}
-			if (data.key == 'B') {
-				float color[] = { 0.f, 0.f, 1.f, 1.f };
-				shaders::ColorShader::Instance().SetColor(color);
-			}
-		}
-		});
 }
 
 void Gravity::InitDraw()
@@ -95,12 +76,7 @@ void Gravity::InitDraw()
 		Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 		shaders::InitShaders();
 		cameras::MakeCameras();
-
-		{
-			Shape::Ptr sp = mystd::make_shared<Shape>("qwe");
-			Resource<Shape>::Ptr res = sp;
-		}
-
+		Space::Instance().Generate(100, 100);
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);
@@ -109,10 +85,6 @@ void Gravity::InitDraw()
 	catch (...) {
 		__debugbreak();
 	}
-
-	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
-		space->Generate(200, 10);
-	}
 }
 
 void Gravity::TestDraw()
@@ -120,17 +92,17 @@ void Gravity::TestDraw()
 	using namespace Engine;
 
 	Draw::ClearColor();
-	auto& shader = shaders::ColorShader::Instance();
+	auto& shader = shaders::BaseShader::Instance();
 	shader.UseProgram();
 
-	if (Space* space = dynamic_cast<Space*>(Space::MakeItem<Space>("First").get())) {
-		for (auto& object : space->Objects()) {
-			shader.SetModelPos(glm::value_ptr(object.pos));
-			//Draw::Render(SHAPES["Star", true, true].mesh);
-			Draw::Render(SHAPES["Sphere", true, true].mesh);
-		}
-	}
+	Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
+	Space& space = Space::Instance();
+	for (auto& object : space.Objects()) {
+		shader.SetModelPos(glm::value_ptr(object.pos));
+		//Draw::Render(SHAPES["Star", true, true].mesh);
+		Draw::Render(SHAPES["Sphere", true, true].mesh);
+	}
 }
 
 void Gravity::TestSimpleShared()

@@ -15,6 +15,7 @@ namespace Engine
 		static void DepthTest(bool enable);
 		static void Viewport();
 		static void Render(unsigned int vao, int count);
+		static void BindTexture(unsigned int textureId);
 
 		template <typename T>
 		static void Render(const T& mesh) {

@@ -3,7 +3,7 @@
 
 #include <Draw/Mesh.h>
 #include <Object/Resource.h>
-#include <Log.h>
+
 namespace Engine
 {
 	class Shape final : public Resource<Shape>
@@ -14,9 +14,8 @@ namespace Engine
 		Shape() = default;
 		Shape(std::string_view name, bool load = true, bool bindVao = false);
 		Shape(std::string_view name, std::string_view fileNamePath, bool load = false, bool bindVao = false);
-		~Shape() {
-			LOG("~Shape");
-		}
+		~Shape() = default;
+
 		bool Load(bool createBuffer = false);
 		bool Load(std::string_view fileNamePath, bool createBuffer = false);
 

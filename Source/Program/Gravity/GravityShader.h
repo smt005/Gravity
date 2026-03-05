@@ -6,11 +6,11 @@
 
 namespace shaders
 {
-	class ColorShader final : public Engine::Shader, public mystd::Singletone<ColorShader>
+	class BaseShader : public Engine::Shader, public mystd::Singletone<BaseShader>
 	{
 	public:
-		void UseProgram() override;
-		void GetLocation() override;
+		bool UseProgram() override;
+		bool GetLocation() override;
 		void SetColor(const float* const color) const;
 		template <std::ranges::range T>
 		void SetColor(const T&& color) const {
@@ -20,10 +20,21 @@ namespace shaders
 		void SetModelMatrix(const float* const mat) const;
 
 	private:
+		//unsigned int aPosition = 0;
 		unsigned int uMatProjectionView = 0;
 		unsigned int uMatViewModel = 0;
 		unsigned int uColor = 0;
 	};
+
+	/*class TextureShader : public ColorShader
+	{
+	public:
+		bool UseProgram() override;
+		bool GetLocation() override;
+
+	private:
+		//unsigned int aTexCoord = 0;
+	};*/
 
 	void InitShaders();
 }
