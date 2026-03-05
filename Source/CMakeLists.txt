@@ -50,6 +50,10 @@ set(IMGUI_NAME imgui)
 set(IMGUI_DIR "${ENGINE_DIR}/ThirdParty/${IMGUI_NAME}")
 set(IMGUI_INCLUDES "${IMGUI_DIR}")
 
+# FreeImage (prebuilt: Dist/x32, Dist/x64) — arch set after project()
+set(FREEIMAGE_NAME FreeImage)
+set(FREEIMAGE_DIR "${ENGINE_DIR}/ThirdParty/${FREEIMAGE_NAME}")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -62,6 +66,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOURCE_DIR}/../Bin)
 project(${PROJECT_NAME} LANGUAGES CXX)
 add_executable(${PROJECT_NAME} ${PROJECT_MAIN_FILE})
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+
+# FreeImage: choose arch after project() so CMAKE_SIZEOF_VOID_P is set
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(FREEIMAGE_DIST_ARCH "x64")
+else()
+    set(FREEIMAGE_DIST_ARCH "x32")
+endif()
+set(FREEIMAGE_INCLUDES "${FREEIMAGE_DIR}/Dist/${FREEIMAGE_DIST_ARCH}")
+set(FREEIMAGE_LIB_DIR "${FREEIMAGE_DIR}/Dist/${FREEIMAGE_DIST_ARCH}")
 
 # Game
 include_directories(${PROGRAM_SOURCE})
@@ -104,5 +117,15 @@ include_directories(${GLM_INCLUDES})
 
 # ImGui
 include_directories(${IMGUI_INCLUDES})
+
+# FreeImage
+include_directories(${FREEIMAGE_INCLUDES})
+target_link_libraries(${PROJECT_NAME} "${FREEIMAGE_LIB_DIR}/FreeImage.lib")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FREEIMAGE_LIB_DIR}/FreeImage.dll"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying FreeImage.dll to output directory"
+)
 
 message("End generate. . . . . . . . . . . . . . . .")
