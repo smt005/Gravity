@@ -13,6 +13,6 @@ struct Object final {
 	float maxForce = std::numeric_limits<float>::min();
 
 public:
-	inline static float gForce = 0.1f; // Гравитационная постоянная
+	inline static float gForce = 1.f; // Гравитационная постоянная
 };
 

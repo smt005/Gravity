@@ -27,107 +27,40 @@ unsigned int Texture::Id()
 	return _id;
 }
 
-unsigned int Texture::Load()
+bool Texture::Load()
 {
-	if (GetName().empty()) return 0;
+	const std::filesystem::path fullFileName = Engine::FileManager::Get("base").GetRoot() / "Textures" / GetName();
+	if (!std::filesystem::exists(fullFileName)) {
+		return false;
+	}
 
-	_id = LoadTexture(GetName().c_str(), _width, _height);
-
-	return _id;
-}
-
-void Texture::SetId(const unsigned int id) {
-	_id = id;
-	_fileName.clear();
-}
-
-unsigned int Texture::LoadTexture(const char* fileName)
-{
-	std::filesystem::path fullFileName = Engine::FileManager::Get("base").GetRoot() / std::filesystem::path("Textures") / std::filesystem::path(fileName);
-
-	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
-	FIBITMAP *dib(0);
-	BYTE* bits(0);
-	unsigned int width(0), height(0);
-	GLuint _textureId;
-
-	fif = FreeImage_GetFileType(fullFileName.string().c_str(), 0);
-
-	if (fif == FIF_UNKNOWN)	{
+	FREE_IMAGE_FORMAT fif = FreeImage_GetFileType(fullFileName.string().c_str(), 0);
+	if (fif == FIF_UNKNOWN) {
 		fif = FreeImage_GetFIFFromFilename(fullFileName.string().c_str());
 	}
 
 	if (fif == FIF_UNKNOWN) {
-		return 0;
+		return false;
 	}
 
-	if (FreeImage_FIFSupportsReading(fif)) {
-		dib = FreeImage_Load(fif, fullFileName.string().c_str());
-	}
-
-	if (!dib) {
-		return 0;
-	}
-
-	bits = FreeImage_GetBits(dib);
-	width = FreeImage_GetWidth(dib);
-	height = FreeImage_GetHeight(dib);
-
-	if ((bits == 0) || (width == 0) || (height == 0)) {
-		return 0;
-	}
-
-	GLenum format = GL_RGB;
-	if (FreeImage_GetBPP(dib) == 32)format = GL_RGBA;
-	if (FreeImage_GetBPP(dib) == 24)format = GL_RGB;
-	if (FreeImage_GetBPP(dib) == 8)format = GL_LUMINANCE;
-
-	glGenTextures(1, &_textureId);
-	glBindTexture(GL_TEXTURE_2D, _textureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, bits);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	
-	return _textureId;
-}
-
-unsigned int Texture::LoadTexture(const std::string& fileName, unsigned int& width, unsigned int& height) {
-	width = 0;
-	height = 0;
-	std::filesystem::path fullFileName = Engine::FileManager::Get("base").GetRoot() / std::filesystem::path("Textures") / std::filesystem::path(fileName);
-
-	FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
 	FIBITMAP* bitMap = nullptr;
-	BYTE* bytes = nullptr;
-
-	fif = FreeImage_GetFileType(fullFileName.string().c_str(), 0);
-
-	if (fif == FIF_UNKNOWN) {
-		fif = FreeImage_GetFIFFromFilename(fullFileName.string().c_str());
-	}
-
-	if (fif == FIF_UNKNOWN) {
-		return 0;
-	}
-
 	if (FreeImage_FIFSupportsReading(fif)) {
 		bitMap = FreeImage_Load(fif, fullFileName.string().c_str());
 	}
 
 	if (!bitMap) {
-		return 0;
+		return false;
 	}
 
-	width = FreeImage_GetWidth(bitMap);
-	height = FreeImage_GetHeight(bitMap);
-	bytes = FreeImage_GetBits(bitMap);
+	unsigned int width = FreeImage_GetWidth(bitMap);
+	unsigned int height = FreeImage_GetHeight(bitMap);
+	BYTE* bytes = FreeImage_GetBits(bitMap);
 
 	if ((bytes == 0) || (width == 0) || (height == 0)) {
 		width = 0;
 		height = 0;
 		FreeImage_Unload(bitMap);
-		return 0;
+		return false;
 	}
 
 	unsigned int textureId = 0;
@@ -144,12 +77,17 @@ unsigned int Texture::LoadTexture(const std::string& fileName, unsigned int& wid
 		FreeImage_Unload(bitMap);
 		width = 0;
 		height = 0;
-		return 0;
+		return false;
 	}
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	FreeImage_Unload(bitMap);
-	return textureId;
+
+	_id = textureId;
+	_width = width;
+	_height = height;
+
+	return true;
 }
