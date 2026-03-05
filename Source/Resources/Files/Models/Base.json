@@ -1,0 +1,10 @@
+{
+  "Star": {
+    "texture": "Star.png",
+    "shape": "Star"
+  },
+  "Star256": {
+    "texture": "Star.png",
+    "shape": "Star"
+  }
+}

@@ -28,6 +28,8 @@ namespace Engine
 		struct CursorPos {
 			float x;
 			float y;
+			float deltaX;
+			float deltaY;
 		};
 
 		union EventData {
@@ -61,6 +63,10 @@ namespace Engine
 		static void Update();
 		static bool KeyPressed(char ch);
 		static bool MouseButtonPressed(int button);
+		static const float* const GetMousePos();
+		static const float* const GetDeltaMousePos();
+		static double GetCurrentTime();
+		static double GetDeltaTime();
 
 	private:
 		std::unordered_map<Type, std::list<Fun>> _callbackFuns;
@@ -69,6 +75,10 @@ namespace Engine
 		inline static std::array<std::vector<Callback*>, static_cast<size_t>(Type::COUNT)> callbacksByEvent;
 		inline static std::unordered_set<char> callbackPinchKey;
 		inline static std::unordered_set<int> callbackPinchMouseButton;
+		inline static float mousePos[2];
+		inline static float deltaMousePos[2];
+		inline static double lastTime;
+		inline static double deltaTime;
 		inline static EventData currentEventData;
 	};
 }

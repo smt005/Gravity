@@ -10,6 +10,7 @@ file(GLOB_RECURSE SOURCES ${PROGRAM_SOURCE}/*.cpp)
 source_group(TREE ${PROGRAM_SOURCE} TREE PREFIX "" FILES ${INCLUDES} ${SOURCES})
 
 include_directories(${MYSTL_SOURCE})
+include_directories(${GLAD_INCLUDES})
 include_directories(${JSON_INCLUDES})
 include_directories(${ENGINE_SOURCE})
 include_directories(${GLM_INCLUDES})

@@ -19,4 +19,8 @@ public:
 private:
 	void InitFileManagers();
 	void InitCallback();
+
+	void InitDraw();
+	void TestDraw();
+	void TestSimpleShared();
 };

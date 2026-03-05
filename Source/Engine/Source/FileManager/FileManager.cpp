@@ -1,4 +1,4 @@
-﻿// ◦ Xyz ◦
+// ◦ Xyz ◦
 
 #include "FileManager.h"
 #include <exception>
@@ -31,6 +31,11 @@ const std::filesystem::path& FileManager::SetRoot(const std::filesystem::path& p
     return GetRoot();
 }
 
+std::string FileManager::ReadTextFile(const std::filesystem::path& filePath) const
+{
+    return ReadFile<std::string>(filePath);
+}
+
 FileManager& FileManager::Make(const std::string& name, const std::filesystem::path& relativePath) {
     auto it = fileManagers.find(name);
 
@@ -61,4 +66,13 @@ FileManager& FileManager::Get(const std::string& name)
 bool FileManager::IsExist(const std::string& name)
 {
     return fileManagers.contains(name);
+}
+
+namespace Engine
+{
+    std::ostream& operator << (std::ostream& os, const FileManager& fm)
+    {
+        os << "'" << fm.GetName() << "'\n" << fm.GetRoot();
+        return os;
+    }
 }

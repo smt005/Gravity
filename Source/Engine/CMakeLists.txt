@@ -28,6 +28,7 @@ include_directories(${GLFW_INCLUDES})
 include_directories(${GLAD_INCLUDES})
 include_directories(${JSON_INCLUDES})
 include_directories(${GLM_INCLUDES})
+include_directories(${FREEIMAGE_INCLUDES})
 
 add_library(${ENGINE_NAME} STATIC ${INCLUDES} ${SOURCES})
 

@@ -1,4 +1,7 @@
 #include "Callback.h"
+#include <Log.h>
+
+#include <chrono>
 
 using namespace Engine;
 
@@ -57,8 +60,15 @@ void Callback::Clear()
 
 void Callback::OnCursorPosCallback(double x, double y)
 {
+	deltaMousePos[0] = x - mousePos[0];
+	deltaMousePos[1] = y - mousePos[1];
+	mousePos[0] = x;
+	mousePos[1] = y;
 	currentEventData.cursorPos.x = x;
 	currentEventData.cursorPos.y = y;
+	currentEventData.cursorPos.deltaX = deltaMousePos[0];
+	currentEventData.cursorPos.deltaY = deltaMousePos[1];
+
 	IterationCallback(Type::MOVE, currentEventData);
 }
 
@@ -133,8 +143,27 @@ void Callback::IterationCallback(Type type, EventData eventData)
 	callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), nullptr), callbacks.end());
 }
 
+double Callback::GetCurrentTime()
+{
+	std::chrono::milliseconds ms;
+	ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+	double value = static_cast<double>(ms.count());
+	return value;
+}
+
+double Callback::GetDeltaTime()
+{
+	return deltaTime;
+}
+
 void Callback::Update()
 {
+	double currentTime = GetCurrentTime();
+	double deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
+	deltaTime = deltaTime / 1000;
+
 	for (auto key : callbackPinchKey) {
 		currentEventData.key = static_cast<char>(key);
 		IterationCallback(Type::PINCH_KEY, currentEventData);
@@ -144,6 +173,10 @@ void Callback::Update()
 		currentEventData.mouseButton = button;
 		IterationCallback(Type::PINCH_TAP, currentEventData);
 	}
+
+	deltaMousePos[0] = 0;
+	deltaMousePos[1] = 0;
+
 }
 
 bool Callback::KeyPressed(char ch)
@@ -154,4 +187,14 @@ bool Callback::KeyPressed(char ch)
 bool Callback::MouseButtonPressed(int button)
 {
 	return callbackPinchMouseButton.contains(button);
+}
+
+const float* const Callback::GetMousePos()
+{
+	return mousePos;
+}
+
+const float* const Callback::GetDeltaMousePos()
+{
+	return deltaMousePos;
 }

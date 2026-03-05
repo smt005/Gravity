@@ -22,12 +22,14 @@ namespace Engine
 		const std::filesystem::path& GetRoot() const;
 		const std::filesystem::path& SetRoot(const std::filesystem::path& path);
 
+		std::string ReadTextFile(const std::filesystem::path& filePath) const;
+
 		template<std::ranges::range T>
 		T ReadFile(const std::filesystem::path& filePath) const
 		{
 			T buffer;
 			if (!ReadFile(buffer, filePath)) {
-				LOG("[FileManager::ReadFile] Error read file: '{}': '{}'", filePath);
+				LOG("[FileManager::ReadFile] Error read file: '{}'", filePath);
 			}
 			return buffer;
 		}
@@ -95,4 +97,6 @@ namespace Engine
 	private:
 		inline static std::unordered_map<std::string, FileManager> fileManagers;
 	};
+
+	std::ostream& operator << (std::ostream& os, const FileManager& fm);
 }

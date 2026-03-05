@@ -1,4 +1,6 @@
+﻿// ◦ Xyz ◦
 #pragma once
+
 
 #include <iostream>
 #include <sstream>
@@ -20,7 +22,7 @@ namespace mystd
 {
 	std::ostream& operator << (std::ostream& os, const std::exception& exc)
 	{
-		os << "EXCEPTION: " << typeid(exc).name() << ": " << exc.what();
+		os << exc.what();
 		return os;
 	}
 

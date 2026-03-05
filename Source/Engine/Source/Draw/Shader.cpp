@@ -1,0 +1,83 @@
+﻿// ◦ Xyz ◦
+
+#include "Shader.h"
+#include <exception>
+#include <FileManager/FileManager.h>
+#include <glad/gl.h>
+
+using namespace Engine;
+
+Shader::~Shader()
+{
+    glDeleteProgram(_program);
+}
+
+void Shader::Load(const std::string& vertexFilePath, const std::string& fragmentFilePath)
+{
+    GLint params;
+    glDeleteProgram(_program);
+    _program = 0;
+    const auto& fm = FileManager::Get("base");
+
+    std::string vertexShaderSourceStr = fm.ReadTextFile(vertexFilePath);
+    const char* vertexShaderSource = vertexShaderSourceStr.c_str();
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &params);
+    if (!params) {
+        int infoLogLength, charactersWritten;
+        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        glGetShaderInfoLog(vertexShader, infoLogLength, &charactersWritten, infoLog.data());
+
+        throw std::invalid_argument(TO_STRING("[Shader::Load] Shader compiled vertex ERROR: {}", infoLog));
+    }
+
+    std::string fragmentShaderSourceStr = fm.ReadTextFile(fragmentFilePath);
+    const char* fragmentShaderSource = fragmentShaderSourceStr.c_str();
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &params);
+    if (!params) {
+        int infoLogLength, charactersWritten;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        glGetShaderInfoLog(fragmentShader, infoLogLength, &charactersWritten, infoLog.data());
+        glDeleteShader(vertexShader);
+
+        throw std::invalid_argument(TO_STRING("[Shader::Load] Shader compiled fragment ERROR: {}", infoLog));
+    }
+
+    _program = glCreateProgram();
+    glAttachShader(_program, vertexShader);
+    glAttachShader(_program, fragmentShader);
+    glLinkProgram(_program);
+
+    glGetProgramiv(_program, GL_LINK_STATUS, &params);
+    if (!params) {
+        int infoLogLength, charactersWritten;
+        glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        glGetProgramInfoLog(_program, infoLogLength, &charactersWritten, infoLog.data());
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        throw std::invalid_argument(TO_STRING("[Shader::Load] Shader linked ERROR: {}", infoLog));
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    GetLocation();
+}
+
+void Shader::LoadByName(const std::string& name)
+{
+    const std::string vertexFilePath = TO_STRING("Shaders/{}.vert", name);
+    const std::string fragmentFilePath = TO_STRING("Shaders/{}.frag", name);
+    Load(vertexFilePath, fragmentFilePath);
+}

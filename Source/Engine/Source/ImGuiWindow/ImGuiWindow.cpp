@@ -104,7 +104,7 @@ void ImGuiWindow::RenderWindows()
         if (window.IsVisible()) {
             if (window.IsFullScreen()) {
                 ImGui::SetNextWindowPos(ImVec2(0, 0));
-                ImGui::SetNextWindowSize(ImVec2(static_cast<float>(ScreenParams::width), static_cast<float>(ScreenParams::height)));
+                ImGui::SetNextWindowSize(ImVec2(static_cast<float>(ScreenParams::Width()), static_cast<float>(ScreenParams::Height())));
             }
             
             ImGui::Begin(window.GetTitle().c_str(), nullptr, window._flags);
