@@ -1,10 +1,9 @@
 ﻿// ◦ Xyz ◦
+
 #include "Shader.h"
-#include <string>
 #include <exception>
 #include <FileManager/FileManager.h>
 #include <glad/gl.h>
-#include <Common/Common.h>
 
 using namespace Engine;
 

@@ -1,10 +1,7 @@
 ﻿// ◦ Xyz ◦
 #pragma once
 
-#include <memory>
 #include <string>
-#include <unordered_map>
-#include <Log.h>
 
 namespace Engine
 {

@@ -42,7 +42,7 @@ void Space::UpdateForce()
 		float sumWeight = 0;
 	};
 
-	Object::gForce = 0.001f;
+	Object::gForce = 0.01f;
 	float colapseDist = 2.f; // 1.f; // 0.1f;
 	
 	size_t size = _objects.size();
