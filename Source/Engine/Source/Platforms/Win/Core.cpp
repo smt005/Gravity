@@ -6,14 +6,15 @@
 #include <GLFW/glfw3.h>
 #include <Screen.h>
 #include <Callback/Callback.h>
+#include <FileManager/FileManager.h>
 #include <ImGuiWindow/ImGuiWindow.h>
-
+#include <nlohmann/json.hpp>
 #include <Log.h>
 
 using namespace Engine;
 
 #if _DEBUG
-#define ApplicationInfo	" v.0.0 DEBUG [" __DATE__"  " __TIME__" ]"
+#define ApplicationInfo	" DEBUG ["__DATE__" "__TIME__"]"
 #else
 #define ApplicationInfo ""
 #endif
@@ -29,6 +30,69 @@ void WindowPosCallback(GLFWwindow* window, int left, int top);
 void WindowCloseCallback(GLFWwindow* window);
 void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+struct Settings
+{
+	int left = 100;
+	int top = 100;
+	int width = 400;
+	int height = 200;
+	bool fullScreen = false; // TODO:
+
+	inline static const std::string_view settingsFileName = "Settings.json";
+};
+
+Settings LoadSettings()
+{
+	Settings settings;
+
+	using json = nlohmann::json;
+	json jsonData;
+	const std::string jsonText = FileManager::Get("write").ReadTextFile(Settings::settingsFileName);
+
+	if (jsonText.empty()) {
+		return settings;
+	}
+
+	try {
+		jsonData = json::parse(jsonText);
+
+		if (jsonData.contains("width")) {
+			settings.width = jsonData["width"].get<int>();
+		}
+		if (jsonData.contains("height")) {
+			settings.height = jsonData["height"].get<int>();
+		}
+		if (jsonData.contains("top")) {
+			settings.top = jsonData["top"].get<int>();
+		}
+		if (jsonData.contains("left")) {
+			settings.left = jsonData["left"].get<int>();
+		}
+		if (jsonData.contains("fullScreen")) {
+			settings.fullScreen = jsonData["fullScreen"].get<int>();
+		}
+	}
+	catch (...) {
+		LOG("[Core::LoadSettings] fail load settings.");
+		return settings;
+	}
+
+	return settings;
+}
+
+void SaveSettings()
+{
+	using json = nlohmann::json;
+	json jsonData;
+
+	jsonData["width"] = ScreenParams::Width();
+	jsonData["height"] = ScreenParams::Height();
+	jsonData["top"] = ScreenParams::Top();
+	jsonData["left"] = ScreenParams::Left();
+
+	FileManager::Get("write").WriteFile(jsonData.dump(2), Settings::settingsFileName);
+}
+
 int Core::Execution(std::string_view params)
 {
 	if (!instanceProgram) {
@@ -39,6 +103,11 @@ int Core::Execution(std::string_view params)
 	return Main(params);
 }
 
+void Core::Close()
+{
+	glfwSetWindowShouldClose(glfwWindow, GLFW_TRUE);
+}
+
 int Core::Main(std::string_view params)
 {
 	if (!glfwInit()) {
@@ -46,7 +115,14 @@ int Core::Main(std::string_view params)
 		return 2;
 	}
 
-	const std::string title = TO_STRING("{}_{}", windowTitle, ApplicationInfo);
+	FileManager::Make("write");
+	const Settings settings = LoadSettings();
+	ScreenParams::SetWidth(settings.width);
+	ScreenParams::SetHeight(settings.height);
+	ScreenParams::SetTop(settings.top);
+	ScreenParams::SetLeft(settings.left);
+
+	const std::string title = TO_STRING("{}{}", windowTitle, ApplicationInfo);
 	glfwWindow = glfwCreateWindow(ScreenParams::Width(), ScreenParams::Height(), title.c_str(), nullptr, nullptr);
 	if (!glfwWindow) {
 		glfwTerminate();
@@ -86,6 +162,9 @@ int Core::Main(std::string_view params)
 
 	instanceProgram->OnClose();
 	ImGuiWindow::Cleanup();
+	SaveSettings();
+
+	glfwDestroyWindow(glfwWindow);
 	glfwTerminate();
 	glfwWindow = nullptr;
 
@@ -165,5 +244,11 @@ void WindowPosCallback(GLFWwindow* window, int left, int top)
 
 void WindowCloseCallback(GLFWwindow* window)
 {
-	instanceProgram->OnClose();
+	/*instanceProgram->OnClose();
+
+	SaveSettings();
+	settings.width = ScreenParams::Width();
+	settings.height = ScreenParams::Height();
+	settings.top = ScreenParams::Top();
+	settings.left = ScreenParams::Left();*/
 }

@@ -28,6 +28,7 @@ namespace Engine
 	class Core final {
 	public:
 		static int Execution(std::string_view params);
+		static void Close();
 
 	private:
 		static int Main(std::string_view params);
