@@ -2,11 +2,8 @@
 
 #include "TopPanel.h"
 #include <GuiWindow/GuiWindows.h>
-#include <imgui_internal.h>
 #include <imgui.h>
 #include <Screen.h>
-
-#include "../../Temp/LogSpecification.h"
 #include <StringUtils.h>
 #include <Log.h>
 
@@ -37,19 +34,29 @@ void TopPanel::OnOpen()
 }
 
 void TopPanel::Render() {
-	ImVec4 color = { 1.f, 1.f, 1.f, 1.f };
-	if (_fps < 10) {
-		color = { 1.f, 0.f, 0.f, 1.f };
-	}
-	if (_fps >= 30) {
-		color = { 0.f, 1.f, 0.f, 1.f };
+	{
+		ImVec4 color = { 1.f, 1.f, 1.f, 1.f };
+		if (_fps < 10) {
+			color = { 1.f, 0.f, 0.f, 1.f };
+		}
+		if (_fps >= 30) {
+			color = { 0.f, 1.f, 0.f, 1.f };
+		}
+
+		std::string_view prefix;
+		#ifdef _DEBUG
+			prefix = "DEBUG";
+		#endif
+
+		std::string text = TO_STRING("{} fps: {} ", prefix, _fps);
+		ImGui::TextColored(color, text.c_str());
 	}
 
-	ImGui::TextColored(color, "fps: %d ", _fps);
-
-	std::string text = TO_STRING("[min: {} middle: {} max: {}]", _minFps, (_maxFps + _minFps) / 2,  _maxFps);
-	ImGui::SameLine();
-	ImGui::Text(text.c_str());
+	{
+		std::string text = TO_STRING("[min: {} middle: {} max: {}]", _minFps, (_maxFps + _minFps) / 2, _maxFps);
+		ImGui::SameLine();
+		ImGui::Text(text.c_str());
+	}
 
 	ImGui::SameLine();
 	if (ImGui::Button("Reset", { 40.f, 16.f })) {
@@ -70,6 +77,7 @@ void TopPanel::Update(double dTime) {
 	_minFps = std::min(_fps, _minFps);
 	_maxFps = std::max(_fps, _maxFps);
 }
+
 
 void TopPanel::SwitchVisibleWindow()
 {

@@ -84,7 +84,13 @@ void Gravity::InitDraw()
 		Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 		shaders::InitShaders();
 		cameras::MakeCameras();
+
+#ifdef _DEBUG
 		Space::Instance().Generate(500, 100);
+#else
+		Space::Instance().Generate(2000, 100);
+#endif
+
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);

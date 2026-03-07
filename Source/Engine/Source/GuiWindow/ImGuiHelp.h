@@ -3,9 +3,8 @@
 #pragma once
 
 #include <imgui.h>
-#include <WindowsManager.h>
 
-struct ImGuiFontHandler final {
+/*struct ImGuiFontHandler final {
     ImGuiFontHandler(ImFont* _font)
         : font(_font)
     {
@@ -30,7 +29,7 @@ struct ImGuiFontHandler final {
     }
 
     ImFont* font;
-};
+};*/
 
 struct ImGuiIdHandler final {
     ImGuiIdHandler(void* _id)
