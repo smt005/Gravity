@@ -58,6 +58,11 @@ void Callback::Clear()
 	}
 }
 
+void Callback::InitCallback()
+{
+	lastTime = GetCurrentTime();
+}
+
 void Callback::OnCursorPosCallback(double x, double y)
 {
 	deltaMousePos[0] = x - mousePos[0];
@@ -160,9 +165,9 @@ double Callback::GetDeltaTime()
 void Callback::Update()
 {
 	double currentTime = GetCurrentTime();
-	double deltaTime = currentTime - lastTime;
+	double delta = lastTime != 0 ? currentTime - lastTime : 0;
 	lastTime = currentTime;
-	deltaTime = deltaTime / 1000;
+	deltaTime = delta / 1000;
 
 	for (auto key : callbackPinchKey) {
 		currentEventData.key = static_cast<char>(key);

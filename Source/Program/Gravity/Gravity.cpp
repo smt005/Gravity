@@ -15,6 +15,8 @@
 #include <mystd_memory.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Windows/TopPanel.h"
+
 #include <Examples/TestClass.h>
 #include "../Temp/LogSpecification.h"
 #include "../Temp/LogMyStlSpecification.h"
@@ -63,20 +65,26 @@ void Gravity::InitCallback()
 
 	Callback::Add(Callback::Type::PRESS_KEY, [](const Callback::EventData& data) {
 		if (data.key == VirtualKey::ESCAPE) {
-			exit(0);
+			Core::Close();
+		}
+
+		if (data.key == VirtualKey::F1) {
+			Windows::TopPanel::SwitchVisibleWindow();
 		}
 	});
 }
 
 void Gravity::InitDraw()
 {
+	Windows::TopPanel::OpenWindow();
+
 	using namespace Engine;
 
 	try {
 		Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 		shaders::InitShaders();
 		cameras::MakeCameras();
-		Space::Instance().Generate(100, 100);
+		Space::Instance().Generate(500, 100);
 	}
 	catch (const std::exception& exc) {
 		LOG("EXCEPTION: {}", exc);

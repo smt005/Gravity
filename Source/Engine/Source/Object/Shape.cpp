@@ -3,7 +3,7 @@
 #include "Shape.h"
 #include <FileManager/FileManager.h>
 #include <Object/Loaders/ObjLoader.h>
-#include <Log.h>
+#include <StringUtils.h>
 
 using namespace Engine;
 

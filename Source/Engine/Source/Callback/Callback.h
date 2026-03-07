@@ -55,6 +55,7 @@ namespace Engine
 		void Clear();
 
 	public:
+		static void InitCallback();
 		static void OnCursorPosCallback(double x, double y);
 		static void OnMouseButtonCallback(Type type, int button);
 		static void OnKeyCallback(Type type, int key);
@@ -77,8 +78,8 @@ namespace Engine
 		inline static std::unordered_set<int> callbackPinchMouseButton;
 		inline static float mousePos[2];
 		inline static float deltaMousePos[2];
-		inline static double lastTime;
-		inline static double deltaTime;
+		inline static double lastTime = 0;
+		inline static double deltaTime = 0;
 		inline static EventData currentEventData;
 	};
 }

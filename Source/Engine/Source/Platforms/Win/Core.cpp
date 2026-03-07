@@ -7,7 +7,7 @@
 #include <Screen.h>
 #include <Callback/Callback.h>
 #include <FileManager/FileManager.h>
-#include <ImGuiWindow/ImGuiWindow.h>
+#include <GuiWindow/GuiWindows.h>
 #include <nlohmann/json.hpp>
 #include <Log.h>
 
@@ -146,8 +146,8 @@ int Core::Main(std::string_view params)
 	glfwGetFramebufferSize(glfwWindow, &width, &height);
 	glViewport(0, 0, width, height);
 
-	if (!ImGuiWindow::Init(glfwWindow)) {
-		LOG("[Core::Main] ImGuiWindow::Init fail.");
+	if (!GuiWindows::Init(glfwWindow)) {
+		LOG("[Core::Main] GuiWindows::Init fail.");
 		return 4;
 	}
 
@@ -158,10 +158,12 @@ int Core::Main(std::string_view params)
 
 	instanceProgram->OnResize();
 
+	Callback::InitCallback();
+
 	MainLoop();
 
 	instanceProgram->OnClose();
-	ImGuiWindow::Cleanup();
+	GuiWindows::Cleanup();
 	SaveSettings();
 
 	glfwDestroyWindow(glfwWindow);
@@ -175,11 +177,11 @@ void Core::MainLoop()
 {
 	while (!glfwWindowShouldClose(glfwWindow)) {
 		instanceProgram->Draw();
-		ImGuiWindow::RenderWindows();
+		GuiWindows::RenderWindows();
 
 		Callback::Update();
 		instanceProgram->Update();
-		ImGuiWindow::UpdateWindows(Callback::GetDeltaTime());
+		GuiWindows::UpdateWindows(Callback::GetDeltaTime());
 
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();
@@ -230,7 +232,7 @@ void WindowSizeCallback(GLFWwindow* window, int width, int height)
 
 	glViewport(0, 0, width, height);
 	instanceProgram->OnResize();
-	ImGuiWindow::ResizeWindows();
+	GuiWindows::ResizeWindows();
 }
 
 void WindowPosCallback(GLFWwindow* window, int left, int top)
@@ -239,7 +241,7 @@ void WindowPosCallback(GLFWwindow* window, int left, int top)
 	ScreenParams::SetTop(top);
 
 	instanceProgram->OnResize();
-	ImGuiWindow::ResizeWindows();
+	GuiWindows::ResizeWindows();
 }
 
 void WindowCloseCallback(GLFWwindow* window)
