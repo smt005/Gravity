@@ -5,7 +5,7 @@
 
 struct Object final {
 	glm::vec3 pos;
-	float weight = 1.f;
+	float mass = 1.f;
 	glm::vec3 speed;
 	glm::vec3 force;
 	void* colapseData = nullptr;

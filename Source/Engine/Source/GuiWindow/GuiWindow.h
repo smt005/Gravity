@@ -37,6 +37,7 @@ namespace Engine
 
 		const std::string& GetName() const;
 		const std::string& GetTitle() const;
+		const char* GetId() const;
 		void SetTitle(std::string_view title);
 		bool IsVisible() const;
 		void SetVisible(bool state);
@@ -46,9 +47,6 @@ namespace Engine
 		void SetAlpha(int value);
 		bool IsFullScreen() const;
 		void Close();
-
-	private:
-		const char* GetId() const;
 
 	private:
 		bool _opened = false;

@@ -4,24 +4,21 @@
 #include <FileManager/FileManager.h>
 #include <Callback/VirtualKey.h>
 #include <Draw/Camera.h>
-#include <Draw/Mesh.h>
 #include <Draw/Draw.h>
 #include <Object/Shape.h>
 #include <Object/Texture.h>
 #include "GravityShader.h"
 #include "GravityCameras.h"
-#include "GravitySpace.h"
-#include "Object.h"
+#include "Spaces/GravitySpace.h"
 #include <mystd_memory.h>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Windows/TopPanel.h"
-
+#include "Windows/DebugWindow.h"
 #include <Examples/TestClass.h>
 #include "../Temp/LogSpecification.h"
 #include "../Temp/LogMyStlSpecification.h"
 #include "../Temp/LogStlSpecification.h"
 #include <Log.h>
+#include <glm/gtc/type_ptr.hpp>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
@@ -32,6 +29,7 @@ bool Gravity::Init(std::string_view params)
 {
 	InitFileManagers();
 	InitCallback();
+	InitWidows();
     InitDraw();
 	TestSimpleShared();
 	return true;
@@ -71,13 +69,20 @@ void Gravity::InitCallback()
 		if (data.key == VirtualKey::F1) {
 			Windows::TopPanel::SwitchVisibleWindow();
 		}
+		if (data.key == VirtualKey::F2) {
+			Windows::DebugWindow::SwitchVisibleWindow();
+		}
 	});
+}
+
+void Gravity::InitWidows()
+{
+	Windows::TopPanel::OpenWindow();
+	Windows::DebugWindow::OpenWindow();
 }
 
 void Gravity::InitDraw()
 {
-	Windows::TopPanel::OpenWindow();
-
 	using namespace Engine;
 
 	try {
@@ -86,9 +91,9 @@ void Gravity::InitDraw()
 		cameras::MakeCameras();
 
 #ifdef _DEBUG
-		Space::Instance().Generate(500, 100);
+		Space::Instance().Generate(250, 100);
 #else
-		Space::Instance().Generate(2000, 100);
+		Space::Instance().Generate(1000, 100);
 #endif
 
 	}

@@ -16,7 +16,7 @@ GuiWindow::GuiWindow()
 
 GuiWindow::GuiWindow(const std::string& name)
     : _name(name)
-    , _title(TO_STRING("##{}", name, std::to_string(reinterpret_cast<uint64_t>(this))))
+    , _title(TO_STRING("{}##{}", name, std::to_string(reinterpret_cast<uint64_t>(this))))
 {}
 
 const std::string& GuiWindow::GetName() const
@@ -31,7 +31,7 @@ const std::string& GuiWindow::GetTitle() const
 
 void GuiWindow::SetTitle(std::string_view title)
 {
-    _title = title;
+    _title = TO_STRING("{}##{}", title, std::to_string(reinterpret_cast<uint64_t>(this)));
 }
 
 bool GuiWindow::IsVisible() const
