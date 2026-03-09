@@ -9,9 +9,10 @@ namespace shaders
 	class BaseShader : public Engine::Shader, public mystd::Singletone<BaseShader>
 	{
 	public:
-		bool UseProgram() override;
+		bool UseProgram() const override;
 		bool GetLocation() override;
 		void SetColor(const float* const color) const;
+
 		template <std::ranges::range T>
 		void SetColor(const T&& color) const {
 			SetColor(color.data());
@@ -20,21 +21,26 @@ namespace shaders
 		void SetModelMatrix(const float* const mat) const;
 
 	private:
-		//unsigned int aPosition = 0;
 		unsigned int uMatProjectionView = 0;
 		unsigned int uMatViewModel = 0;
 		unsigned int uColor = 0;
 	};
 
-	/*class TextureShader : public ColorShader
+	class LineShader : public Engine::Shader, public mystd::Singletone<LineShader>
 	{
 	public:
-		bool UseProgram() override;
+		bool UseProgram() const override;
 		bool GetLocation() override;
+		void SetColor(const float* const color) const;
 
+		template <std::ranges::range T>
+		void SetColor(const T&& color) const {
+			SetColor(color.data());
+		}
 	private:
-		//unsigned int aTexCoord = 0;
-	};*/
+		unsigned int uMatProjectionView = 0;
+		unsigned int uColor = 0;
+	};
 
 	void InitShaders();
 }

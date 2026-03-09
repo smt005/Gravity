@@ -13,7 +13,8 @@
 
 using namespace shaders;
 
-bool BaseShader::UseProgram()
+// BaseShader
+bool BaseShader::UseProgram() const
 {
 	if (!_program) {
 		return false;
@@ -24,6 +25,10 @@ bool BaseShader::UseProgram()
 
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_TEXTURE_2D);
 
 	return true;
 }
@@ -66,29 +71,73 @@ void BaseShader::SetModelMatrix(const float* const mat) const
 	}
 }
 
+// LineShader
+bool LineShader::UseProgram() const
+{
+	if (!_program) {
+		return false;
+	}
+
+	glBindVertexArray(0);
+
+	glUseProgram(_program);
+	glUniformMatrix4fv(uMatProjectionView, 1, GL_FALSE, Engine::Camera::GetLink().ProjectViewFloat());
+
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_COLOR);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glEnableVertexAttribArray(0);
+
+	return true;
+}
+
+bool LineShader::GetLocation()
+{
+	if (!_program) {
+		return false;
+	}
+
+	uMatProjectionView = glGetUniformLocation(_program, "uMatProjectionView");
+	uColor = glGetUniformLocation(_program, "uColor");
+
+	return true;
+}
+
+void LineShader::SetColor(const float* const color) const
+{
+	if (color) {
+		glUniform4fv(uColor, 1, color);
+	}
+}
+
+// InitShaders
 void shaders::InitShaders()
 {
-	/*{
-		auto& colorShader = shaders::BaseShader::Instance();
-		colorShader.LoadByName("Color");
-		colorShader.UseProgram();
-
-		glm::vec4 color{ 1.f, 0.6f, 0.f, 1.f };
-		colorShader.SetColor(glm::value_ptr(color));
-
-		glm::mat4x4 mat{ 1.f };
-		colorShader.SetModelMatrix(glm::value_ptr(mat));
-	}*/
-
 	{
-		auto& colorShader = shaders::BaseShader::Instance();
-		colorShader.LoadByName("Texture");
-		colorShader.UseProgram();
+		auto& shader = shaders::BaseShader::Instance();
+		shader.LoadByName("Texture");
+		shader.UseProgram();
 
 		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
-		colorShader.SetColor(glm::value_ptr(color));
+		shader.SetColor(glm::value_ptr(color));
 
 		glm::mat4x4 mat{ 1.f };
-		colorShader.SetModelMatrix(glm::value_ptr(mat));
+		shader.SetModelMatrix(glm::value_ptr(mat));
+	}
+
+	{
+		auto& shader = shaders::LineShader::Instance();
+		shader.LoadByName("Line");
+		shader.UseProgram();
+
+		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
+		shader.SetColor(glm::value_ptr(color));
 	}
 }

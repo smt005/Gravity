@@ -25,6 +25,12 @@ Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 using namespace mystd::Examples;
 mystd::shared_ptr<TestClass> testShader;
 
+struct TypeDraw
+{
+	bool model = true;
+	bool point = true;
+} typeDraw;
+
 bool Gravity::Init(std::string_view params)
 {
 	InitFileManagers();
@@ -72,6 +78,13 @@ void Gravity::InitCallback()
 		if (data.key == VirtualKey::F2) {
 			Windows::DebugWindow::SwitchVisibleWindow();
 		}
+
+		if (data.key == VirtualKey::VK_1) {
+			typeDraw.model = !typeDraw.model;
+		}
+		if (data.key == VirtualKey::VK_2) {
+			typeDraw.point = !typeDraw.point;
+		}
 	});
 }
 
@@ -110,17 +123,41 @@ void Gravity::TestDraw()
 {
 	using namespace Engine;
 
-	Draw::ClearColor();
-	auto& shader = shaders::BaseShader::Instance();
-	shader.UseProgram();
-
-	Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
-
 	Space& space = Space::Instance();
-	for (auto& object : space.Objects()) {
-		shader.SetModelPos(glm::value_ptr(object.pos));
-		//Draw::Render(SHAPES["Star", true, true].mesh);
-		Draw::Render(SHAPES["Sphere", true, true].mesh);
+	Draw::ClearColor();
+
+	if (typeDraw.model) {
+		auto& shader = shaders::BaseShader::Instance();
+		shader.UseProgram();
+		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
+
+		for (auto& object : space.Objects()) {
+			shader.SetModelPos(glm::value_ptr(object.pos));
+			//Draw::Render(SHAPES["Star", true, true].mesh);
+			Draw::Render(SHAPES["Sphere", true, true].mesh);
+		}
+	}
+
+	if (typeDraw.point) {
+		Draw::SetPointSize(2.f);
+		const auto& shader = shaders::LineShader::Instance();
+		shader.UseProgram();
+
+		/*for (auto& object : space.Objects()) {
+			Draw::RenderPoints(glm::value_ptr(object.pos), 1);
+		}*/
+
+		unsigned int countPoints = space.Objects().size();
+		std::vector<float> points;
+		points.reserve(countPoints * 3);
+
+		for (auto& object : space.Objects()) {
+			points.emplace_back(object.pos.x);
+			points.emplace_back(object.pos.y);
+			points.emplace_back(object.pos.z);
+		}
+
+		Draw::RenderPoints(points.data(), countPoints);
 	}
 }
 

@@ -31,10 +31,52 @@ void Draw::DepthTest(bool enable) {
     }
 }
 
+void Draw::CullFace(CullFaceType type) {
+	if (type == CullFaceType::NONE) {
+		glDisable(GL_CULL_FACE);
+		return;
+	}
+
+	glEnable(GL_CULL_FACE);
+
+	if (type == CullFaceType::FRONT) {
+		glCullFace(GL_FRONT);
+	}
+	else if (type == CullFaceType::BACK) {
+		glCullFace(GL_BACK);
+	}
+	else if (type == CullFaceType::FRONT_AND_BACK) {
+		glCullFace(GL_FRONT_AND_BACK);
+	}
+	else if (type == CullFaceType::FRONT_LEFT) {
+		glCullFace(GL_FRONT_LEFT);
+	}
+	else if (type == CullFaceType::FRONT_RIGHT) {
+		glCullFace(GL_FRONT_RIGHT);
+	}
+	else {
+		glDisable(GL_CULL_FACE);
+	}
+}
+
 void Draw::Viewport() {
-    int widthScreen = ScreenParams::Width();
-    int heightScreen = ScreenParams::Height();
-    glViewport(0, 0, widthScreen, heightScreen);
+	int widthScreen = Engine::ScreenParams::Width();
+	int heightScreen = Engine::ScreenParams::Height();
+	glViewport(0, 0, widthScreen, heightScreen);
+}
+
+void Draw::SetPointSize(const float sizePoint)
+{
+	if (sizePoint >= 0.f) {
+		glPointSize(sizePoint);
+	}
+	else {
+		glEnable(GL_PROGRAM_POINT_SIZE);
+	}
+}
+
+void Draw::BindTexture(unsigned int textureId) {
+	glBindTexture(GL_TEXTURE_2D, textureId);
 }
 
 void Draw::Render(unsigned int vao, int count)
@@ -43,6 +85,16 @@ void Draw::Render(unsigned int vao, int count)
     glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
-void Draw::BindTexture(unsigned int textureId) {
-    glBindTexture(GL_TEXTURE_2D, textureId);
+void Draw::RenderLines(const float* vertexes, unsigned int count)
+{
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertexes);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_LINE_LOOP, 0, count);
+}
+
+void Draw::RenderPoints(const float* vertexes, unsigned int count)
+{
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertexes);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_POINTS, 0, count);
 }
