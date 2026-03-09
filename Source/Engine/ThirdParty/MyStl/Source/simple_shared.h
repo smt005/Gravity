@@ -9,10 +9,15 @@ namespace mystd
 	public:
 		simple_shared_ptr() = default;
 
-		simple_shared_ptr(const simple_shared_ptr& ptr)
-			: _dataPtr(ptr._dataPtr)
-			, _counter(ptr._counter)
+		simple_shared_ptr(const simple_shared_ptr& ptrRef)
+			: _dataPtr(ptrRef._dataPtr)
+			, _counter(ptrRef._counter)
 		{
+			if (!_counter) {
+				simple_shared_ptr<T>* ptr = const_cast<simple_shared_ptr<T>*>(&ptrRef);
+				ptr->_counter = new size_t(1);
+				_counter = ptr->_counter;
+			}
 			IncreaseCounter();
 		}
 
@@ -23,26 +28,27 @@ namespace mystd
 
 		simple_shared_ptr(T* dataPtr)
 			: _dataPtr(dataPtr)
-			, _counter(_dataPtr ? new size_t(1) : nullptr)
+			, _counter(nullptr)
 		{}
 		
 		~simple_shared_ptr() {
 			DecreaseCounter();
 		}
 
-		simple_shared_ptr& operator = (const simple_shared_ptr& ptr) {
+		simple_shared_ptr& operator = (const simple_shared_ptr& ptrRef) {
 			DecreaseCounter();
 			_dataPtr = nullptr;
 			_counter = nullptr;
 
-			if (ptr._counter) {
-				_counter = ptr._counter;
-
-				if (IncreaseCounter()) {
-					_dataPtr = ptr._dataPtr;
-				}
+			if (!ptrRef._counter) {
+				simple_shared_ptr<T>* ptr = const_cast<simple_shared_ptr<T>*>(&ptrRef);
+				ptr->_counter = new size_t(1);
 			}
+			_counter = ptrRef._counter;
 
+			if (IncreaseCounter()) {
+				_dataPtr = ptrRef._dataPtr;
+			}
 			return *this;
 		}
 
@@ -106,6 +112,9 @@ namespace mystd
 					delete _dataPtr;
 					delete _counter;
 				}
+			}
+			else {
+				delete _dataPtr;
 			}
 		}
 
