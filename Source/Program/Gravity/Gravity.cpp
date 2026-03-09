@@ -7,8 +7,8 @@
 #include <Draw/Draw.h>
 #include <Object/Shape.h>
 #include <Object/Texture.h>
-#include "GravityShader.h"
-#include "GravityCameras.h"
+#include "Shaders/GravityShader.h"
+#include "Cameras/GravityCameras.h"
 #include "Spaces/GravitySpace.h"
 #include <mystd_memory.h>
 #include "Windows/TopPanel.h"

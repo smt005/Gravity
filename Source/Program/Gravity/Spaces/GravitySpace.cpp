@@ -2,12 +2,13 @@
 
 #include "GravitySpace.h"
 #include "../DebugContext.h"
-#include <glm/ext/quaternion_geometric.hpp>
-#include <glm/vec3.hpp>
-#include <deque>
 #include <Common/Common.h>
 #include "../../Temp/LogSpecification.h"
 #include <Log.h>
+#include <glm/ext/quaternion_geometric.hpp>
+#include <glm/vec3.hpp>
+
+#include <deque>
 
 void Space::Generate(size_t count, size_t radius)
 {
