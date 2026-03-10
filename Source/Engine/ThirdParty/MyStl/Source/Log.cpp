@@ -28,7 +28,7 @@ void mystd::WriteLog(const std::string& text) {
         }
 
         if (!str.is_open()) {
-            throw std::runtime_error("[LogStream] Cannot open log file.");
+            throw std::runtime_error("[mystd::WriteLog] Cannot open log file.");
         }
 
         using namespace std::chrono;
