@@ -1,23 +1,27 @@
 ﻿// ◦ Xyz ◦
 #pragma once
 
-//#include <iostream>
-#include <sstream>
-#include <string>
-//#include <string_view>
 #include <StringUtils.h>
 
 namespace mystd
 {
+	void WriteLog(const std::string& text);
+
 	template <typename... Args>
-	void Log(Args&&... args) {
+	std::string Log(Args&&... args) {
 		const std::string text = ToString(std::forward<Args>(args)...);
 		std::cout << "LOG:" << text << std::endl;
+		WriteLog(text);
+		return text;
+	}
 
-	#ifdef _DEBUG
-		_CrtDbgReport(_CRT_WARN, NULL, 0, NULL, "LOG: %s\n", text.c_str());
-	#endif // DEBUG
+	template <typename... Args>
+	std::string LogBreak(Args&&... args) {
+		const std::string text = Log(std::forward<Args>(args)...);
+		__debugbreak();
+		return text;
 	}
 }
 
 #define LOG mystd::Log
+#define LOG_BREAK mystd::LogBreak
