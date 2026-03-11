@@ -186,10 +186,24 @@ void Space::Clean()
 
 void Space::Update()
 {
+	if (!_pause) {
+		return;
+	}
+
 	DebugContext::Instance().Clean();
 	UpdateForce();
 	UpdateSpeed();
 	UpdatePos();
+}
+
+void Space::SwitchPause()
+{
+	_pause = !_pause;
+}
+
+bool Space::IsPaused() const
+{
+	return _pause;
 }
 
 glm::vec3 Space::PosOfMinSpeedObject() const

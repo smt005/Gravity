@@ -3,7 +3,7 @@
 
 #include <string>
 #include "Shader.h"
-#include "Mesh.h"
+#include "Object/Mesh.h"
 
 namespace Engine
 {

@@ -14,6 +14,9 @@ public:
 	virtual void UpdatePos();
 	virtual void Clean();
 	virtual void Update();
+	
+	void SwitchPause();
+	bool IsPaused() const;
 
 	const std::vector<Object>& Objects() const;
 	glm::vec3 PosOfMinSpeedObject() const;
@@ -22,5 +25,6 @@ public:
 	glm::vec3 PosOfMaxMassObject() const;
 
 private:
+	bool _pause = true;
 	std::vector<Object> _objects;
 };

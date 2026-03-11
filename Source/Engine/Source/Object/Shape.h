@@ -1,7 +1,7 @@
 // ◦ Xyz ◦
 #pragma once
 
-#include <Draw/Mesh.h>
+#include <Object/Mesh.h>
 #include <Object/Resource.h>
 
 namespace Engine

@@ -27,8 +27,10 @@ mystd::shared_ptr<TestClass> testShader;
 
 struct TypeDraw
 {
-	bool model = true;
+	bool model = false;
+	bool sprite = true;
 	bool point = true;
+	
 } typeDraw;
 
 bool Gravity::Init(std::string_view params)
@@ -38,10 +40,14 @@ bool Gravity::Init(std::string_view params)
 	InitWidows();
     InitDraw();
 	TestSimpleShared();
+
+	LOG("Gravity::Init");
 	return true;
 }
 
-void Gravity::OnClose() {}
+void Gravity::OnClose() {
+	LOG("Gravity::OnClose");
+}
 
 void Gravity::Update() {
 	Space::Instance().Update();
@@ -79,10 +85,17 @@ void Gravity::InitCallback()
 			Windows::DebugWindow::SwitchVisibleWindow();
 		}
 
+		if (data.key == 'P') {
+			Space::Instance().SwitchPause();
+		}
+
 		if (data.key == VirtualKey::VK_1) {
 			typeDraw.model = !typeDraw.model;
 		}
 		if (data.key == VirtualKey::VK_2) {
+			typeDraw.sprite = !typeDraw.sprite;
+		}
+		if (data.key == VirtualKey::VK_3) {
 			typeDraw.point = !typeDraw.point;
 		}
 	});
@@ -98,25 +111,15 @@ void Gravity::InitDraw()
 {
 	using namespace Engine;
 
-	try {
-		Draw::SetClearColor(0.1f, 0.2f, 0.3f);
-		shaders::InitShaders();
-		cameras::MakeCameras();
+	Draw::SetClearColor(0.1f, 0.2f, 0.3f);
+	shaders::InitShaders();
+	cameras::MakeCameras();
 
 #ifdef _DEBUG
 		Space::Instance().Generate(250, 100);
 #else
 		Space::Instance().Generate(1000, 100);
 #endif
-
-	}
-	catch (const std::exception& exc) {
-		LOG("EXCEPTION: {}", exc);
-		__debugbreak();
-	}
-	catch (...) {
-		__debugbreak();
-	}
 }
 
 void Gravity::TestDraw()
@@ -127,20 +130,35 @@ void Gravity::TestDraw()
 	Draw::ClearColor();
 
 	if (typeDraw.model) {
-		auto& shader = shaders::BaseShader::Instance();
+		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
 		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
 		for (auto& object : space.Objects()) {
-			shader.SetModelPos(glm::value_ptr(object.pos));
-			//Draw::Render(SHAPES["Star", true, true].mesh);
+			shader.SetModelPos(object.pos);
 			Draw::Render(SHAPES["Sphere", true, true].mesh);
+		}
+	}
+
+	if (typeDraw.sprite) {
+		auto& shader = shaders::ForwardShaderSingle::Instance();
+		shader.UseProgram();
+
+		Draw::BindTexture(Texture::GetRef("Star.png").Id());
+		//Draw::BindTexture(Texture::GetRef("Rgba64.png").Id());
+
+		for (auto& object : space.Objects()) {
+			shader.SetPos(object.pos);
+			shader.SetModelPos(object.pos);
+
+			Draw::Render(SHAPES["Star5", true, true].mesh);
+			//Draw::Render(SHAPES["RgbBox", true, true].mesh);
 		}
 	}
 
 	if (typeDraw.point) {
 		Draw::SetPointSize(2.f);
-		const auto& shader = shaders::LineShader::Instance();
+		const auto& shader = shaders::LineShaderSingle::Instance();
 		shader.UseProgram();
 
 		/*for (auto& object : space.Objects()) {
