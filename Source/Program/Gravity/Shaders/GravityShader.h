@@ -38,8 +38,7 @@ namespace shaders
 		bool UseProgram() const override;
 		bool GetLocation() override;
 		void SetModelPos(const glm::vec3& pos) const override;
-
-		void SetPos(const glm::vec3& pos);
+		void SetModelMatrix(const glm::mat4x4& mat) const override;
 
 	protected:
 		unsigned int uCameraPos = 0;

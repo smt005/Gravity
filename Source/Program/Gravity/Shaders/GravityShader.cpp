@@ -74,9 +74,6 @@ bool ForwardShader::UseProgram() const
 		return false;
 	}
 
-	//glDepthFunc(GL_LEQUAL);
-	//glEnable(GL_DEPTH_TEST);
-
 	glDisable(GL_DEPTH_TEST);
 
 	glUniform3fv(uCameraPos, 1, glm::value_ptr(Engine::Camera::GetLink().Pos()));
@@ -97,30 +94,17 @@ bool ForwardShader::GetLocation()
 	return true;
 }
 
-void ForwardShader::SetPos(const glm::vec3& pos)
-{
-	glUniform3fv(uPos, 1, glm::value_ptr(pos));
-}
-
 void ForwardShader::SetModelPos(const glm::vec3& pos) const
 {
-	glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - pos);
-	glm::vec3 from(0.f, 0.f, 1.f); 
-	glm::vec3 axis = glm::normalize(glm::cross(from, to));
+	glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), pos);
+	glUniform3fv(uPos, 1, glm::value_ptr(pos));
+	glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, glm::value_ptr(mat));
+}
 
-	// угол между векторами
-	float dot = glm::dot(from, to);
-	float angle = acos(dot);
-
-	glm::mat4 mat(1.f);
-	mat = glm::translate(mat, pos);
-
-	if (glm::length(axis)) {
-		mat = glm::rotate(mat, angle, axis);
-	}
-
-	
-
+void ForwardShader::SetModelMatrix(const glm::mat4x4& mat) const
+{
+	float pos[] = { mat[3][0], mat[3][1], mat[3][2] };
+	glUniform3fv(uPos, 1, pos);
 	glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
