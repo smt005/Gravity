@@ -82,7 +82,7 @@ void CameraControl::MakeCallback() {
 
 	Add(Callback::Type::PINCH_TAP, [this](const Engine::Callback::EventData& data) {
 		if (Callback::MouseButtonPressed(VirtualTap::RIGHT)) {
-				glm::vec2 delta(Callback::GetDeltaMousePos()[0], Callback::GetDeltaMousePos()[1]);
+				glm::vec2 delta(-Callback::GetDeltaMousePos()[0], -Callback::GetDeltaMousePos()[1]);
 				Rotate(delta);
 			}
 

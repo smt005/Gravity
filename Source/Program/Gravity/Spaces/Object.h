@@ -3,6 +3,7 @@
 
 #include <glm/vec3.hpp>
 
+// TODO
 struct Object final {
 	glm::vec3 pos;
 	float mass = 1.f;

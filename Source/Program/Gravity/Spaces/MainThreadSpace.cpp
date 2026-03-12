@@ -1,42 +1,13 @@
 ﻿// ◦ Xyz ◦
 
-#include "GravitySpace.h"
-#include "../DebugContext.h"
+#include "MainThreadSpace.h"
+#include <deque>
 #include <Common/Common.h>
+#include "../DebugContext.h"
 #include "../../Temp/LogSpecification.h"
 #include <Log.h>
-#include <glm/ext/quaternion_geometric.hpp>
-#include <glm/vec3.hpp>
 
-#include <deque>
-
-void Space::Generate(size_t count, size_t radius)
-{
-	_objects.clear();
-	_objects.reserve(count);
-
-	for (int i = 0; i < count; ++i) {
-		auto& object = _objects.emplace_back();
-		
-		object.pos.x = Engine::Random(-(float)radius, (float)radius);
-		object.pos.y = Engine::Random(-(float)radius, (float)radius);
-		object.pos.z = Engine::Random(-(float)radius, (float)radius);
-
-		float speed = 0.005f;
-		object.speed.x = Engine::Random(-(float)speed, (float)speed);
-		object.speed.y = Engine::Random(-(float)speed, (float)speed);
-		object.speed.z = Engine::Random(-(float)speed, (float)speed);
-		
-		object.mass = Engine::Random(0.1f, 10.f);
-	}
-}
-
-const std::vector<Object>& Space::Objects() const
-{
-	return _objects;
-}
-
-void Space::UpdateForce()
+void MainThreadSpace::UpdateForce()
 {
 	struct Colapce {
 		int objectIndex = -1;
@@ -141,7 +112,7 @@ void Space::UpdateForce()
 	DebugContext::Instance().countObject = _objects.size();
 }
 
-void Space::UpdateSpeed()
+void MainThreadSpace::UpdateSpeed()
 {
 	DebugContext& debug = DebugContext::Instance();
 
@@ -170,7 +141,7 @@ void Space::UpdateSpeed()
 	debug.maxSpeed = debug.constSpeed * debug.maxForce;
 }
 
-void Space::UpdatePos()
+void MainThreadSpace::UpdatePos()
 {
 	const size_t size = _objects.size();
 
@@ -179,12 +150,7 @@ void Space::UpdatePos()
 	}
 }
 
-void Space::Clean()
-{
-	_objects.clear();
-}
-
-void Space::Update()
+void MainThreadSpace::Update()
 {
 	if (!_pause) {
 		return;
@@ -194,95 +160,4 @@ void Space::Update()
 	UpdateForce();
 	UpdateSpeed();
 	UpdatePos();
-}
-
-void Space::SwitchPause()
-{
-	_pause = !_pause;
-}
-
-bool Space::IsPaused() const
-{
-	return _pause;
-}
-
-glm::vec3 Space::PosOfMinSpeedObject() const
-{
-	float speed = std::numeric_limits<float>::max();
-	const Object* obj = nullptr;
-
-	for (size_t i = 0; i < _objects.size(); ++i) {
-		if (glm::length(_objects[i].speed) < speed) {
-			speed = glm::length(_objects[i].speed);
-			obj = &_objects[i];
-		}
-	}
-
-	if (!obj) {
-		return {};
-	}
-
-	LOG("MIN SPEED: {} {} mass: {} pos: {}", glm::length(obj->speed), obj->speed, obj->mass, obj->pos);
-	return obj->speed;
-}
-
-glm::vec3 Space::PosOfMaxSpeedObject() const
-{
-	float speed = 0.f;
-	const Object* obj = nullptr;
-
-	for (size_t i = 0; i < _objects.size(); ++i) {
-		if (glm::length(_objects[i].speed) > speed) {
-			speed = glm::length(_objects[i].speed);
-			obj = &_objects[i];
-		}
-	}
-
-	if (!obj) {
-		return {};
-	}
-	
-	LOG("MAX SPEED: {} {} mass: {} pos: {}", glm::length(obj->speed), obj->speed, obj->mass, obj->pos);
-	return obj->speed;
-}
-
-glm::vec3 Space::PosOfMinMassObject() const
-{
-	glm::vec3 pos(0.f, 0.f, 0.f);
-	float mass = std::numeric_limits<float>::max();
-	const Object* obj = nullptr;
-
-	for (size_t i = 0; i < _objects.size(); ++i) {
-		if (_objects[i].mass < mass) {
-			mass = _objects[i].mass;
-			obj = &_objects[i];
-		}
-	}
-
-	if (!obj) {
-		return {};
-	}
-
-	LOG("MIN MASS: {}  speed: {} {} pos: {}", obj->mass, glm::length(obj->speed), obj->speed, obj->pos);
-	return obj->pos;
-}
-
-glm::vec3 Space::PosOfMaxMassObject() const
-{
-	const Object* obj = nullptr;
-	float mass = 0.f;
-
-	for (size_t i = 0; i < _objects.size(); ++i) {
-		if (_objects[i].mass > mass) {
-			mass = _objects[i].mass;
-			obj = &_objects[i];
-		}
-	}
-
-	if (!obj) {
-		return {};
-	}
-
-	LOG("MAX MASS: {}  speed: {} {} pos: {}", obj->mass, glm::length(obj->speed), obj->speed, obj->pos);
-	return obj->pos;
 }

@@ -9,7 +9,9 @@
 #include <Object/Texture.h>
 #include "Shaders/GravityShader.h"
 #include "Cameras/GravityCameras.h"
-#include "Spaces/GravitySpace.h"
+#include "Spaces/Space.h"
+#include "Spaces/MainThreadSpace.h"
+#include "Spaces/SpaceManager.h"
 #include <mystd_memory.h>
 #include "Windows/TopPanel.h"
 #include "Windows/DebugWindow.h"
@@ -31,10 +33,10 @@ mystd::shared_ptr<TestClass> testShader;
 
 struct TypeDraw
 {
-	bool model = false;
-	bool sprite = true;
+	bool model = true;
+	bool sprite = false;
 	bool spriteShader = false;
-	bool point = true;
+	bool point = false;
 	
 } typeDraw;
 
@@ -55,7 +57,7 @@ void Gravity::OnClose() {
 }
 
 void Gravity::Update() {
-	Space::Instance().Update();
+	SpaceManager::Update();
 }
 
 void Gravity::OnResize()
@@ -78,7 +80,7 @@ void Gravity::InitCallback()
 {
 	using namespace Engine;
 
-	Callback::Add(Callback::Type::PRESS_KEY, [](const Callback::EventData& data) {
+	Callback::Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
 		if (data.key == VirtualKey::ESCAPE) {
 			Core::Close();
 		}
@@ -91,7 +93,25 @@ void Gravity::InitCallback()
 		}
 
 		if (data.key == 'P') {
-			Space::Instance().SwitchPause();
+			SpaceManager::Current().SwitchPause();
+		}
+
+		if (Callback::KeyPressed(VirtualKey::CONTROL)) {
+			if (data.key == 'P') {
+#ifdef _DEBUG
+				SpaceManager::SetCurrent<Space>().Generate(20000, 300);
+#else
+				SpaceManager::SetCurrent<Space>().Generate(100000, 300);
+#endif
+
+			}
+			if (data.key == 'O') {
+#ifdef _DEBUG
+				SpaceManager::SetCurrent<MainThreadSpace>().Generate(200, 100);
+#else
+				SpaceManager::SetCurrent<MainThreadSpace>().Generate(1000, 300);
+#endif
+			}
 		}
 
 		if (data.key == VirtualKey::VK_1) {
@@ -122,19 +142,15 @@ void Gravity::InitDraw()
 	Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
-
-#ifdef _DEBUG
-		Space::Instance().Generate(250, 100);
-#else
-		Space::Instance().Generate(1000, 100);
-#endif
+	SpaceManager::Current().Generate(1000, 100);
 }
 
 void Gravity::TestDraw()
 {
 	using namespace Engine;
 
-	Space& space = Space::Instance();
+	Space& space = SpaceManager::Current();
+	//Space space;
 	Draw::ClearColor();
 
 	if (typeDraw.model) {

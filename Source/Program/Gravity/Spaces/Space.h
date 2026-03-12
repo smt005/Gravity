@@ -1,17 +1,17 @@
 ﻿// ◦ Xyz ◦
 #pragma once
 
-#include "Singletone.h"
 #include "Object.h"
 #include <vector>
 #include <glm/vec3.hpp>
+#include <mystd_memory.h>
 
-class Space final : public mystd::Singletone<Space> {
+class Space
+{
 public:
+	using Ptr = mystd::shared_ptr<Space>;
+
 	virtual void Generate(size_t count, size_t radius);
-	virtual void UpdateForce();
-	virtual void UpdateSpeed();
-	virtual void UpdatePos();
 	virtual void Clean();
 	virtual void Update();
 	
@@ -24,7 +24,7 @@ public:
 	glm::vec3 PosOfMinMassObject() const;
 	glm::vec3 PosOfMaxMassObject() const;
 
-private:
+protected:
 	bool _pause = true;
 	std::vector<Object> _objects;
 };

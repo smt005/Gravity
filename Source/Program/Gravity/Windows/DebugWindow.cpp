@@ -1,7 +1,7 @@
 // ◦ Xyz ◦
 
 #include "DebugWindow.h"
-#include "../Spaces/GravitySpace.h"
+#include "../Spaces/SpaceManager.h"
 #include "../DebugContext.h"
 #include <Draw/Camera.h>
 #include <GuiWindow/GuiWindows.h>
@@ -77,14 +77,12 @@ void DebugWindow::Update(double dTime) {
 
 void DebugWindow::CameraToMinMassObject()
 {
-	Space& space = Space::Instance();
-	Engine::Camera::GetLink().SetPos(space.PosOfMinMassObject());
+	Engine::Camera::GetLink().SetPos(SpaceManager::Current().PosOfMinMassObject());
 }
 
 void DebugWindow::CameraToMaxMassObject()
 {
-	Space& space = Space::Instance();
-	Engine::Camera::GetLink().SetPos(space.PosOfMaxMassObject());
+	Engine::Camera::GetLink().SetPos(SpaceManager::Current().PosOfMaxMassObject());
 }
 
 void DebugWindow::SwitchVisibleWindow()
