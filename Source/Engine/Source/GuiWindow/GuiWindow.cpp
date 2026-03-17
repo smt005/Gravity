@@ -16,7 +16,7 @@ GuiWindow::GuiWindow()
 
 GuiWindow::GuiWindow(const std::string& name)
     : _name(name)
-    , _title(TO_STRING("{}##{}", name, std::to_string(reinterpret_cast<uint64_t>(this))))
+    , _title(TO_STRING("{}##{}", name, _name))
 {}
 
 const std::string& GuiWindow::GetName() const
@@ -31,7 +31,7 @@ const std::string& GuiWindow::GetTitle() const
 
 void GuiWindow::SetTitle(std::string_view title)
 {
-    _title = TO_STRING("{}##{}", title, std::to_string(reinterpret_cast<uint64_t>(this)));
+    _title = TO_STRING("{}##{}", title, _name);
 }
 
 bool GuiWindow::IsVisible() const
@@ -83,7 +83,7 @@ void GuiWindow::SetFullScreen(bool state)
         _flags = _flags ^ noFullScreenFlags;
     }
 
-    Resize(); // TODO:
+    GuiWindows::ResizeWindows(_name);
 }
 
 void GuiWindow::Close()
@@ -94,4 +94,14 @@ void GuiWindow::Close()
 const char* GuiWindow::GetId() const
 {
     return GetTitle().c_str();
+}
+
+void GuiWindow::CloseButton(bool show)
+{
+    if (show) {
+        _openPtr = mystd::make_shared<bool>(true);
+    }
+    else {
+        _openPtr.reset();
+    }
 }

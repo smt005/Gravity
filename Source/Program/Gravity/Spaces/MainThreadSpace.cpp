@@ -7,6 +7,11 @@
 #include "../../Temp/LogSpecification.h"
 #include <Log.h>
 
+MainThreadSpace::MainThreadSpace()
+{
+	SetName("MainThreadSpace");
+}
+
 void MainThreadSpace::UpdateForce()
 {
 	struct Colapce {
@@ -33,7 +38,9 @@ void MainThreadSpace::UpdateForce()
 		_objects[i].force.y = 0.f;
 		_objects[i].force.z = 0.f;
 		_objects[i].colapseData = nullptr;
+	}
 
+	for (size_t i = 0; i < size; ++i) {
 		for (size_t j = 0; j < size; ++j) {
 			if (i == j) {
 				continue;
@@ -54,7 +61,7 @@ void MainThreadSpace::UpdateForce()
 					_objects[i].colapseData = colapcePtr;
 					colapcePtr->colapsCount += 1.f;
 					colapcePtr->sumPos += _objects[i].pos;
-					colapcePtr->sumSpeed += _objects[i].speed;
+					colapcePtr->sumSpeed += _objects[i].speed * _objects[i].mass;
 					colapcePtr->sumMass += _objects[i].mass;
 					colapcePtr->objectIndex = i;
 				}
@@ -62,7 +69,7 @@ void MainThreadSpace::UpdateForce()
 					_objects[j].colapseData = colapcePtr;
 					colapcePtr->colapsCount += 1.f;
 					colapcePtr->sumPos += _objects[j].pos;
-					colapcePtr->sumSpeed += _objects[j].speed;
+					colapcePtr->sumSpeed += _objects[j].speed * _objects[j].mass;
 					colapcePtr->sumMass += _objects[j].mass;
 				}
 			}
@@ -74,7 +81,7 @@ void MainThreadSpace::UpdateForce()
 
 	for (Colapce& colapses : colapses) {
 		_objects[colapses.objectIndex].pos = colapses.sumPos / colapses.colapsCount;
-		_objects[colapses.objectIndex].speed = colapses.sumSpeed / colapses.colapsCount;
+		_objects[colapses.objectIndex].speed = colapses.sumSpeed / colapses.sumMass;
 		_objects[colapses.objectIndex].mass = colapses.sumMass;
 		_objects[colapses.objectIndex].colapseData = nullptr;
 	}

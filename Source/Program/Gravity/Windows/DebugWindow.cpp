@@ -17,7 +17,6 @@ DebugWindow::DebugWindow(std::string_view name)
 {
 	SetFlags(ImGuiWindowFlags_NoResize);
 	SetTitle("Debud info");
-
 }
 
 void DebugWindow::OnOpen()
@@ -25,6 +24,13 @@ void DebugWindow::OnOpen()
 	//const float width = static_cast<float>(Engine::ScreenParams::Width());
 	ImGui::SetWindowPos(GetId(), { 10.f, 36.f });
 	ImGui::SetWindowSize(GetId(), { 200.f, 300.f });
+
+	LOG("DebugWindow::OnOpen");
+}
+
+void DebugWindow::OnClose()
+{
+	LOG("DebugWindow::OnClose");
 }
 
 void DebugWindow::Render() {

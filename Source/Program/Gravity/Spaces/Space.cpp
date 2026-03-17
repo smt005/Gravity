@@ -12,34 +12,45 @@
 
 #define _USE_MATH_DEFINE
 
+Space::Space()
+{
+	SetName("Space");
+}
+
 void Space::Generate(size_t count, size_t radius)
 {
 	_objects.clear();
 	_objects.reserve(count);
 	glm::vec3 vec3(1.f, 0.f, 0.f);
+	int typeGenerate = 1;
 
 	for (int i = 0; i < count; ++i) {
 		auto& object = _objects.emplace_back();
 		
-		/*object.pos.x = Engine::Random(-(float)radius, (float)radius);
-		object.pos.y = Engine::Random(-(float)radius, (float)radius);
-		object.pos.z = Engine::Random(-(float)radius, (float)radius);
+		if (typeGenerate == 0) {
+			object.pos.x = Engine::Random(-(float)radius, (float)radius);
+			object.pos.y = Engine::Random(-(float)radius, (float)radius);
+			object.pos.z = Engine::Random(-(float)radius, (float)radius);
 
-		float speed = 0.005f;
-		object.speed.x = Engine::Random(-(float)speed, (float)speed);
-		object.speed.y = Engine::Random(-(float)speed, (float)speed);
-		object.speed.z = Engine::Random(-(float)speed, (float)speed);*/
+			float speed = 0.005f;
+			object.speed.x = Engine::Random(-(float)speed, (float)speed);
+			object.speed.y = Engine::Random(-(float)speed, (float)speed);
+			object.speed.z = Engine::Random(-(float)speed, (float)speed);
 
-		float angle = Engine::Random<double>(0, std::numbers::pi * 2);
+			object.mass = Engine::Random(0.1f, 1.f);
+		}
+		else if (typeGenerate == 1) {
+			float angle = Engine::Random<double>(0, std::numbers::pi * 2);
 
-		glm::vec3 objectVec3(0.f, 0.f, 0.f);
-		objectVec3.x = vec3.x * cos(angle) - vec3.y * sin(angle);
-		objectVec3.y = vec3.x * sin(angle) + vec3.y * cos(angle);
-		//objectVec3.z = Engine::Random(-0.1f, 0.1f);
-		objectVec3 *= Engine::Random(0.f, (float)radius);
-		
-		object.pos = objectVec3;
-		object.mass = Engine::Random(0.1f, 10.f);
+			glm::vec3 objectVec3(0.f, 0.f, 0.f);
+			objectVec3.x = vec3.x * cos(angle) - vec3.y * sin(angle);
+			objectVec3.y = vec3.x * sin(angle) + vec3.y * cos(angle);
+			//objectVec3.z = Engine::Random(-0.1f, 0.1f);
+			objectVec3 *= Engine::Random(0.f, (float)radius);
+
+			object.pos = objectVec3;
+			object.mass = Engine::Random(0.1f, 1.f);
+		}
 	}
 }
 
@@ -58,6 +69,16 @@ void Space::Update() {}
 void Space::SwitchPause()
 {
 	_pause = !_pause;
+}
+
+void Space::SetName(std::string name)
+{
+	_name = std::string(name);
+}
+
+const std::string& Space::GetName() const
+{
+	return _name;
 }
 
 bool Space::IsPaused() const

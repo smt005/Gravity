@@ -121,7 +121,7 @@ namespace mystd
 			return _dataPtr == ptr._dataPtr;
 		}
 
-		void Reset() {
+		void reset() {
 			DecreaseCounter();
 		}
 	

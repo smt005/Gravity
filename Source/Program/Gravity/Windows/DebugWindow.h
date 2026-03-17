@@ -14,6 +14,7 @@ namespace Windows
 		void Render() override;
 		void Update(double dTime) override;
 		void OnOpen() override;
+		void OnClose() override;
 
 		void CameraToMinMassObject();
 		void CameraToMaxMassObject();

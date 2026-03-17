@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <list>
 #include <StringUtils.h>
+#include <mystd_memory.h>
 
 namespace Engine
 {
@@ -30,10 +31,12 @@ namespace Engine
 
 		virtual void Render() = 0;
 		virtual void Update(double dTime) {};
-		virtual void Resize() {}
+		virtual void OnResize() {}
 		virtual void OnOpen() {};
 		virtual void OnClose() {};
 		virtual void SetFullScreen(bool state);
+
+		void CloseButton(bool show);
 
 		const std::string& GetName() const;
 		const std::string& GetTitle() const;
@@ -49,7 +52,7 @@ namespace Engine
 		void Close();
 
 	private:
-		bool _opened = false;
+		mystd::shared_ptr<bool> _openPtr;
 		bool _visible = true;
 		bool _fullScreen = false;
 		float _alpha = 1.f;

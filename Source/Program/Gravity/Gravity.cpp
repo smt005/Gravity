@@ -1,7 +1,7 @@
 // ◦ Xyz ◦
 
 #include "Gravity.h"
-#include <FileManager/FileManager.h>
+#include <Files/FileManager.h>
 #include <Callback/VirtualKey.h>
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
@@ -15,12 +15,15 @@
 #include <mystd_memory.h>
 #include "Windows/TopPanel.h"
 #include "Windows/DebugWindow.h"
+#include "Windows/GenerateWindow.h"
+#include "Windows/AlgorithmWindow.h"
 #include <Examples/TestClass.h>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <Temp/Test.h>
 #include "../Temp/LogSpecification.h"
 #include "../Temp/LogMyStlSpecification.h"
 #include "../Temp/LogStlSpecification.h"
@@ -42,6 +45,8 @@ struct TypeDraw
 
 bool Gravity::Init(std::string_view params)
 {
+	TestFun();
+
 	InitFileManagers();
 	InitCallback();
 	InitWidows();
@@ -91,6 +96,12 @@ void Gravity::InitCallback()
 		if (data.key == VirtualKey::F2) {
 			Windows::DebugWindow::SwitchVisibleWindow();
 		}
+		if (data.key == VirtualKey::F3) {
+			Windows::GenerateWindow::SwitchVisibleWindow();
+		}
+		if (data.key == VirtualKey::F4) {
+			Windows::AlgorithmWindow::SwitchVisibleWindow();
+		}
 
 		if (data.key == 'P') {
 			SpaceManager::Current().SwitchPause();
@@ -107,7 +118,7 @@ void Gravity::InitCallback()
 			}
 			if (data.key == 'O') {
 #ifdef _DEBUG
-				SpaceManager::SetCurrent<MainThreadSpace>().Generate(200, 100);
+				SpaceManager::SetCurrent<MainThreadSpace>().Generate(300, 50);
 #else
 				SpaceManager::SetCurrent<MainThreadSpace>().Generate(1000, 300);
 #endif
@@ -133,6 +144,8 @@ void Gravity::InitWidows()
 {
 	Windows::TopPanel::OpenWindow();
 	Windows::DebugWindow::OpenWindow();
+	Windows::GenerateWindow::OpenWindow();
+	Windows::AlgorithmWindow::OpenWindow();
 }
 
 void Gravity::InitDraw()
@@ -150,7 +163,6 @@ void Gravity::TestDraw()
 	using namespace Engine;
 
 	Space& space = SpaceManager::Current();
-	//Space space;
 	Draw::ClearColor();
 
 	if (typeDraw.model) {
@@ -159,7 +171,11 @@ void Gravity::TestDraw()
 		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
 		for (auto& object : space.Objects()) {
-			shader.SetModelPos(object.pos);
+			//shader.SetModelPos(object.pos);
+			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
+			const float scale = object.Scale();
+			mat = glm::scale(mat, glm::vec3(scale));
+			shader.SetModelMatrix(mat);
 			Draw::Render(SHAPES["Sphere", true, true].mesh);
 		}
 	}
@@ -169,8 +185,8 @@ void Gravity::TestDraw()
 		shader.UseProgram();
 
 		Draw::DepthTest(false);
-		Draw::BindTexture(Texture::GetRef("Star.png").Id());
-		//Draw::BindTexture(Texture::GetRef("Rgba64.png").Id());
+		//Draw::BindTexture(Texture::GetRef("Star.png").Id());
+		Draw::BindTexture(Texture::GetRef("Cloud.png").Id());
 
 		for (auto& object : space.Objects()) {
 			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - object.pos);
@@ -181,12 +197,14 @@ void Gravity::TestDraw()
 			float angle = acos(dot);
 
 			glm::mat4 mat(1.f);
+			const float scale = object.Scale() * 10.f;
+			
 			mat = glm::translate(mat, object.pos);
 
 			if (glm::length(axis)) {
 				mat = glm::rotate(mat, angle, axis);
 			}
-
+			mat = glm::scale(mat, glm::vec3(scale));
 			shader.SetModelMatrix(mat);
 
 			Draw::Render(SHAPES["Star5", true, true].mesh);

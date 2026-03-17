@@ -3,24 +3,22 @@
 
 #include <GuiWindow/GuiWindow.h>
 #include <string>
+#include <functional>
 
 namespace Windows
 {
-	class TopPanel final : public Engine::GuiWindow
+	class AlgorithmWindow final : public Engine::GuiWindow
 	{
 	public:
-		TopPanel(std::string_view name);
-		~TopPanel() = default;
+		AlgorithmWindow(std::string_view name);
+		~AlgorithmWindow() = default;
 		void Render() override;
 		void Update(double dTime) override;
 		void OnResize() override;
 		void OnOpen() override;
+		void OnClose() override;
 
-	private:
-		int _fps = 0;
-		int _minFps = std::numeric_limits<int>::max();
-		int _maxFps = std::numeric_limits<int>::min();
-		double timeOut = 1;
+		void FixSize();
 
 	public:
 		static void SwitchVisibleWindow();
@@ -28,6 +26,6 @@ namespace Windows
 		static void CloseWindow();
 
 	public:
-		inline static const std::string_view windowName = "TopPanel";
+		inline static const std::string_view windowName = "AlgorithmWindow";
 	};
 }

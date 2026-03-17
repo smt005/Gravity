@@ -3,7 +3,7 @@
 #include "Texture.h"
 #include "glad/gl.h"
 #include "FreeImage.h"
-#include <FileManager/FileManager.h>
+#include <Files/FileManager.h>
 
 using namespace Engine;
 

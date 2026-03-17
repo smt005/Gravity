@@ -39,7 +39,6 @@ void GuiWindows::RenderWindows()
     while (it != _windows.end()) {
         const auto windowPtr = it->second;
         auto& window = *windowPtr;
-        ++it;
 
         if (window.IsVisible()) {
             if (window.IsFullScreen()) {
@@ -47,29 +46,42 @@ void GuiWindows::RenderWindows()
                 ImGui::SetNextWindowSize(ImVec2(static_cast<float>(ScreenParams::Width()), static_cast<float>(ScreenParams::Height())));
             }
 
-            if (window._alpha < 1.f) {
-                ImGui::SetNextWindowBgAlpha(window._alpha);
+            ImGui::SetNextWindowBgAlpha(window._alpha);
+
+            ImGui::Begin(window.GetId(), window._openPtr.get(), window._flags);
+
+            if (_windowsOpen.contains(window.GetName())) {
+                window.OnOpen();
             }
 
-            ImGui::Begin(window.GetId(), nullptr, window._flags);
-            
-            if (!window._opened) {
-                window.OnOpen();
-                window._opened = true;
+            if (_allWindowsResize) {
+                window.OnResize();
             }
-            
+            else {
+                if (_windowsResize.contains(window.GetName())) {
+                    window.OnResize();
+                }
+            }
+
+            if (window._openPtr && !*window._openPtr) {
+                window.OnClose();
+                it = _windows.erase(it);
+            }
+            else {
+                ++it;
+            }
+
             window.Render();
             ImGui::End();
         }
     }
-
+    
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    for (auto& window : _windowToClose) {
-        window->OnClose();
-    }
-    _windowToClose.clear();
+    _allWindowsResize = false;
+    _windowsResize.clear();
+    _windowsOpen.clear();
 }
 
 void GuiWindows::CloseWindow(std::string_view name)
@@ -82,15 +94,24 @@ void GuiWindows::CloseWindow(const std::string& name)
     const auto it = _windows.find(name);
 
     if (it != _windows.end()) {
-        _windowToClose.emplace_back(std::move(it->second));
-        _windows.erase(it);
+        it->second->_openPtr = mystd::make_shared<bool>(false);
     }
 }
 
-void GuiWindows::ResizeWindows()
+void GuiWindows::CloseWindows()
 {
     for (const auto& [name, window] : _windows) {
-        window->Resize();
+        window->_openPtr = mystd::make_shared<bool>(false);
+    }
+}
+
+void GuiWindows::ResizeWindows(std::string_view name)
+{
+    if (name.empty()) {
+        _allWindowsResize = true;
+    }
+    else {
+        _windowsResize.emplace(name);
     }
 }
 

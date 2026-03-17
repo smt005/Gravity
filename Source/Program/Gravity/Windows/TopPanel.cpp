@@ -17,7 +17,7 @@ TopPanel::TopPanel(std::string_view name)
 
 }
 
-void TopPanel::Resize()
+void TopPanel::OnResize()
 {
 	const float width = static_cast<float>(Engine::ScreenParams::Width());
 	const float height = static_cast<float>(Engine::ScreenParams::Height());
@@ -30,7 +30,7 @@ void TopPanel::OnOpen()
 {
 	SetAlpha(0.f);
 	ImGui::SetWindowPos(GetTitle().c_str(), { 0.f, 0.f });
-	Resize();
+	OnResize();
 }
 
 void TopPanel::Render() {

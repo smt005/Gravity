@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace mystd
 {
@@ -40,6 +41,24 @@ namespace mystd
 		std::ostringstream oss;
 		ToStreamArgs(oss, std::forward<Args>(args)...);
 		return oss.str();
+	}
+
+	static std::vector<std::string_view> SplitString(std::string_view str, char devider) {
+		std::vector<std::string_view> parsedStr;
+		size_t pos = 0;
+		size_t posLast = str.find(devider);
+
+		while (posLast != str.npos) {
+			parsedStr.emplace_back(str.substr(pos, posLast - pos));
+			pos = posLast + 1;
+			posLast = str.find(devider, pos);
+		}
+
+		if (pos != str.npos) {
+			parsedStr.emplace_back(str.substr(pos, str.size() - pos));
+		}
+
+		return parsedStr;
 	}
 }
 

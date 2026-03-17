@@ -6,6 +6,8 @@
 class MainThreadSpace : public Space
 {
 public:
+	MainThreadSpace();
+
 	void Update() override;
 	void UpdateForce();
 	void UpdateSpeed();

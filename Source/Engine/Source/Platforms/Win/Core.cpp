@@ -6,7 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <Screen.h>
 #include <Callback/Callback.h>
-#include <FileManager/FileManager.h>
+#include <Files/FileManager.h>
+#include <Files/Settings.h>
 #include <GuiWindow/GuiWindows.h>
 #include <nlohmann/json.hpp>
 #include <Log.h>
@@ -30,67 +31,17 @@ void WindowPosCallback(GLFWwindow* window, int left, int top);
 void WindowCloseCallback(GLFWwindow* window);
 void WindowScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-struct Settings
-{
-	int left = 100;
-	int top = 100;
-	int width = 400;
-	int height = 200;
-	bool fullScreen = false; // TODO:
-
-	inline static const std::string_view settingsFileName = "Settings.json";
-};
-
-Settings LoadSettings()
-{
-	Settings settings;
-
-	using json = nlohmann::json;
-	json jsonData;
-	const std::string jsonText = FileManager::Get("write").ReadTextFile(Settings::settingsFileName);
-
-	if (jsonText.empty()) {
-		return settings;
-	}
-
-	try {
-		jsonData = json::parse(jsonText);
-
-		if (jsonData.contains("width")) {
-			settings.width = jsonData["width"].get<int>();
-		}
-		if (jsonData.contains("height")) {
-			settings.height = jsonData["height"].get<int>();
-		}
-		if (jsonData.contains("top")) {
-			settings.top = jsonData["top"].get<int>();
-		}
-		if (jsonData.contains("left")) {
-			settings.left = jsonData["left"].get<int>();
-		}
-		if (jsonData.contains("fullScreen")) {
-			settings.fullScreen = jsonData["fullScreen"].get<int>();
-		}
-	}
-	catch (...) {
-		LOG("[Core::LoadSettings] fail load settings.");
-		return settings;
-	}
-
-	return settings;
-}
-
 void SaveSettings()
 {
-	using json = nlohmann::json;
-	json jsonData;
+	auto& settings = Settings::Instance();
+	auto& jsonData = settings.JsonData();
 
 	jsonData["width"] = ScreenParams::Width();
 	jsonData["height"] = ScreenParams::Height();
 	jsonData["top"] = ScreenParams::Top();
 	jsonData["left"] = ScreenParams::Left();
 
-	FileManager::Get("write").WriteFile(jsonData.dump(2), Settings::settingsFileName);
+	settings.SaveSettings();
 }
 
 int Core::Execution(std::string_view params)
@@ -116,7 +67,8 @@ int Core::Main(std::string_view params)
 	}
 
 	FileManager::Make("write");
-	const Settings settings = LoadSettings();
+	Settings& settings = Settings::Instance();
+	settings.LoadSettings();
 	ScreenParams::SetWidth(settings.width);
 	ScreenParams::SetHeight(settings.height);
 	ScreenParams::SetTop(settings.top);
