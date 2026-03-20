@@ -48,7 +48,7 @@ namespace Engine
 		return result;
 	}
 
-	template<typename T>
+	template <typename T>
 	std::string GetClassName()
 	{
 		const std::string_view typeName = typeid(T).name();

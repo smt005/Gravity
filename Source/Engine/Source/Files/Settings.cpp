@@ -90,3 +90,23 @@ nlohmann::json* Settings::JsonData(std::string_view path, bool create)
 
 	return jsonData;
 }
+
+nlohmann::json Settings::operator [](std::string_view keys)
+{
+	auto* jsonData = JsonData(keys);
+	return jsonData ? *jsonData : nlohmann::json();
+
+	/*nlohmann::json* jsonData = &_jsonData;
+
+	for (std::string_view key : mystd::SplitString(keys, '/')) {
+		if (jsonData->contains(key)) {
+			jsonData = &(*jsonData)[key];
+		}
+		else {
+			static nlohmann::json jsonDefault;
+			return jsonDefault;
+		}
+	}
+
+	return *jsonData;*/
+}

@@ -7,6 +7,7 @@
 #include <list>
 #include <StringUtils.h>
 #include <mystd_memory.h>
+#include <Common/Common.h>
 
 namespace Engine
 {
@@ -35,9 +36,8 @@ namespace Engine
 		virtual void OnOpen() {};
 		virtual void OnClose() {};
 		virtual void SetFullScreen(bool state);
-
+		
 		void CloseButton(bool show);
-
 		const std::string& GetName() const;
 		const std::string& GetTitle() const;
 		const char* GetId() const;

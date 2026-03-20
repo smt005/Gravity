@@ -23,5 +23,4 @@ private:
 
 	void InitDraw();
 	void TestDraw();
-	void TestSimpleShared();
 };

@@ -77,26 +77,3 @@ void TopPanel::Update(double dTime) {
 	_minFps = std::min(_fps, _minFps);
 	_maxFps = std::max(_fps, _maxFps);
 }
-
-
-void TopPanel::SwitchVisibleWindow()
-{
-	if (!OpenWindow()) {
-		CloseWindow();
-	}
-}
-
-bool TopPanel::OpenWindow()
-{
-	if (!Engine::GuiWindows::ExistWindow(windowName)) {
-		Engine::GuiWindows::MakeWindow<TopPanel>(windowName)->GetName();
-		return true;
-	}
-
-	return false;
-}
-
-void TopPanel::CloseWindow()
-{
-	Engine::GuiWindows::CloseWindow(windowName);
-}

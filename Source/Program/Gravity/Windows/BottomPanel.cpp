@@ -45,25 +45,3 @@ void BottomPanel::Render() {
 void BottomPanel::Update(double dTime) {
 
 }
-
-void BottomPanel::SwitchVisibleWindow()
-{
-	if (!OpenWindow()) {
-		CloseWindow();
-	}
-}
-
-bool BottomPanel::OpenWindow()
-{
-	if (!Engine::GuiWindows::ExistWindow(windowName)) {
-		Engine::GuiWindows::MakeWindow<BottomPanel>(windowName)->GetName();
-		return true;
-	}
-
-	return false;
-}
-
-void BottomPanel::CloseWindow()
-{
-	Engine::GuiWindows::CloseWindow(windowName);
-}

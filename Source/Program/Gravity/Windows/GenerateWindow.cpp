@@ -9,6 +9,7 @@
 #include <Files/Settings.h>
 #include "../Spaces/SpaceManager.h"
 #include "../Cameras/GravityCameras.h"
+#include <Common/JsonHelper.h>
 #include <Common/Common.h>
 #include <Log.h>
 
@@ -36,23 +37,12 @@ void GenerateWindow::Render() {
 	const static ImVec2 buttonSize(150.f, 20.f);
 
 	{
-		// TODO:
 		static int count = 0;
 		static  int size = 100;
 
 		if (!count || !size) {
-			const auto& settings = Engine::Settings::Instance();
-			if (auto* jsonData = settings.JsonData(TO_STRING("{}/generateData", Engine::GetClassName<SpaceManager>()))) {
-				count = (*jsonData)["count"];
-				size = (*jsonData)["size"];
-
-				if (count == 0) {
-					count = 100;
-				}
-				if (size == 0) {
-					size = 100;
-				}
-			}
+			count = SpaceManager::GetGenerateValue("count", 200);
+			size = SpaceManager::GetGenerateValue("size", 200);
 		}
 
 		ImGuiWidthHandler width(100.f);
@@ -74,7 +64,6 @@ void GenerateWindow::Render() {
 	if (ImGui::Button("Reset camera", buttonSize)) {
 		cameras::ResetCamera();
 	}
-
 }
 
 void GenerateWindow::FixSize()
@@ -93,26 +82,4 @@ void GenerateWindow::FixSize()
 
 void GenerateWindow::Update(double dTime) {
 
-}
-
-void GenerateWindow::SwitchVisibleWindow()
-{
-	if (!OpenWindow()) {
-		CloseWindow();
-	}
-}
-
-bool GenerateWindow::OpenWindow()
-{
-	if (!Engine::GuiWindows::ExistWindow(windowName)) {
-		Engine::GuiWindows::MakeWindow<GenerateWindow>(windowName)->GetName();
-		return true;
-	}
-
-	return false;
-}
-
-void GenerateWindow::CloseWindow()
-{
-	Engine::GuiWindows::CloseWindow(windowName);
 }

@@ -17,6 +17,14 @@ namespace Engine
 		const nlohmann::json* JsonData(std::string_view path) const;
 		nlohmann::json* JsonData(std::string_view path, bool create);
 
+		nlohmann::json operator [](std::string_view keys);
+
+		template <typename T>
+		nlohmann::json operator [](std::string_view keys, T&& defValue) {
+			auto* jsonValue = JsonData(keys);
+			return jsonValue ? jsonValue->get<T>() : std::forward<T>(defValue);
+		}
+
 	public:
 		int left = 100;
 		int top = 100;

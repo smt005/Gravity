@@ -42,11 +42,6 @@ namespace Windows
 
 		}
 
-	public:
-		static void SwitchVisibleWindow();
-		static bool OpenWindow();
-		static void CloseWindow();
-
 	private:
 		size_t _currentSpace = 0;
 

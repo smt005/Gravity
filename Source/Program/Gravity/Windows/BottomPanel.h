@@ -15,11 +15,6 @@ namespace Windows
 		void Update(double dTime) override;
 		void OnResize() override;
 		void OnOpen() override;
-		
-	public:
-		static void SwitchVisibleWindow();
-		static bool OpenWindow();
-		static void CloseWindow();
 
 	public:
 		inline static const std::string_view windowName = "BottomPanel";

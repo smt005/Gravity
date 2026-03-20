@@ -63,25 +63,3 @@ void AlgorithmWindow::Render() {
 void AlgorithmWindow::Update(double dTime) {
 
 }
-
-void AlgorithmWindow::SwitchVisibleWindow()
-{
-	if (!OpenWindow()) {
-		CloseWindow();
-	}
-}
-
-bool AlgorithmWindow::OpenWindow()
-{
-	if (!Engine::GuiWindows::ExistWindow(windowName)) {
-		Engine::GuiWindows::MakeWindow<AlgorithmWindow>(windowName)->GetName();
-		return true;
-	}
-
-	return false;
-}
-
-void AlgorithmWindow::CloseWindow()
-{
-	Engine::GuiWindows::CloseWindow(windowName);
-}

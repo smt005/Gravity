@@ -25,6 +25,18 @@ namespace Engine
 			return newWindow;
 		}
 
+		template <typename Twindow>
+		static void SwitchVisibleWindow()
+		{
+			const std::string windowName = Engine::GetClassName<Twindow>();
+			if (!ExistWindow(windowName)) {
+				MakeWindow<Twindow>(windowName)->GetName();
+			}
+			else {
+				CloseWindow(windowName);
+			}
+		}
+
 		static bool Init(void* window);
 		static void Cleanup();
 		static void RenderWindows();

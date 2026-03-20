@@ -32,4 +32,16 @@ namespace Engine
 	{
 		return jsonData ? GetJsonValue<T>(key, *jsonData) : T();
 	}
+
+	template <typename T>
+	T GetJsonValue(std::string_view key, const nlohmann::json& jsonData, T&& defValue)
+	{
+		return !jsonData.empty() ? GetJsonValue<T>(key, jsonData) : defValue;
+	}
+
+	template <typename T>
+	T GetJsonValue(std::string_view key, const nlohmann::json* jsonData, T&& defValue)
+	{
+		return jsonData ? GetJsonValue<T>(key, *jsonData) : defValue;
+	}
 }

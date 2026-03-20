@@ -1,6 +1,13 @@
 // ◦ Xyz ◦
 
 #include "Gravity.h"
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <mystd_memory.h>
+#include <GuiWindow/GuiWindows.h>
+#include <Examples/TestClass.h>
+#include <Temp/Test.h>
 #include <Files/FileManager.h>
 #include <Files/Settings.h>
 #include <Callback/VirtualKey.h>
@@ -10,21 +17,11 @@
 #include <Object/Texture.h>
 #include "Shaders/GravityShader.h"
 #include "Cameras/GravityCameras.h"
-#include "Spaces/Space.h"
-//#include "Spaces/OneThreadSpace.h"
 #include "Spaces/SpaceManager.h"
-#include <mystd_memory.h>
 #include "Windows/TopPanel.h"
 #include "Windows/DebugWindow.h"
 #include "Windows/GenerateWindow.h"
 #include "Windows/AlgorithmWindow.h"
-#include <Examples/TestClass.h>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
-//#include <glm/ext/matrix_transform.hpp>
-//#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <Temp/Test.h>
 #include "../Temp/LogSpecification.h"
 #include "../Temp/LogMyStlSpecification.h"
 #include "../Temp/LogStlSpecification.h"
@@ -33,7 +30,6 @@
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
 using namespace mystd::Examples;
-mystd::shared_ptr<TestClass> testShader;
 
 struct TypeDraw
 {
@@ -53,7 +49,6 @@ bool Gravity::Init(std::string_view params)
 	InitCallback();
 	InitWidows();
     InitDraw();
-	TestSimpleShared();
 	SpaceManager::Load();
 
 	LOG("Gravity::Inited");
@@ -99,16 +94,16 @@ void Gravity::InitCallback()
 		}
 
 		if (data.key == VirtualKey::F1) {
-			Windows::TopPanel::SwitchVisibleWindow();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
 		}
 		if (data.key == VirtualKey::F2) {
-			Windows::DebugWindow::SwitchVisibleWindow();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
 		}
 		if (data.key == VirtualKey::F3) {
-			Windows::GenerateWindow::SwitchVisibleWindow();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();
 		}
 		if (data.key == VirtualKey::F4) {
-			Windows::AlgorithmWindow::SwitchVisibleWindow();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::AlgorithmWindow>();
 		}
 
 		if (data.key == 'P') {
@@ -134,17 +129,15 @@ void Gravity::InitCallback()
 
 void Gravity::InitWidows()
 {
-	Windows::TopPanel::OpenWindow();
-	Windows::DebugWindow::OpenWindow();
-	Windows::GenerateWindow::OpenWindow();
-	Windows::AlgorithmWindow::OpenWindow();
+	Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
+	Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
+	Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();
+	Engine::GuiWindows::SwitchVisibleWindow<Windows::AlgorithmWindow>();
 }
 
 void Gravity::InitDraw()
 {
-	using namespace Engine;
-
-	Draw::SetClearColor(0.1f, 0.2f, 0.3f);
+	Engine::Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
 }
@@ -239,42 +232,4 @@ void Gravity::TestDraw()
 
 		Draw::RenderPoints(points.data(), countPoints);
 	}
-}
-
-void Gravity::TestSimpleShared()
-{
-	/*LOG("BEGIN");
-	{
-		mystd::shared_ptr<TestClass> firstShader;
-		mystd::shared_ptr<TestClass> secondShader = mystd::make_shared<TestClass>(111, "Test111");
-
-		TestClass* testClassPtr = nullptr;
-		{
-			mystd::shared_ptr<TestClass> thirdShader(testClassPtr);
-			LOG("[{}], [{}], [{}]", firstShader, *secondShader, thirdShader);
-		}
-
-		testClassPtr = new TestClass(222, "222Test");
-		mystd::shared_ptr<TestClass> thirdShader(testClassPtr);
-		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
-
-		thirdShader = secondShader;
-		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
-
-		firstShader = std::move(secondShader);
-		LOG("[{}], [{}], [{}]", firstShader, secondShader, thirdShader);
-
-		mystd::shared_ptr<TestClass> forShader(firstShader);
-		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
-
-		forShader->_val = 999;
-		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
-
-		firstShader = mystd::make_shared<TestClass>(333, "333Test333");
-		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader);
-
-		mystd::simple_shared_ptr<TestClass> fiveShader(std::move(firstShader));
-		LOG("[{}], [{}], [{}], [{}]", firstShader, secondShader, thirdShader, forShader, fiveShader);
-	}
-	LOG("END");*/
 }

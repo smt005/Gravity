@@ -90,25 +90,3 @@ void DebugWindow::CameraToMaxMassObject()
 {
 	Engine::Camera::GetLink().SetPos(SpaceManager::Current().PosOfMaxMassObject());
 }
-
-void DebugWindow::SwitchVisibleWindow()
-{
-	if (!OpenWindow()) {
-		CloseWindow();
-	}
-}
-
-bool DebugWindow::OpenWindow()
-{
-	if (!Engine::GuiWindows::ExistWindow(windowName)) {
-		Engine::GuiWindows::MakeWindow<DebugWindow>(windowName)->GetName();
-		return true;
-	}
-
-	return false;
-}
-
-void DebugWindow::CloseWindow()
-{
-	Engine::GuiWindows::CloseWindow(windowName);
-}

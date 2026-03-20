@@ -5,6 +5,10 @@
 #include <mystd_memory.h>
 #include "Space.h"
 #include "OneThreadSpace.h"
+#include <StringUtils.h>
+#include <Files/Settings.h>
+#include <Common/JsonHelper.h>
+#include <Common/Common.h>
 
 class SpaceManager final
 {
@@ -46,6 +50,13 @@ public:
 	static Space& SetCurrent()
 	{
 		return *SetCurrentPtr<T>();
+	}
+
+	template<typename T>
+	static T GetGenerateValue(std::string_view key, T&& defValue) {
+		const std::string keys = TO_STRING("{}/generateData/{}", Engine::GetClassName<SpaceManager>(), key);
+		//return std::forward<T>(defValue);// Engine::Settings::Instance()[keys, defValue];
+		return Engine::Settings::Instance()[keys, std::forward<T>(defValue)];
 	}
 
 	static Space& Current();
