@@ -7,6 +7,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <nlohmann/json.hpp>
 #include "Screen.h"
 
 namespace Engine
@@ -14,7 +15,7 @@ namespace Engine
 	class Camera
 	{
 	public:
-		typedef std::shared_ptr<Camera> Ptr;
+		using Ptr = std::shared_ptr<Camera>;
 
 		enum class Type {
 			PERSPECTIVE,
@@ -115,8 +116,10 @@ namespace Engine
 			_up = up;
 		}
 
-		//virtual void Load(const Json::Value& data);
-		//virtual void Save(Json::Value& data);
+		virtual bool Load();
+		virtual void Save();
+		virtual bool Load(const nlohmann::json& data);
+		virtual void Save(nlohmann::json& data);
 
 	protected:
 

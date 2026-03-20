@@ -2,6 +2,7 @@
 
 #include "Gravity.h"
 #include <Files/FileManager.h>
+#include <Files/Settings.h>
 #include <Callback/VirtualKey.h>
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
@@ -10,7 +11,7 @@
 #include "Shaders/GravityShader.h"
 #include "Cameras/GravityCameras.h"
 #include "Spaces/Space.h"
-#include "Spaces/MainThreadSpace.h"
+//#include "Spaces/OneThreadSpace.h"
 #include "Spaces/SpaceManager.h"
 #include <mystd_memory.h>
 #include "Windows/TopPanel.h"
@@ -20,8 +21,8 @@
 #include <Examples/TestClass.h>
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/matrix_clip_space.hpp>
+//#include <glm/ext/matrix_transform.hpp>
+//#include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <Temp/Test.h>
 #include "../Temp/LogSpecification.h"
@@ -45,6 +46,7 @@ struct TypeDraw
 
 bool Gravity::Init(std::string_view params)
 {
+	LOG("Gravity::Init");
 	TestFun();
 
 	InitFileManagers();
@@ -52,13 +54,19 @@ bool Gravity::Init(std::string_view params)
 	InitWidows();
     InitDraw();
 	TestSimpleShared();
+	SpaceManager::Load();
 
-	LOG("Gravity::Init");
+	LOG("Gravity::Inited");
 	return true;
 }
 
 void Gravity::OnClose() {
 	LOG("Gravity::OnClose");
+	
+	SpaceManager::Save();
+	Engine::Camera::GetLink().Save();
+
+	LOG("Gravity::OnClosed");
 }
 
 void Gravity::Update() {
@@ -108,34 +116,18 @@ void Gravity::InitCallback()
 		}
 
 		if (Callback::KeyPressed(VirtualKey::CONTROL)) {
-			if (data.key == 'P') {
-#ifdef _DEBUG
-				SpaceManager::SetCurrent<Space>().Generate(20000, 300);
-#else
-				SpaceManager::SetCurrent<Space>().Generate(100000, 300);
-#endif
-
+			if (data.key == VirtualKey::VK_1) {
+				typeDraw.model = !typeDraw.model;
 			}
-			if (data.key == 'O') {
-#ifdef _DEBUG
-				SpaceManager::SetCurrent<MainThreadSpace>().Generate(300, 50);
-#else
-				SpaceManager::SetCurrent<MainThreadSpace>().Generate(1000, 300);
-#endif
+			if (data.key == VirtualKey::VK_2) {
+				typeDraw.sprite = !typeDraw.sprite;
 			}
-		}
-
-		if (data.key == VirtualKey::VK_1) {
-			typeDraw.model = !typeDraw.model;
-		}
-		if (data.key == VirtualKey::VK_2) {
-			typeDraw.sprite = !typeDraw.sprite;
-		}
-		if (data.key == VirtualKey::VK_3) {
-			typeDraw.spriteShader = !typeDraw.spriteShader;
-		}
-		if (data.key == VirtualKey::VK_4) {
-			typeDraw.point = !typeDraw.point;
+			if (data.key == VirtualKey::VK_3) {
+				typeDraw.spriteShader = !typeDraw.spriteShader;
+			}
+			if (data.key == VirtualKey::VK_4) {
+				typeDraw.point = !typeDraw.point;
+			}
 		}
 	});
 }
@@ -155,7 +147,6 @@ void Gravity::InitDraw()
 	Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
-	SpaceManager::Current().Generate(1000, 100);
 }
 
 void Gravity::TestDraw()
@@ -185,8 +176,8 @@ void Gravity::TestDraw()
 		shader.UseProgram();
 
 		Draw::DepthTest(false);
-		//Draw::BindTexture(Texture::GetRef("Star.png").Id());
-		Draw::BindTexture(Texture::GetRef("Cloud.png").Id());
+		Draw::BindTexture(Texture::GetRef("Star.png").Id());
+		//Draw::BindTexture(Texture::GetRef("Cloud.png").Id());
 
 		for (auto& object : space.Objects()) {
 			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - object.pos);

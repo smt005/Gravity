@@ -49,6 +49,28 @@ nlohmann::json& Settings::JsonData()
 	return _jsonData;
 }
 
+const nlohmann::json& Settings::JsonData() const
+{
+	return _jsonData;
+}
+
+const nlohmann::json* Settings::JsonData(std::string_view path) const
+{
+	const nlohmann::json* jsonData = &_jsonData;
+
+	for (std::string_view key : mystd::SplitString(path, '/')) {
+		if (jsonData->contains(key)) {
+			jsonData = &(*jsonData)[key];
+		}
+		else {
+			return nullptr;
+		}
+	}
+
+	return jsonData;
+}
+
+
 nlohmann::json* Settings::JsonData(std::string_view path, bool create)
 {
 	nlohmann::json* jsonData = &_jsonData;

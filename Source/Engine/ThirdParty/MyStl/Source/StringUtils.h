@@ -62,4 +62,18 @@ namespace mystd
 	}
 }
 
+template<typename T>
+T ValueFromString(const std::string& text)
+{
+	std::stringstream ss(text);
+	T value;
+
+	ss >> value;
+
+	if (ss.fail() || !ss.eof())
+		throw std::invalid_argument("Conversion failed");
+
+	return value;
+}
+
 #define TO_STRING mystd::ToString

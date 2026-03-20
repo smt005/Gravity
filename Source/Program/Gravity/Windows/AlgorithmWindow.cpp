@@ -9,8 +9,6 @@
 #include <Common/Common.h>
 #include <Files/Settings.h>
 #include <GuiWindow/ImGuiHelp.h>
-#include "../Spaces/SpaceManager.h"
-
 #include <Log.h>
 
 using namespace Windows;
@@ -31,6 +29,7 @@ void AlgorithmWindow::OnResize()
 void AlgorithmWindow::OnOpen()
 {
 	OnResize();
+	_currentSpace = SpaceManager::Current().GetId();
 }
 
 void AlgorithmWindow::FixSize()
@@ -49,37 +48,16 @@ void AlgorithmWindow::FixSize()
 
 void AlgorithmWindow::OnClose()
 {
-	const ImVec2& windowPos = ImGui::GetWindowPos();
-	const ImVec2& windowSize = ImGui::GetWindowSize();
-	LOG("OnClose: {}: [{}, {}] [{}, {}]", windowName, windowPos.x, windowPos.y, windowSize.x, windowSize.y);
 }
 
 void AlgorithmWindow::Render() {
-	const static ImVec2 buttonSize(200.f, 20.f);
-	const ImColor currentColor(0.9f, 0.6f, 0.3f, 1.f);
-	const ImColor defaultColor(0.5f, 0.6f, 0.7f, 1.f);
-
+	size_t spaceHash = typeid(*SpaceManager::CurrentPtr().get()).hash_code();
 	std::string text = TO_STRING("Current: {}", SpaceManager::Current().GetName());
 	ImGui::Text(text.c_str());
 	ImGui::Separator();
 
-	{
-		const std::string_view name = "Space";
-		ImGuiColorHandler color(ImGuiCol_Button, name == SpaceManager::Current().GetName() ? currentColor : defaultColor);
-
-		if (ImGui::Button(name.data(), buttonSize)) {
-			SpaceManager::SetCurrent<Space>();
-		}
-	}
-
-	{
-		const std::string_view name = "MainThreadSpace";
-		ImGuiColorHandler color(ImGuiCol_Button, name == SpaceManager::Current().GetName() ? currentColor : defaultColor);
-
-		if (ImGui::Button(name.data(), buttonSize)) {
-			SpaceManager::SetCurrent<MainThreadSpace>();
-		}
-	}
+	ButtonRender<Space>();
+	ButtonRender<OneThreadSpace>();
 }
 
 void AlgorithmWindow::Update(double dTime) {

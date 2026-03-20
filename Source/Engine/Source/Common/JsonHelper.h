@@ -8,10 +8,14 @@
 namespace Engine
 {
 	template <typename T>
-	T GetJsonValue(const std::string& key, nlohmann::json& jsonData)
+	T GetJsonValue(std::string_view key, const nlohmann::json& jsonData)
 	{
+		if (!jsonData.contains(key)) {
+			return {};
+		}
+
 		try {
-			return jsonData["width"].get<T>();
+			return jsonData[key].get<T>();
 		}
 		catch (const std::exception& exc) {
 			LOG("[Engine::GetJsonValue] key: '{}', '{}', type: '{}' , ", key, exc.what(), typeid(T).name());
@@ -21,5 +25,11 @@ namespace Engine
 		}
 
 		return {};
+	}
+
+	template <typename T>
+	T GetJsonValue(std::string_view key, const nlohmann::json* jsonData)
+	{
+		return jsonData ? GetJsonValue<T>(key, *jsonData) : T();
 	}
 }

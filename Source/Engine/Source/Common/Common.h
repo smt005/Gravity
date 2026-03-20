@@ -6,32 +6,53 @@
 
 namespace Engine
 {
+	static std::string ExtractClassName(const std::string_view fullName)
+	{
+		std::string result;
+		size_t pos = fullName.npos;
+
+		// TODO:
+		{
+			const std::string_view text = "::";
+			pos = fullName.find_last_of(text);
+			if (pos != fullName.npos) {
+				pos += text.length();
+			}
+		}
+
+		if (pos == fullName.npos) {
+			const std::string_view text = "class ";
+			pos = fullName.find(text);
+
+			if (pos != fullName.npos) {
+				pos += text.length();
+			}
+		}
+
+		if (pos == fullName.npos) {
+			const std::string_view text = "struct ";
+			pos = fullName.find(text);
+
+			if (pos != fullName.npos) {
+				pos += text.length();
+			}
+		}
+
+		if (pos != fullName.npos) {
+			result = std::string(fullName.substr(pos, fullName.size() - pos));
+		}
+		else {
+			result = std::string(fullName);
+		}
+
+		return result;
+	}
+
 	template<typename T>
 	std::string GetClassName()
 	{
 		const std::string_view typeName = typeid(T).name();
-		size_t pos = typeName.find_last_of("::");
-
-		if (pos == typeName.npos) {
-			pos = typeName.find_last_of("class");
-		}
-		if (pos == typeName.npos) {
-			pos = typeName.find_last_of("struct");
-		}
-
-		++pos;
-
-		if (pos != typeName.npos) {
-			return std::string(typeName.substr(pos, typeName.size() - pos));
-		}
-
-		return std::string(typeName);
-	}
-
-	template<typename T>
-	std::string GetClassName(T*)
-	{
-		return GetClassName<T>();
+		return ExtractClassName(typeName);
 	}
 
 	template <typename T>

@@ -13,7 +13,9 @@ namespace Engine
 		nlohmann::json& LoadSettings();
 		void SaveSettings();
 		nlohmann::json& JsonData();
-		nlohmann::json* JsonData(std::string_view path, bool create = false);
+		const nlohmann::json& JsonData() const;
+		const nlohmann::json* JsonData(std::string_view path) const;
+		nlohmann::json* JsonData(std::string_view path, bool create);
 
 	public:
 		int left = 100;

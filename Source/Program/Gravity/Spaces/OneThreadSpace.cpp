@@ -1,18 +1,13 @@
 ﻿// ◦ Xyz ◦
 
-#include "MainThreadSpace.h"
+#include "OneThreadSpace.h"
 #include <deque>
 #include <Common/Common.h>
 #include "../DebugContext.h"
 #include "../../Temp/LogSpecification.h"
 #include <Log.h>
 
-MainThreadSpace::MainThreadSpace()
-{
-	SetName("MainThreadSpace");
-}
-
-void MainThreadSpace::UpdateForce()
+void OneThreadSpace::UpdateForce()
 {
 	struct Colapce {
 		int objectIndex = -1;
@@ -119,7 +114,7 @@ void MainThreadSpace::UpdateForce()
 	DebugContext::Instance().countObject = _objects.size();
 }
 
-void MainThreadSpace::UpdateSpeed()
+void OneThreadSpace::UpdateSpeed()
 {
 	DebugContext& debug = DebugContext::Instance();
 
@@ -148,7 +143,7 @@ void MainThreadSpace::UpdateSpeed()
 	debug.maxSpeed = debug.constSpeed * debug.maxForce;
 }
 
-void MainThreadSpace::UpdatePos()
+void OneThreadSpace::UpdatePos()
 {
 	const size_t size = _objects.size();
 
@@ -157,9 +152,9 @@ void MainThreadSpace::UpdatePos()
 	}
 }
 
-void MainThreadSpace::Update()
+void OneThreadSpace::Update()
 {
-	if (!_pause) {
+	if (_pause) {
 		return;
 	}
 

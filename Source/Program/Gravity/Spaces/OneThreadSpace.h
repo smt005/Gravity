@@ -3,11 +3,9 @@
 
 #include "Space.h"
 
-class MainThreadSpace : public Space
+class OneThreadSpace : public Space
 {
 public:
-	MainThreadSpace();
-
 	void Update() override;
 	void UpdateForce();
 	void UpdateSpeed();

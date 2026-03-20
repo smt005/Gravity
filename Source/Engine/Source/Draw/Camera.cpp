@@ -1,7 +1,9 @@
 
 #include "Camera.h"
-#include "Callback/Callback.h"
 #include <glm/ext/matrix_clip_space.hpp>
+#include <Files/Settings.h>
+#include <Common/JsonHelper.h>
+#include "Callback/Callback.h"
 
 using namespace Engine;
 
@@ -50,77 +52,118 @@ void Camera::SetOrtho(const float size, float zNear, float zFar) {
 	return objcoord;
 }*/
 
-/*void Camera::Load(const Json::Value& data) {
-	const Json::Value& typeData = data["type"];
-	if (typeData.isString()) {
-		const std::string typeStr = typeData.asString();
-
-		if (typeStr == "ortho" || typeStr == "Ortho" || typeStr == "ORTHO") { // TODO:
-			_type = Type::ORTHO;
-		} else if (typeStr == "perspective" || typeStr == "Perspective" || typeStr == "PERSPECTIVE") {
-			_type = Type::PERSPECTIVE;
-		}
+// TODO: Объединить Load, Save
+bool Camera::Load()
+{
+	if (auto* jsonData = Settings::Instance().JsonData("Cameras")) {
+		return Load(*jsonData);
 	}
-
-	const Json::Value& posData = data["pos"];
-	if (posData.isArray()) {
-		_pos.x = posData[0].asFloat();
-		_pos.y = posData[1].asFloat();
-		_pos.z = posData[2].asFloat();
-	}
-
-	const Json::Value& directData = data["direct"];
-	if (directData.isArray()) {
-		_direct.x = directData[0].asFloat();
-		_direct.y = directData[1].asFloat();
-		_direct.z = directData[2].asFloat();
-	}
-
-	const Json::Value& upData = data["up"];
-	if (upData.isArray()) {
-		_up.x = upData[0].asFloat();
-		_up.y = upData[1].asFloat();
-		_up.z = upData[2].asFloat();
-	}
-
-	//...
-	_matView = glm::lookAt(_pos, _pos + _direct, _up);
-	Resize();
 }
 
-void Camera::Save(Json::Value& data) {
+void Camera::Save()
+{
+	if (auto* jsonData = Settings::Instance().JsonData("Cameras", true)) {
+		Save(*jsonData);
+	}
+}
+
+bool Camera::Load(const nlohmann::json& data) {
+	using Json = nlohmann::json;
+
+	if (data.empty()) {
+		return false;
+	}
+
+	try {
+		Type type = Type::PERSPECTIVE;
+		glm::vec3 pos = glm::vec3(2.f, 2.f, 1.f);
+		glm::vec3 direct = glm::vec3(-0.524f, -0.514f, -0.679f);
+		glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
+
+		const std::string typeStr = Engine::GetJsonValue<std::string>("type", data);
+		if (typeStr == "ortho" || typeStr == "Ortho" || typeStr == "ORTHO") { // TODO:
+			type = Type::ORTHO;
+		}
+		else if (typeStr == "perspective" || typeStr == "Perspective" || typeStr == "PERSPECTIVE") {
+			type = Type::PERSPECTIVE;
+		}
+
+		const auto posData = Engine::GetJsonValue<std::vector<float>>("pos", data);
+		if (posData.size() >= 3) {
+			pos.x = posData[0];
+			pos.y = posData[1];
+			pos.z = posData[2];
+
+			// TODO:
+			if (pos.length() == 0.f) {
+				pos = glm::vec3( 2.f, 2.f, 1.f );
+			}
+		}
+
+		const auto directData = Engine::GetJsonValue<std::vector<float>>("direct", data);
+		if (directData.size() >= 3) {
+			direct.x = directData[0];
+			direct.y = directData[1];
+			direct.z = directData[2];
+
+			// TODO:
+			if (direct.length() == 0.f) {
+				direct = glm::vec3( -0.524f, -0.514f, -0.679f );
+			}
+		}
+
+		const auto upData = Engine::GetJsonValue<std::vector<float>>("up", data);
+		if (upData.size() >= 3) {
+			up.x = upData[0];
+			up.y = upData[1];
+			up.z = upData[2];
+
+			// TODO:
+			if (up.length() == 0.f) {
+				up.z = 1.f;
+			}
+		}
+
+		_type = type;
+		_pos = pos;
+		_direct = direct;
+		_up = up;
+	}
+	catch (...) {
+		Init();
+		return false;
+	}
+
+	Init();
+	return true;
+}
+
+void Camera::Save(nlohmann::json& data) {
+	using Json = nlohmann::json;
+
 	data["type"] = _type == Type::PERSPECTIVE ? "perspective" : "ortho";
 
-	if (_pos.x == 0.f && _pos.y == 0.f && _pos.z == 0.f) {
-		data.removeMember("pos");
+	if (_pos.length() == 0.f) {
+		data.erase("pos");
 	}
 	else {
-		Json::Value& posData = data["pos"];
-		posData.append(_pos.x);
-		posData.append(_pos.y);
-		posData.append(_pos.z);
+		data["pos"] = { _pos.x, _pos.y, _pos.z };
 	}
 
-	if (_direct.x == 1.f && _direct.y == 0.f && _direct.z == 0.f) {
-		data.removeMember("direct");
+	if (_direct.length() == 0.f) {
+		data.erase("direct");
 	}
 	else {
-		Json::Value& directData = data["direct"];
-		directData.append(_direct.x);
-		directData.append(_direct.y);
-		directData.append(_direct.z);
+		data["direct"] = { _direct.x, _direct.y, _direct.z };
 	}
 
-	if (_up.x == 0.f && _up.y == 0.f && _up.z == 1.f) {
-		data.removeMember("up");
+	if (_up.length() == 1.f) {
+		data.erase("up");
 	}
 	else {
-		Json::Value& upData = data["up"];
-		upData.append(_up.x);
-		upData.append(_up.y);
-		upData.append(_up.z);
+		data["up"] = { _up.x, _up.y, _up.z };
 	}
-}*/
+}
 
 // STATIC
 Camera::Ptr Camera::_currentCameraPtr;
