@@ -48,7 +48,6 @@ void Space::Generate(size_t count, size_t radius, int typeGenerate)
 			glm::vec3 objectVec3(0.f, 0.f, 0.f);
 			objectVec3.x = vec3.x * cos(angle) - vec3.y * sin(angle);
 			objectVec3.y = vec3.x * sin(angle) + vec3.y * cos(angle);
-			//objectVec3.z = Engine::Random(-0.1f, 0.1f);
 			objectVec3 *= Engine::Random(0.f, (float)radius);
 
 			object.pos = objectVec3;
@@ -89,7 +88,8 @@ void Space::Update() {
 		return;
 	}
 
-	static float angleSpeed = 0.005f;
+	static float angleSpeedFactor = 0.001f;
+	float angleSpeed = static_cast<float>(deltaTime) * static_cast<float>(countOfIteration) * angleSpeedFactor;
 	glm::vec3 rotationAxis(0.f, 0.f, 1.f);
 	glm::quat rotationQuat = glm::angleAxis(angleSpeed, rotationAxis);
 

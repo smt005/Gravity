@@ -22,6 +22,7 @@
 #include "Windows/DebugWindow.h"
 #include "Windows/GenerateWindow.h"
 #include "Windows/AlgorithmWindow.h"
+#include "Windows/BottomPanel.h"
 #include "../Temp/LogSpecification.h"
 #include "../Temp/LogMyStlSpecification.h"
 #include "../Temp/LogStlSpecification.h"
@@ -93,17 +94,20 @@ void Gravity::InitCallback()
 			Core::Close();
 		}
 
-		if (data.key == VirtualKey::F1) {
+		if (data.key == VirtualKey::F5) {
 			Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
 		}
-		if (data.key == VirtualKey::F2) {
+		if (data.key == VirtualKey::F6) {
 			Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
 		}
-		if (data.key == VirtualKey::F3) {
+		if (data.key == VirtualKey::F7) {
 			Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();
 		}
-		if (data.key == VirtualKey::F4) {
+		if (data.key == VirtualKey::F8) {
 			Engine::GuiWindows::SwitchVisibleWindow<Windows::AlgorithmWindow>();
+		}
+		if (data.key == VirtualKey::F9) {
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::BottomPanel>();
 		}
 
 		if (data.key == 'P') {
@@ -133,6 +137,7 @@ void Gravity::InitWidows()
 	Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
 	Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();
 	Engine::GuiWindows::SwitchVisibleWindow<Windows::AlgorithmWindow>();
+	Engine::GuiWindows::SwitchVisibleWindow<Windows::BottomPanel>();
 }
 
 void Gravity::InitDraw()

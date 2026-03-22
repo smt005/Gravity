@@ -55,7 +55,6 @@ public:
 	template<typename T>
 	static T GetGenerateValue(std::string_view key, T&& defValue) {
 		const std::string keys = TO_STRING("{}/generateData/{}", Engine::GetClassName<SpaceManager>(), key);
-		//return std::forward<T>(defValue);// Engine::Settings::Instance()[keys, defValue];
 		return Engine::Settings::Instance()[keys, std::forward<T>(defValue)];
 	}
 

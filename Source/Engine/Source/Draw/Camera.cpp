@@ -58,6 +58,8 @@ bool Camera::Load()
 	if (auto* jsonData = Settings::Instance().JsonData("Cameras")) {
 		return Load(*jsonData);
 	}
+
+	return false;
 }
 
 void Camera::Save()

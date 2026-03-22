@@ -118,7 +118,7 @@ void OneThreadSpace::UpdateSpeed()
 {
 	DebugContext& debug = DebugContext::Instance();
 
-	float speed = 0.1f;
+	float speed = Space::deltaTime;// 0.1f;
 	debug.constSpeed = speed;
 
 	const size_t size = _objects.size();
@@ -158,8 +158,10 @@ void OneThreadSpace::Update()
 		return;
 	}
 
-	DebugContext::Instance().Clean();
-	UpdateForce();
-	UpdateSpeed();
-	UpdatePos();
+	for (int i = 0; i < countOfIteration; ++i) {
+		DebugContext::Instance().Clean();
+		UpdateForce();
+		UpdateSpeed();
+		UpdatePos();
+	}
 }

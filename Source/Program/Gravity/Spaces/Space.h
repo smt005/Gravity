@@ -31,6 +31,10 @@ public:
 	glm::vec3 PosOfMinMassObject() const;
 	glm::vec3 PosOfMaxMassObject() const;
 
+public:
+	inline static int deltaTime = 1;
+	inline static int countOfIteration = 1;
+
 	// TODO:
 public:
 	int typeTemp = 0;

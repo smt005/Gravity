@@ -3,6 +3,8 @@
 
 #include <string>
 #include <random>
+#include <memory>
+#include <mystd_memory.h>
 
 namespace Engine
 {
@@ -68,3 +70,46 @@ namespace Engine
 		return std::forward<Arg>(arg);
 	}
 }
+
+class VariableHandler final {
+private:
+	struct Variable {
+		// TODO: Реалезовать удалятор у mystd::shared
+		virtual ~Variable() = default;
+	};
+
+	using Ptr = std::shared_ptr<Variable>;
+
+	template <typename T>
+	struct VariableT final : Variable {
+		T& _ref;
+		T _prevValue;
+		VariableT(T& ref, T value)
+			: _ref(ref)
+			, _prevValue(std::move(_ref))
+		{
+			_ref = std::forward<T>(value);
+		}
+		~VariableT() {
+			_ref = std::move(_prevValue);
+		}
+	};
+
+	VariableHandler(const VariableHandler&) = delete;
+	VariableHandler(VariableHandler&&) = delete;
+	void operator = (const VariableHandler&) = delete;
+	void operator = (VariableHandler&&) = delete;
+
+public:
+	VariableHandler() = default;
+	~VariableHandler() = default;
+
+
+	template <typename T>
+	void Push(T& ref, T value) {
+		auto var = std::make_shared<VariableT<T>>(ref, value);
+		_refs.emplace_back(var);
+	}
+
+	std::list<Ptr> _refs;
+};

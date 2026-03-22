@@ -43,6 +43,15 @@ void GenerateWindow::Render() {
 		if (!count || !size) {
 			count = SpaceManager::GetGenerateValue("count", 200);
 			size = SpaceManager::GetGenerateValue("size", 200);
+
+			if (count == 0) {
+				LOG("[GenerateWindow::Render] count: {}", count);
+				count = 200;
+			}
+			if (size == 0) {
+				LOG("[GenerateWindow::Render] size: {}", size);
+				size = 200;
+			}
 		}
 
 		ImGuiWidthHandler width(100.f);

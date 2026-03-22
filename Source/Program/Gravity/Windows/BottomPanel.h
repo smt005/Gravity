@@ -2,7 +2,6 @@
 #pragma once
 
 #include <GuiWindow/GuiWindow.h>
-#include <string>
 
 namespace Windows
 {
@@ -12,7 +11,6 @@ namespace Windows
 		BottomPanel(std::string_view name);
 		~BottomPanel() = default;
 		void Render() override;
-		void Update(double dTime) override;
 		void OnResize() override;
 		void OnOpen() override;
 
