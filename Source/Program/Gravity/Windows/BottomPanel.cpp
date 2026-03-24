@@ -66,13 +66,13 @@ void BottomPanel::Render() {
     }
     else {
         volatile static float minOffset = Engine::GetJsonValue("minOffset", Engine::Settings::Instance().JsonData("BottomPanel"), 1.f);
-        volatile static float maxOffset = Engine::GetJsonValue("maxOffset", Engine::Settings::Instance().JsonData("BottomPanel"), 100.f);
+        volatile static float maxOffset = Engine::GetJsonValue("maxOffset", Engine::Settings::Instance().JsonData("BottomPanel"), 100000.f);
 
-        static float offsetIteration = static_cast<float>(SpaceManager::offsetIteration) / 1000.f;
-        std::string text = TO_STRING("Speed (error): {}", SpaceManager::offsetIteration / 1000);
+        static float offsetIteration = static_cast<float>(SpaceManager::offsetIteration);
+        std::string text = TO_STRING("Speed (error): {}", SpaceManager::offsetIteration);
 
         if (ImGui::SliderFloat("##offset_iteration_slider", &offsetIteration, minOffset, maxOffset, text.c_str())) {
-            SpaceManager::offsetIteration = static_cast<int>(offsetIteration) * 1000;
+            SpaceManager::offsetIteration = static_cast<int>(offsetIteration);
         }
     }
     

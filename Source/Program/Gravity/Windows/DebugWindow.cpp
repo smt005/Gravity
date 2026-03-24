@@ -38,14 +38,12 @@ void DebugWindow::Render() {
 	ImGui::Text("Diameter space: %f", DebugContext::Instance().diameterSpace);
 	
 	ImGui::Separator();
-	ImGui::Text("     Min force: %f", DebugContext::Instance().minForce);
-	ImGui::Text("  Middle force: %f", DebugContext::Instance().middleForce);
-	ImGui::Text("     Max force: %f", DebugContext::Instance().maxForce);
+	ImGui::Text("     Min force: %f", DebugContext::Instance().minForce * 1000000.f);
+	ImGui::Text("     Max force: %f", DebugContext::Instance().maxForce * 1000000.f);
 	
 	ImGui::Separator();
-	ImGui::Text("     Min speed: %f", DebugContext::Instance().minSpeed);
-	ImGui::Text("  Middle speed: %f", DebugContext::Instance().middleSpeed);
-	ImGui::Text("     Max speed: %f", DebugContext::Instance().maxSpeed);
+	ImGui::Text("     Min speed: %f", DebugContext::Instance().minVelocity * 1000000.f);
+	ImGui::Text("     Max speed: %f", DebugContext::Instance().maxVelocity * 1000000.f);
 	
 	ImGui::Separator();
 	ImGui::Text("      Min mass: %f", DebugContext::Instance().minMass);
@@ -55,7 +53,6 @@ void DebugWindow::Render() {
 		}
 	}
 
-	ImGui::Text("   Middle mass: %f", DebugContext::Instance().middleMass);
 	ImGui::Text("      Max mass: %f", DebugContext::Instance().maxMass);
 	if (ImGui::IsItemHovered()) {
 		if (ImGui::IsItemClicked()) {

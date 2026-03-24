@@ -6,6 +6,7 @@
 #include <Common/Common.h>
 #include "Space.h"
 #include "OneThreadSpace.h"
+#include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
 
 Space& SpaceManager::Current()
@@ -23,8 +24,10 @@ const Space::Ptr& SpaceManager::CurrentPtr()
 
 void SpaceManager::Update(double deltaTime)
 {
+	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
 	Current().Update();
+	Current().CollectDebugData();
 }
 
 void SpaceManager::Load()

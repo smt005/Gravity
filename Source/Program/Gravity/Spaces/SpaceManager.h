@@ -96,7 +96,7 @@ public:
 
 //private: // TODO:
 public:
-	inline static int offsetIteration = 1000;
+	inline static int offsetIteration = 1; // 1000;
 	inline static int countOfIteration = 1;
 	inline static bool collapseBodies = true;
 

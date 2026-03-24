@@ -23,6 +23,6 @@ struct Object final {
 	}
 
 public:
-	inline static float gForce = 6.67430e-11f; //  1.f; // Гравитационная постоянная
+	inline static float gForce = 6.67430e-11f; //6.67430e-5f; //6.67430e-11f; //  1.f; // Гравитационная постоянная
 };
 

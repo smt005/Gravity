@@ -165,7 +165,6 @@ void Gravity::TestDraw()
 		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
 		for (auto& object : space.Objects()) {
-			//shader.SetModelPos(object.pos);
 			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
 			const float scale = object.Diameter();
 			mat = glm::scale(mat, glm::vec3(scale));
@@ -180,7 +179,6 @@ void Gravity::TestDraw()
 
 		Draw::DepthTest(false);
 		Draw::BindTexture(Texture::GetRef("Star.png").Id());
-		//Draw::BindTexture(Texture::GetRef("Cloud.png").Id());
 
 		for (auto& object : space.Objects()) {
 			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - object.pos);
@@ -201,8 +199,7 @@ void Gravity::TestDraw()
 			mat = glm::scale(mat, glm::vec3(scale));
 			shader.SetModelMatrix(mat);
 
-			Draw::Render(SHAPES["Star5", true, true].mesh);
-			//Draw::Render(SHAPES["RgbBox", true, true].mesh);
+			Draw::Render(SHAPES["Sprite", true, true].mesh);
 		}
 	}
 
@@ -216,7 +213,7 @@ void Gravity::TestDraw()
 		for (auto& object : space.Objects()) {
 			shader.SetModelPos(object.pos);
 
-			//Draw::Render(SHAPES["Star5", true, true].mesh);
+			//Draw::Render(SHAPES["Sprite", true, true].mesh);
 			Draw::Render(SHAPES["RgbBox", true, true].mesh);
 		}
 	}

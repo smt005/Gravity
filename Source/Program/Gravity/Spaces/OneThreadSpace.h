@@ -12,5 +12,4 @@ public:
 	void UpdateForce();
 	void UpdateSpeed(float deltaTime);
 	void UpdatePos(float deltaTime);
-	void GetDebugData();
 };

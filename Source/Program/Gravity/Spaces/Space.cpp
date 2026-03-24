@@ -108,7 +108,17 @@ void Space::CollectDebugData() const
 {
 	DebugContext& debugContext = DebugContext::Instance();
 
+	auto& _bodies = _objects; // TODO:
 
+	for (auto& body : _bodies) {
+		debugContext.minForce = std::min(debugContext.minForce, glm::length(body.force));
+		debugContext.minMass = std::min(debugContext.minMass, glm::length(body.mass));
+		debugContext.minVelocity = std::min(debugContext.minVelocity, glm::length(body.velocity));
+		debugContext.maxForce = std::max(debugContext.maxForce, glm::length(body.force));
+		debugContext.maxMass = std::max(debugContext.maxMass, glm::length(body.mass));
+		debugContext.maxVelocity = std::max(debugContext.maxVelocity, glm::length(body.velocity));
+		debugContext.sumMass += body.mass;
+	}
 }
 
 void Space::SwitchPause()
