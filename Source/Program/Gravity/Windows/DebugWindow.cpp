@@ -15,7 +15,7 @@ using namespace Windows;
 DebugWindow::DebugWindow(std::string_view name)
 	: Engine::GuiWindow(std::string(name))
 {
-	SetFlags(ImGuiWindowFlags_NoResize);
+	SetFlags(ImGuiWindowFlags_AlwaysAutoResize);
 	SetTitle("Debud info");
 }
 
@@ -68,6 +68,17 @@ void DebugWindow::Render() {
 	ImGui::Separator();
 	ImGui::Text("   Const force: %f", DebugContext::Instance().constForce);
 	ImGui::Text("   Const speed: %f", DebugContext::Instance().constSpeed);
+
+	if (Space::subProgress >= 0) {
+		char buf[32];
+		sprintf(buf, "sub: %d/%d", (int)(Space::subProgress * 100), 100);
+		ImGui::ProgressBar(Space::subProgress, ImVec2(0.f, 0.f), buf);
+	}
+	if (Space::progress >= 0) {
+		char buf[32];
+		sprintf(buf, "%d/%d", (int)(Space::progress * 100), 100);
+		ImGui::ProgressBar(Space::progress, ImVec2(0.f, 0.f), buf);
+	}
 }
 
 void DebugWindow::Update(double dTime) {

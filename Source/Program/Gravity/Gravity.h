@@ -11,7 +11,7 @@ public:
 
 	Gravity() = default;
 	bool Init(std::string_view params) override;
-	void Update() override;
+	void Update(double deltaTime) override;
 	void Draw() override;
 	void OnResize() override;
 	void OnClose() override;

@@ -8,6 +8,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <Common/Common.h>
 #include "../DebugContext.h"
+#include "SpaceManager.h"
 #include "../../Temp/LogSpecification.h"
 #include <Log.h>
 
@@ -59,9 +60,9 @@ void Space::Generate(size_t count, size_t radius, int typeGenerate)
 			object.pos.z = Engine::Random(-(float)radius, (float)radius);
 
 			float speed = 0.005f;
-			object.speed.x = Engine::Random(-(float)speed, (float)speed);
-			object.speed.y = Engine::Random(-(float)speed, (float)speed);
-			object.speed.z = Engine::Random(-(float)speed, (float)speed);
+			object.velocity.x = Engine::Random(-(float)speed, (float)speed);
+			object.velocity.y = Engine::Random(-(float)speed, (float)speed);
+			object.velocity.z = Engine::Random(-(float)speed, (float)speed);
 
 			object.mass = Engine::Random(0.1f, 1.f);
 		}
@@ -79,7 +80,7 @@ void Space::Clean()
 }
 
 void Space::Update() {
-	if (_pause) {
+	if (SpaceManager::countOfIteration == 0) {
 		return;
 	}
 
@@ -89,13 +90,25 @@ void Space::Update() {
 	}
 
 	static float angleSpeedFactor = 0.001f;
-	float angleSpeed = static_cast<float>(deltaTime) * static_cast<float>(countOfIteration) * angleSpeedFactor;
+	float angleSpeed = static_cast<float>(SpaceManager::offsetIteration) * static_cast<float>(SpaceManager::countOfIteration) * angleSpeedFactor;
 	glm::vec3 rotationAxis(0.f, 0.f, 1.f);
 	glm::quat rotationQuat = glm::angleAxis(angleSpeed, rotationAxis);
 
+	int completeObjects = 0;
+
 	for (auto& object : _objects) {
 		object.pos = rotationQuat * object.pos;
+
+		++completeObjects;
+		progress = (float)completeObjects / (float)countObject;
 	}
+}
+
+void Space::CollectDebugData() const
+{
+	DebugContext& debugContext = DebugContext::Instance();
+
+
 }
 
 void Space::SwitchPause()
@@ -130,8 +143,8 @@ glm::vec3 Space::PosOfMinSpeedObject() const
 	const Object* obj = nullptr;
 
 	for (size_t i = 0; i < _objects.size(); ++i) {
-		if (glm::length(_objects[i].speed) < speed) {
-			speed = glm::length(_objects[i].speed);
+		if (glm::length(_objects[i].velocity) < speed) {
+			speed = glm::length(_objects[i].velocity);
 			obj = &_objects[i];
 		}
 	}
@@ -140,18 +153,18 @@ glm::vec3 Space::PosOfMinSpeedObject() const
 		return {};
 	}
 
-	LOG("MIN SPEED: {} {} mass: {} pos: {}", glm::length(obj->speed), obj->speed, obj->mass, obj->pos);
-	return obj->speed;
+	LOG("MIN SPEED: {} {} mass: {} pos: {}", glm::length(obj->velocity), obj->velocity, obj->mass, obj->pos);
+	return obj->velocity;
 }
 
 glm::vec3 Space::PosOfMaxSpeedObject() const
 {
-	float speed = 0.f;
+	float velocity = 0.f;
 	const Object* obj = nullptr;
 
 	for (size_t i = 0; i < _objects.size(); ++i) {
-		if (glm::length(_objects[i].speed) > speed) {
-			speed = glm::length(_objects[i].speed);
+		if (glm::length(_objects[i].velocity) > velocity) {
+			velocity = glm::length(_objects[i].velocity);
 			obj = &_objects[i];
 		}
 	}
@@ -160,8 +173,8 @@ glm::vec3 Space::PosOfMaxSpeedObject() const
 		return {};
 	}
 	
-	LOG("MAX SPEED: {} {} mass: {} pos: {}", glm::length(obj->speed), obj->speed, obj->mass, obj->pos);
-	return obj->speed;
+	LOG("MAX SPEED: {} {} mass: {} pos: {}", glm::length(obj->velocity), obj->velocity, obj->mass, obj->pos);
+	return obj->velocity;
 }
 
 glm::vec3 Space::PosOfMinMassObject() const
@@ -181,7 +194,7 @@ glm::vec3 Space::PosOfMinMassObject() const
 		return {};
 	}
 
-	LOG("MIN MASS: {}  speed: {} {} pos: {}", obj->mass, glm::length(obj->speed), obj->speed, obj->pos);
+	LOG("MIN MASS: {}  velocity: {} {} pos: {}", obj->mass, glm::length(obj->velocity), obj->velocity, obj->pos);
 	return obj->pos;
 }
 
@@ -201,6 +214,6 @@ glm::vec3 Space::PosOfMaxMassObject() const
 		return {};
 	}
 
-	LOG("MAX MASS: {}  speed: {} {} pos: {}", obj->mass, glm::length(obj->speed), obj->speed, obj->pos);
+	LOG("MAX MASS: {}  velocity: {} {} pos: {}", obj->mass, glm::length(obj->velocity), obj->velocity, obj->pos);
 	return obj->pos;
 }

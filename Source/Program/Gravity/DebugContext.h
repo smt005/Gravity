@@ -26,6 +26,10 @@
 		float constForce = 1.f;
 		float constSpeed = 1.f;
 
+		float deltaTime = 0.f;
+		float subProgress = 0.f;
+		float progress = 0.f;
+
 		void Clean() {
 			countObject = 0;
 			diameterSpace = 0.f;

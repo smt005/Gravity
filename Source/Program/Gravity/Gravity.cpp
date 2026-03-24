@@ -23,6 +23,7 @@
 #include "Windows/GenerateWindow.h"
 #include "Windows/AlgorithmWindow.h"
 #include "Windows/BottomPanel.h"
+#include "Windows/InfoWindow.h"
 #include "../Temp/LogSpecification.h"
 #include "../Temp/LogMyStlSpecification.h"
 #include "../Temp/LogStlSpecification.h"
@@ -41,6 +42,8 @@ struct TypeDraw
 	
 } typeDraw;
 
+float scaleStar = 1.f;
+
 bool Gravity::Init(std::string_view params)
 {
 	LOG("Gravity::Init");
@@ -52,21 +55,23 @@ bool Gravity::Init(std::string_view params)
     InitDraw();
 	SpaceManager::Load();
 
+	scaleStar = Engine::GetJsonValue("scale", Engine::Settings::Instance().JsonData("test"), scaleStar);
+
 	LOG("Gravity::Inited");
 	return true;
 }
 
 void Gravity::OnClose() {
 	LOG("Gravity::OnClose");
-	
+
 	SpaceManager::Save();
 	Engine::Camera::GetLink().Save();
 
 	LOG("Gravity::OnClosed");
 }
 
-void Gravity::Update() {
-	SpaceManager::Update();
+void Gravity::Update(double deltaTime) {
+	SpaceManager::Update(deltaTime);
 }
 
 void Gravity::OnResize()
@@ -162,7 +167,7 @@ void Gravity::TestDraw()
 		for (auto& object : space.Objects()) {
 			//shader.SetModelPos(object.pos);
 			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
-			const float scale = object.Scale();
+			const float scale = object.Diameter();
 			mat = glm::scale(mat, glm::vec3(scale));
 			shader.SetModelMatrix(mat);
 			Draw::Render(SHAPES["Sphere", true, true].mesh);
@@ -186,7 +191,7 @@ void Gravity::TestDraw()
 			float angle = acos(dot);
 
 			glm::mat4 mat(1.f);
-			const float scale = object.Scale() * 10.f;
+			const float scale = object.Diameter() * scaleStar;
 			
 			mat = glm::translate(mat, object.pos);
 

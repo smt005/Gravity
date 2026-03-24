@@ -3,9 +3,11 @@
 #include "BottomPanel.h"
 #include <imgui.h>
 #include <GuiWindow/ImGuiHelp.h>
+#include <Files/FileManager.h>
+#include <Common/JsonHelper.h>
 #include <Screen.h>
 #include <StringUtils.h>
-#include "../Spaces/Space.h"
+#include "../Spaces/SpaceManager.h"
 #include <Log.h>
 
 using namespace Windows;
@@ -50,18 +52,37 @@ void BottomPanel::Render() {
     styleHandler.Push(style.FrameRounding, 5.f);
 
     ImGuiWidthHandler widthHandler(widthSlider);
+    
+    // TODO:
+    volatile static bool expOffsetIteration = Engine::GetJsonValue<bool>("expOffsetIteration", Engine::Settings::Instance().JsonData("otherSettings"));
+    if (expOffsetIteration) {
+        static float offsetIteration = std::log(static_cast<float>(SpaceManager::offsetIteration));
+        std::string text = TO_STRING("Speed (error): {}", SpaceManager::offsetIteration);
 
-    if (ImGui::SliderInt("##deltaTime_slider", &Space::deltaTime, 1, 100, "error = %d")) {
-        LOG("deltaTime: {}", Space::deltaTime);
+        if (ImGui::SliderFloat("##offset_iteration_slider", &offsetIteration, 10.f, 15, text.c_str())) {
+            //LOG("SpaceManager::offsetIteration: {}, offsetIteration: {}", SpaceManager::offsetIteration, offsetIteration);
+            SpaceManager::offsetIteration = static_cast<int>(std::expf(offsetIteration - 1));
+        }
     }
+    else {
+        volatile static float minOffset = Engine::GetJsonValue("minOffset", Engine::Settings::Instance().JsonData("BottomPanel"), 1.f);
+        volatile static float maxOffset = Engine::GetJsonValue("maxOffset", Engine::Settings::Instance().JsonData("BottomPanel"), 100.f);
 
+        static float offsetIteration = static_cast<float>(SpaceManager::offsetIteration) / 1000.f;
+        std::string text = TO_STRING("Speed (error): {}", SpaceManager::offsetIteration / 1000);
+
+        if (ImGui::SliderFloat("##offset_iteration_slider", &offsetIteration, minOffset, maxOffset, text.c_str())) {
+            SpaceManager::offsetIteration = static_cast<int>(offsetIteration) * 1000;
+        }
+    }
+    
     ImGui::SameLine();
+    {
+        static float countOfIteration = std::log(static_cast<float>(SpaceManager::countOfIteration));
+        std::string text = TO_STRING("Count iteration: {}", SpaceManager::countOfIteration);
 
-    static float countOfIteration = static_cast<float>(Space::countOfIteration);
-    std::string text = TO_STRING("Speed: {}", Space::countOfIteration);
-
-    if (ImGui::SliderFloat("##time_speed_slider", &countOfIteration, 0.8f, 8, text.c_str())) {
-        Space::countOfIteration = static_cast<int>(std::expf(countOfIteration - 1));
-        LOG("countOfIteration: {}", countOfIteration);
+        if (ImGui::SliderFloat("##count_iteration_slider", &countOfIteration, 0.8f, 8, text.c_str())) {
+            SpaceManager::countOfIteration = static_cast<int>(std::expf(countOfIteration - 1));
+        }
     }
 }

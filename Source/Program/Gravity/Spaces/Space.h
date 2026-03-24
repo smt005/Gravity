@@ -19,12 +19,13 @@ public:
 	virtual void Generate(size_t count, size_t radius, int typeGenerate);
 	virtual void Clean();
 	virtual void Update();
-	
+	virtual void CollectDebugData() const;
+
 	void SwitchPause();
 	const std::string& GetName() const;
 	size_t GetId() const;
 	bool IsPaused() const;
-	
+
 	const std::vector<Object>& Objects() const;
 	glm::vec3 PosOfMinSpeedObject() const;
 	glm::vec3 PosOfMaxSpeedObject() const;
@@ -32,8 +33,8 @@ public:
 	glm::vec3 PosOfMaxMassObject() const;
 
 public:
-	inline static int deltaTime = 1;
-	inline static int countOfIteration = 1;
+	inline static float progress = -1.f;
+	inline static float subProgress = -1.f;
 
 	// TODO:
 public:
@@ -42,6 +43,7 @@ public:
 	int sizeTemp = 0;
 
 protected:
+public: // TODO
 	bool _pause = false;
 	mutable std::string _name;
 	mutable size_t _id;

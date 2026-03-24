@@ -34,15 +34,17 @@ void GenerateWindow::OnOpen()
 }
 
 void GenerateWindow::Render() {
-	const static ImVec2 buttonSize(150.f, 20.f);
+	const static ImVec2 buttonSize(200.f, 20.f);
 
 	{
 		static int count = 0;
+		static  int minSize = 100;
 		static  int size = 100;
 
 		if (!count || !size) {
 			count = SpaceManager::GetGenerateValue("count", 200);
 			size = SpaceManager::GetGenerateValue("size", 200);
+			minSize = SpaceManager::GetGenerateValue("minSize", 1);
 
 			if (count == 0) {
 				LOG("[GenerateWindow::Render] count: {}", count);
@@ -56,14 +58,19 @@ void GenerateWindow::Render() {
 
 		ImGuiWidthHandler width(100.f);
 		ImGui::InputInt("count", &count, 1, 100000);
+		ImGui::InputInt("min size", &minSize, 1, 100000);
 		ImGui::InputInt("size", &size, 1, 100000);
 
 		if (ImGui::Button("Box", buttonSize)) {
-			SpaceManager::Current().Generate(count, size, 0);
+			SpaceManager::Generate(SpaceManager::GenerateType::BOX, count, minSize, size);
 		}
 
 		if (ImGui::Button("Round plane", buttonSize)) {
-			SpaceManager::Current().Generate(count, size, 1);
+			SpaceManager::Generate(SpaceManager::GenerateType::BOX, count, minSize, size);
+		}
+
+		if (ImGui::Button("On plane orbit", buttonSize)) {
+			SpaceManager::Generate(SpaceManager::GenerateType::ORBIT_ON_MAIN_BODT, count, minSize, size);
 		}
 
 		ImGui::Separator();

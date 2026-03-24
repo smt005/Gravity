@@ -128,12 +128,12 @@ int Core::Main(std::string_view params)
 void Core::MainLoop()
 {
 	while (!glfwWindowShouldClose(glfwWindow)) {
+		Callback::Update();
+		instanceProgram->Update(Engine::Callback::GetDeltaTime());
+		GuiWindows::UpdateWindows(Callback::GetDeltaTime());
+
 		instanceProgram->Draw();
 		GuiWindows::RenderWindows();
-
-		Callback::Update();
-		instanceProgram->Update();
-		GuiWindows::UpdateWindows(Callback::GetDeltaTime());
 
 		glfwSwapBuffers(glfwWindow);
 		glfwPollEvents();

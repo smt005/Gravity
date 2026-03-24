@@ -8,14 +8,14 @@
 namespace Engine
 {
 	template <typename T>
-	T GetJsonValue(std::string_view key, const nlohmann::json& jsonData)
+	T GetJsonValue(std::string_view key, const nlohmann::json& jsonData, const T& defaultValue = T())
 	{
 		if (!jsonData.contains(key)) {
-			return {};
+			return defaultValue;
 		}
 
 		try {
-			return jsonData[key].get<T>();
+			return jsonData.at(key).get<T>();
 		}
 		catch (const std::exception& exc) {
 			LOG("[Engine::GetJsonValue] key: '{}', '{}', type: '{}' , ", key, exc.what(), typeid(T).name());
@@ -24,24 +24,12 @@ namespace Engine
 			LOG("[Engine::GetJsonValue] key: '{}', type: '{}' , ", key, typeid(T).name());
 		}
 
-		return {};
+		return defaultValue;
 	}
 
 	template <typename T>
-	T GetJsonValue(std::string_view key, const nlohmann::json* jsonData)
+	T GetJsonValue(std::string_view key, const nlohmann::json* jsonData, const T& defaultValue = T())
 	{
-		return jsonData ? GetJsonValue<T>(key, *jsonData) : T();
-	}
-
-	template <typename T>
-	T GetJsonValue(std::string_view key, const nlohmann::json& jsonData, T&& defValue)
-	{
-		return !jsonData.empty() ? GetJsonValue<T>(key, jsonData) : defValue;
-	}
-
-	template <typename T>
-	T GetJsonValue(std::string_view key, const nlohmann::json* jsonData, T&& defValue)
-	{
-		return jsonData ? GetJsonValue<T>(key, *jsonData) : defValue;
+		return jsonData ? GetJsonValue<T>(key, *jsonData, defaultValue) : defaultValue;
 	}
 }

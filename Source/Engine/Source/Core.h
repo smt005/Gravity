@@ -13,7 +13,7 @@ namespace Engine
 
 		virtual ~Program() = default;
 		virtual bool Init(std::string_view params) { return false; };
-		virtual void Update() {};
+		virtual void Update(double deltaTime) {};
 		virtual void Draw() {};
 		virtual void OnResize() {};
 		virtual void OnClose() {};
