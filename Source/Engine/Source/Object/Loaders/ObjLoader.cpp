@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstdlib>
 #include <memory>
-#include <Log.h>
+#include <Logs.h>
 
 namespace {
     static size_t GetCount(std::string_view word, size_t& offsetPos, const std::string& data) {

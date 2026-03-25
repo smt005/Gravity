@@ -7,11 +7,11 @@
 #include <StringUtils.h>
 #include <GuiWindow/ImGuiHelp.h>
 #include <Files/Settings.h>
-#include "../Spaces/SpaceManager.h"
-#include "../Cameras/GravityCameras.h"
 #include <Common/JsonHelper.h>
 #include <Common/Common.h>
-#include <Log.h>
+#include <Logs.h>
+#include "../Spaces/SpaceManager.h"
+#include "../Cameras/GravityCameras.h"
 
 using namespace Windows;
 

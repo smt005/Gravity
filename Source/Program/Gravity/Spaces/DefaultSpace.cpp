@@ -9,8 +9,7 @@
 #include <Common/Common.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
-#include "../../Temp/LogSpecification.h"
-#include <Log.h>
+#include <Logs.h>
 
 void DefaultSpace::Clear()
 {
@@ -47,10 +46,15 @@ void DefaultSpace::AddBodies(std::vector<Body>& bodies)
 	_bodies.append_range(bodies);
 }
 
-/*void DefaultSpace::AddBodies(std::vector<Body>&& bodies)
+void DefaultSpace::AddBodies(std::vector<Body>&& bodies)
 {
-	_bodies.append_range(std::forward<std::vector<Body>>(bodies));
-}*/
+	if (_bodies.empty()) {
+		std::swap(_bodies, bodies);
+	}
+	else {
+		_bodies.append_range(bodies);
+	}
+}
 
 const std::vector<Body>& DefaultSpace::Bodies() const
 {

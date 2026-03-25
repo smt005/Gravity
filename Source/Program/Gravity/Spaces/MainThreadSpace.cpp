@@ -2,7 +2,7 @@
 
 #include "MainThreadSpace.h"
 #include <deque>
-#include <glm/detail/func_geometric.inl>
+//         #include <glm/detail/func_geometric.inl>
 //#include <Common/Common.h>
 //#include <Files/Settings.h>
 #include "../DebugContext.h"
@@ -100,8 +100,6 @@ void MainThreadSpace::UpdateColapse()
 	}
 
 	const auto removeIt = std::remove_if(_bodies.begin(), _bodies.end(), [](const auto& object) {
-		//static float maxDist = 1000;// TODO:
-		//return object.colapseData || object.minDist > maxDist;
 		return object.colapseData;
 		});
 

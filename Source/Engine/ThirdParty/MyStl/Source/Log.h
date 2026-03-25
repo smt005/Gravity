@@ -33,5 +33,6 @@ namespace mystd
 	}
 }
 
+#define PRINT mystd::Print
 #define LOG mystd::Log
 #define LOG_BREAK mystd::LogBreak

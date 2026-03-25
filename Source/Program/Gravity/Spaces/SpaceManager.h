@@ -77,12 +77,10 @@ public:
 	static void CollectDebugData();
 
 	static glm::vec3 CenteMassSpace();
-	//static void AddBodyOnOrbit(const glm::vec3& pos, const Body& mainBody);
 	static glm::vec3 GetVelocityOnOrbit(Body& body, const Body& mainBody);
 	static void GenerateBox(int count, float minSpaceRange, float spaceRange);
 	static void GeneratePlaneSphere(int count, float minSpaceRange, float spaceRange);
 	static void GenerateOnOrbitSphere(int count, float minSpaceRange, float spaceRange);
-	static void GetBodyPositions(std::vector<glm::vec3>& bodiesVec3);
 
 	template <typename ... Args>
 	static void Generate(GenerateType type, Args...args)

@@ -2,7 +2,6 @@
 
 #include "Gravity.h"
 #include <GuiWindow/GuiWindows.h>
-#include <Temp/Test.h>
 #include <Files/FileManager.h>
 #include <Callback/VirtualKey.h>
 #include <Draw/Camera.h>
@@ -14,17 +13,12 @@
 #include "Windows/AlgorithmWindow.h"
 #include "Windows/BottomPanel.h"
 #include "Render/GravityRender.h"
-#include "../Temp/LogSpecification.h"
-#include "../Temp/LogMyStlSpecification.h"
-#include "../Temp/LogStlSpecification.h"
-#include <Log.h>
+#include <Logs.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
 bool Gravity::Init(std::string_view params)
 {
-	TestFun();
-
 	InitFileManagers();
 	InitCallback();
 	InitWidows();

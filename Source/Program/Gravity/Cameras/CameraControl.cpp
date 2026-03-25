@@ -2,7 +2,7 @@
 #include "CameraControl.h"
 #include <Core.h>
 #include <Callback/VirtualKey.h>
-#include <Log.h>
+#include <Logs.h>
 
 using namespace Engine;
 
@@ -13,30 +13,6 @@ CameraControl::~CameraControl() {
 	}
 }
 
-// VIRTUAL
-/*void CameraControl::Load(const Json::Value& data) {
-	Camera::Load(data);
-
-	const Json::Value& speedData = data["speed"];
-	if (speedData.isNumeric()) {
-		_speed = speedData.asFloat();
-	}
-
-	const Json::Value& angleSpeedData = data["angleSpeed"];
-	if (angleSpeedData.isNumeric()) {
-		_angleSpeed = angleSpeedData.asFloat();
-	}
-}
-
-void CameraControl::Save(Json::Value& data) {
-	Camera::Save(data);
-
-	data["class"] = "CameraControl";
-	data["speed"] = _speed;
-	data["angleSpeed"] = _angleSpeed;
-}*/
-
-//...
 void CameraControl::Enable(const bool state) {
 	if (state) {
 		if (!_callbackPtr) {

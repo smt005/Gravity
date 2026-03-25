@@ -7,9 +7,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <Temp/LogSpecification.h>
-#include <Log.h>
+#include <Logs.h>
 
 using namespace shaders;
 

@@ -1,4 +1,4 @@
-﻿// ◦ Xyz ◦
+// ◦ Xyz ◦
 #pragma once
 
 
@@ -18,15 +18,15 @@
 #include <unordered_map>
 #include <exception>
 
-namespace mystd
+namespace std
 {
-	std::ostream& operator << (std::ostream& os, const std::exception& exc)
+	inline ostream& operator << (std::ostream& os, const std::exception& exc)
 	{
 		os << exc.what();
 		return os;
 	}
 
-	std::ostream& operator << (std::ostream& os, std::byte byte)
+	inline std::ostream& operator << (std::ostream& os, std::byte byte)
 	{
 		os << static_cast<unsigned char>(byte);
 		return os;

@@ -8,7 +8,7 @@
 #include <Screen.h>
 #include <StringUtils.h>
 #include "../Spaces/SpaceManager.h"
-#include <Log.h>
+#include <Logs.h>
 
 using namespace Windows;
 

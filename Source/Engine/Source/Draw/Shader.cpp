@@ -4,7 +4,7 @@
 #include <exception>
 #include <glad/gl.h>
 #include <Files/FileManager.h>
-#include <Log.h>
+#include <Logs.h>
 
 using namespace Engine;
 

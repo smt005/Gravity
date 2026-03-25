@@ -9,7 +9,7 @@
 #include <Common/Common.h>
 #include <Files/Settings.h>
 #include <GuiWindow/ImGuiHelp.h>
-#include <Log.h>
+#include <Logs.h>
 
 using namespace Windows;
 

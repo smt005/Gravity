@@ -76,24 +76,10 @@ endif()
 set(FREEIMAGE_INCLUDES "${FREEIMAGE_DIR}/Dist/${FREEIMAGE_DIST_ARCH}")
 set(FREEIMAGE_LIB_DIR "${FREEIMAGE_DIR}/Dist/${FREEIMAGE_DIST_ARCH}")
 
-# Game
-include_directories(${PROGRAM_SOURCE})
-add_subdirectory(${PROGRAM_SOURCE})
-target_link_libraries(${PROJECT_NAME} ${PROGRAM_NAME})
-link_directories(${PROGRAM_SOURCE})
-
-# Engine
-include_directories(${ENGINE_SOURCE})
-add_subdirectory(${ENGINE_DIR})
-target_link_libraries(${PROJECT_NAME} ${ENGINE_NAME})
-link_directories(${ENGINE_SOURCE})
-
 # ThirdParty
-# MyStl
-include_directories(${MYSTL_SOURCE})
-add_subdirectory(${MYSTL_DIR})
-target_link_libraries(${PROJECT_NAME} ${MYSTL_NAME})
-link_directories(${MYSTL_SOURCE})
+
+# glm
+include_directories(${GLM_INCLUDES})
 
 # glfw
 include_directories(${GLFW_INCLUDES})
@@ -112,9 +98,6 @@ include_directories(${JSON_INCLUDES})
 add_subdirectory(${JSON_DIR} EXCLUDE_FROM_ALL)
 target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
 
-# GLM
-include_directories(${GLM_INCLUDES})
-
 # ImGui
 include_directories(${IMGUI_INCLUDES})
 
@@ -127,5 +110,23 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMENT "Copying FreeImage.dll to output directory"
 )
+
+# MyStl
+include_directories(${MYSTL_SOURCE})
+add_subdirectory(${MYSTL_DIR})
+target_link_libraries(${PROJECT_NAME} ${MYSTL_NAME})
+link_directories(${MYSTL_SOURCE})
+
+# Engine
+include_directories(${ENGINE_SOURCE})
+add_subdirectory(${ENGINE_DIR})
+target_link_libraries(${PROJECT_NAME} ${ENGINE_NAME})
+link_directories(${ENGINE_SOURCE})
+
+# Game
+include_directories(${PROGRAM_SOURCE})
+add_subdirectory(${PROGRAM_SOURCE})
+target_link_libraries(${PROJECT_NAME} ${PROGRAM_NAME})
+link_directories(${PROGRAM_SOURCE})
 
 message("End generate. . . . . . . . . . . . . . . .")

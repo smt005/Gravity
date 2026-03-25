@@ -5,7 +5,7 @@
 #include <imgui.h>
 #include <Screen.h>
 #include <StringUtils.h>
-#include <Log.h>
+#include <Logs.h>
 
 using namespace Windows;
 
