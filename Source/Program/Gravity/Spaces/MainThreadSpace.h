@@ -1,13 +1,12 @@
 ﻿// ◦ Xyz ◦
 #pragma once
 
-#include "Space.h"
+#include "DefaultSpace.h"
 
-class OneThreadSpace : public Space
+class MainThreadSpace : public DefaultSpace
 {
 public:
 	void Update() override;
-	void CollectDebugData() const override;
 	void UpdateColapse();
 	void UpdateForce();
 	void UpdateSpeed(float deltaTime);

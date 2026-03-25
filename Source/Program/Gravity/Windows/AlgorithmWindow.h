@@ -6,9 +6,11 @@
 #include <functional>
 #include <GuiWindow/ImGuiHelp.h>
 #include <Common/Common.h>
-#include "../Spaces/Space.h"
-#include "../Spaces/OneThreadSpace.h"
 #include "../Spaces/SpaceManager.h"
+#include "../Spaces/Space.h"
+#include "../Spaces/DefaultSpace.h"
+#include "../Spaces/MainThreadSpace.h"
+//#include "../Spaces/ParallelThreadSpace.h"
 
 namespace Windows
 {
@@ -18,7 +20,6 @@ namespace Windows
 		AlgorithmWindow(std::string_view name);
 		~AlgorithmWindow() = default;
 		void Render() override;
-		void Update(double dTime) override;
 		void OnResize() override;
 		void OnOpen() override;
 		void OnClose() override;
@@ -36,7 +37,11 @@ namespace Windows
 			std::string nameBtn = Engine::ExtractClassName(typeid(T).name());
 
 			if (ImGui::Button(nameBtn.data(), buttonSize)) {
-				SpaceManager::SetCurrent<T>() = SpaceManager::Current();
+				// TODO: Перенемти в SpaceManager
+				std::vector<Body> bodies = SpaceManager::Current().Bodies();
+				auto& newSpace = SpaceManager::SetCurrent<T>();
+				newSpace.Clear();
+				newSpace.AddBodies(bodies);
 				_currentSpace = typeid(T).hash_code();
 			}
 

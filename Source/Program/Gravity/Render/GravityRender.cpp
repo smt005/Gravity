@@ -8,7 +8,7 @@
 #include <Object/Texture.h>
 #include "../Shaders/GravityShader.h"
 #include "../Cameras/GravityCameras.h"
-#include "../Spaces/Object.h"
+#include "../Spaces/Body.h"
 #include "../Spaces/SpaceManager.h"
 
 void GravityRender::Init()
@@ -30,7 +30,7 @@ void GravityRender::Render()
 		shader.UseProgram();
 		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
-		for (auto& object : space.Objects()) {
+		for (auto& object : space.Bodies()) {
 			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
 			const float scale = object.Diameter();
 			mat = glm::scale(mat, glm::vec3(scale));
@@ -47,7 +47,7 @@ void GravityRender::Render()
 		Draw::DepthTest(false);
 		Draw::BindTexture(Texture::GetRef("Star.png").Id());
 
-		for (auto& object : space.Objects()) {
+		for (auto& object : space.Bodies()) {
 			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - object.pos);
 			glm::vec3 from(0.f, 0.f, 1.f);
 			glm::vec3 axis = glm::normalize(glm::cross(from, to));
@@ -79,7 +79,7 @@ void GravityRender::Render()
 		//Draw::BindTexture(Texture::GetRef("Star.png").Id());
 		Draw::BindTexture(Texture::GetRef("Rgba64.png").Id());
 
-		for (auto& object : space.Objects()) {
+		for (auto& object : space.Bodies()) {
 			shader.SetModelPos(object.pos);
 
 			//Draw::Render(SHAPES["Sprite", true, true].mesh);
@@ -101,8 +101,10 @@ void GravityRender::Render()
 
 void GravityRender::GetBodyPositions(std::vector<float>& data)
 {
+	const auto& space = SpaceManager::Current();
 	std::vector<glm::vec3> bodyPoses;
-	SpaceManager::GetBodyPositions(bodyPoses);
+	space.GetBodyPositions(bodyPoses);
+
 	std::vector<float> points;
 	points.reserve(bodyPoses.size() * 3);
 
@@ -117,5 +119,6 @@ void GravityRender::GetBodyPositions(std::vector<float>& data)
 
 void GravityRender::GetBodyPositions(std::vector<glm::vec3>& vec3Data)
 {
-	SpaceManager::GetBodyPositions(vec3Data);
+	const auto& space = SpaceManager::Current();
+	space.GetBodyPositions(vec3Data);
 }

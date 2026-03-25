@@ -1,0 +1,84 @@
+﻿// ◦ Xyz ◦
+
+#include "DefaultSpace.h"
+#include <deque>
+#include <numbers>
+#include <glm/vec3.hpp>
+#include <glm/ext/vector_common.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <Common/Common.h>
+#include "../DebugContext.h"
+#include "SpaceManager.h"
+#include "../../Temp/LogSpecification.h"
+#include <Log.h>
+
+void DefaultSpace::Clear()
+{
+	_bodies.clear();
+}
+
+void DefaultSpace::Update() {
+	if (SpaceManager::countOfIteration == 0) {
+		return;
+	}
+
+	static volatile float angleSpeedFactor = 0.001f;
+	const float angleSpeed = static_cast<float>(SpaceManager::offsetIteration) * static_cast<float>(SpaceManager::countOfIteration) * angleSpeedFactor;
+	const glm::vec3 rotationAxis(0.f, 0.f, 1.f);
+	const glm::quat rotationQuat = glm::angleAxis(angleSpeed, rotationAxis);
+
+	for (auto& body : _bodies) {
+		body.pos = rotationQuat * body.pos;
+	}
+}
+
+void DefaultSpace::AddBody(Body& body)
+{
+	_bodies.emplace_back(body);
+}
+
+void DefaultSpace::AddBody(Body&& body)
+{
+	_bodies.emplace_back(std::forward<Body>(body));
+}
+
+void DefaultSpace::AddBodies(std::vector<Body>& bodies)
+{
+	_bodies.append_range(bodies);
+}
+
+/*void DefaultSpace::AddBodies(std::vector<Body>&& bodies)
+{
+	_bodies.append_range(std::forward<std::vector<Body>>(bodies));
+}*/
+
+const std::vector<Body>& DefaultSpace::Bodies() const
+{
+	return _bodies;
+}
+
+void DefaultSpace::GetBodyPositions(std::vector<float>& positions) const
+{
+	std::vector<float> tempPositions;
+	tempPositions.reserve(_bodies.size() * 3);
+
+	for (const auto& body : _bodies) {
+		tempPositions.emplace_back(body.pos.x);
+		tempPositions.emplace_back(body.pos.y);
+		tempPositions.emplace_back(body.pos.z);
+	}
+
+	std::swap(positions, tempPositions);
+}
+
+void DefaultSpace::GetBodyPositions(std::vector<glm::vec3>& positions) const
+{
+	std::vector<glm::vec3> tempPositions;
+	tempPositions.reserve(_bodies.size());
+
+	for (const auto& body : _bodies) {
+		tempPositions.emplace_back(body.pos);
+	}
+
+	std::swap(positions, tempPositions);
+}

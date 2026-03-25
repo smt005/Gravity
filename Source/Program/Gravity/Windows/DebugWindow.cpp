@@ -34,47 +34,49 @@ void DebugWindow::OnClose()
 }
 
 void DebugWindow::Render() {
-	ImGui::Text("  Count object: %d", DebugContext::Instance().countObject);
-	ImGui::Text("Diameter space: %f", DebugContext::Instance().diameterSpace);
+	DebugContext& debugContext = DebugContext::Instance();
+
+	ImGui::Text("  Count object: %d", debugContext.countObject);
+	ImGui::Text("Diameter space: %f", debugContext.diameterSpace);
 	
 	ImGui::Separator();
-	ImGui::Text("     Min force: %f", DebugContext::Instance().minForce * 1000000.f);
-	ImGui::Text("     Max force: %f", DebugContext::Instance().maxForce * 1000000.f);
+	ImGui::Text("     Min force: %f", debugContext.minForce * 1000000.f);
+	ImGui::Text("     Max force: %f", debugContext.maxForce * 1000000.f);
 	
 	ImGui::Separator();
-	ImGui::Text("     Min speed: %f", DebugContext::Instance().minVelocity * 1000000.f);
-	ImGui::Text("     Max speed: %f", DebugContext::Instance().maxVelocity * 1000000.f);
+	ImGui::Text("     Min speed: %f", debugContext.minVelocity * 1000000.f);
+	ImGui::Text("     Max speed: %f", debugContext.maxVelocity * 1000000.f);
 	
 	ImGui::Separator();
-	ImGui::Text("      Min mass: %f", DebugContext::Instance().minMass);
+	ImGui::Text("      Min mass: %f", debugContext.minMass);
 	if (ImGui::IsItemHovered()) {
 		if (ImGui::IsItemClicked()) {
 			CameraToMinMassObject();
 		}
 	}
 
-	ImGui::Text("      Max mass: %f", DebugContext::Instance().maxMass);
+	ImGui::Text("      Max mass: %f", debugContext.maxMass);
 	if (ImGui::IsItemHovered()) {
 		if (ImGui::IsItemClicked()) {
 			CameraToMaxMassObject();
 		}
 	}
 
-	ImGui::Text("      Sum mass: %f", DebugContext::Instance().sumMass);
+	ImGui::Text("      Sum mass: %f", debugContext.sumMass);
 
 	ImGui::Separator();
-	ImGui::Text("   Const force: %f", DebugContext::Instance().constForce);
-	ImGui::Text("   Const speed: %f", DebugContext::Instance().constSpeed);
+	ImGui::Text("   Const force: %f", debugContext.constForce);
+	ImGui::Text("   Const speed: %f", debugContext.constSpeed);
 
-	if (Space::subProgress >= 0) {
+	if (debugContext.subProgress >= 0) {
 		char buf[32];
-		sprintf(buf, "sub: %d/%d", (int)(Space::subProgress * 100), 100);
-		ImGui::ProgressBar(Space::subProgress, ImVec2(0.f, 0.f), buf);
+		sprintf(buf, "sub: %d/%d", (int)(debugContext.subProgress * 100), 100);
+		ImGui::ProgressBar(debugContext.subProgress, ImVec2(0.f, 0.f), buf);
 	}
-	if (Space::progress >= 0) {
+	if (debugContext.progress >= 0) {
 		char buf[32];
-		sprintf(buf, "%d/%d", (int)(Space::progress * 100), 100);
-		ImGui::ProgressBar(Space::progress, ImVec2(0.f, 0.f), buf);
+		sprintf(buf, "%d/%d", (int)(debugContext.progress * 100), 100);
+		ImGui::ProgressBar(debugContext.progress, ImVec2(0.f, 0.f), buf);
 	}
 }
 
@@ -91,10 +93,10 @@ void DebugWindow::Update(double dTime) {
 
 void DebugWindow::CameraToMinMassObject()
 {
-	Engine::Camera::GetLink().SetPos(SpaceManager::Current().PosOfMinMassObject());
+	Engine::Camera::GetLink().SetPos(SpaceManager::PosOfMinMassObject());
 }
 
 void DebugWindow::CameraToMaxMassObject()
 {
-	Engine::Camera::GetLink().SetPos(SpaceManager::Current().PosOfMaxMassObject());
+	Engine::Camera::GetLink().SetPos(SpaceManager::PosOfMaxMassObject());
 }

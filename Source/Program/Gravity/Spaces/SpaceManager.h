@@ -5,7 +5,6 @@
 #include <glm/vec3.hpp>
 #include <mystd_memory.h>
 #include "Space.h"
-#include "OneThreadSpace.h"
 #include <StringUtils.h>
 #include <Files/Settings.h>
 #include <Common/JsonHelper.h>
@@ -75,10 +74,11 @@ public:
 	static nlohmann::json& GetSettingData(std::string_view path, bool create = false);
 	static void StopUpdate();
 	static void CheckOverload(double deltaTime);
+	static void CollectDebugData();
 
 	static glm::vec3 CenteMassSpace();
-	static void AddBodyOnOrbit(const glm::vec3& pos, const Object& mainBody);
-	static glm::vec3 GetVelocityOnOrbit(Object& body, const Object& mainBody);
+	//static void AddBodyOnOrbit(const glm::vec3& pos, const Body& mainBody);
+	static glm::vec3 GetVelocityOnOrbit(Body& body, const Body& mainBody);
 	static void GenerateBox(int count, float minSpaceRange, float spaceRange);
 	static void GeneratePlaneSphere(int count, float minSpaceRange, float spaceRange);
 	static void GenerateOnOrbitSphere(int count, float minSpaceRange, float spaceRange);
@@ -94,6 +94,11 @@ public:
 		default: GenerateBox(std::forward<Args>(args)...);
 		}
 	}
+
+	static glm::vec3 PosOfMinSpeedObject();
+	static glm::vec3 PosOfMaxSpeedObject();
+	static glm::vec3 PosOfMinMassObject();
+	static glm::vec3 PosOfMaxMassObject();
 
 //private: // TODO:
 public:

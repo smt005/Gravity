@@ -58,10 +58,7 @@ void AlgorithmWindow::Render() {
 
 	ImGui::Checkbox(": collapse" , &SpaceManager::collapseBodies);
 
-	ButtonRender<Space>();
-	ButtonRender<OneThreadSpace>();
-}
-
-void AlgorithmWindow::Update(double dTime) {
-
+	ButtonRender<DefaultSpace>();
+	ButtonRender<MainThreadSpace>();
+	//ButtonRender<ParallelThreadSpace>();
 }

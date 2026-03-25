@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <mystd_memory.h>
-#include <Log.h>
 
 namespace mystd
 {

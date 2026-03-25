@@ -5,10 +5,16 @@
 #include <glm/glm.hpp>
 #include <Common/Common.h>
 #include "Space.h"
-#include "OneThreadSpace.h"
+#include "DefaultSpace.h"
+#include "MainThreadSpace.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
-
+/*
+#include "../../Temp/LogSpecification.h"
+#include "../../Temp/LogMyStlSpecification.h"
+#include "../../Temp/LogStlSpecification.h"
+#include <Log.h>
+*/
 Space& SpaceManager::Current()
 {
 	return *CurrentPtr();
@@ -17,7 +23,7 @@ Space& SpaceManager::Current()
 const Space::Ptr& SpaceManager::CurrentPtr()
 {
 	if (!currentSpace) {
-		return GetPtr<Space>(true);
+		return GetPtr<DefaultSpace>(true);
 	}
 	return currentSpace;
 }
@@ -27,7 +33,7 @@ void SpaceManager::Update(double deltaTime)
 	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
 	Current().Update();
-	Current().CollectDebugData();
+	CollectDebugData();
 }
 
 void SpaceManager::Load()
@@ -37,14 +43,14 @@ void SpaceManager::Load()
 	auto& settings = Engine::Settings::Instance();
 	auto currentSpaceName = settings[TO_STRING("{}/class", className)];
 
-	if (currentSpaceName == Engine::GetClassName<Space>()) {
-		currentPtr = SetCurrentPtr<Space>();
+	if (currentSpaceName == Engine::GetClassName<DefaultSpace>()) {
+		currentPtr = SetCurrentPtr<DefaultSpace>();
 	}
-	else if (currentSpaceName == Engine::GetClassName<OneThreadSpace>()) {
-		currentPtr = SetCurrentPtr<OneThreadSpace>();
+	else if (currentSpaceName == Engine::GetClassName<MainThreadSpace>()) {
+		currentPtr = SetCurrentPtr<MainThreadSpace>();
 	}
 	else {
-		currentPtr = SetCurrentPtr<Space>();
+		currentPtr = SetCurrentPtr<DefaultSpace>();
 	}
 
 	auto generationData = settings[TO_STRING("{}/generationData", className)];
@@ -108,6 +114,20 @@ void SpaceManager::CheckOverload(double deltaTime)
 	}
 }
 
+void SpaceManager::CollectDebugData()
+{
+	DebugContext& debugContext = DebugContext::Instance();
+
+	for (auto& body : Current().Bodies()) {
+		debugContext.minForce = std::min(debugContext.minForce, glm::length(body.force));
+		debugContext.minMass = std::min(debugContext.minMass, glm::length(body.mass));
+		debugContext.minVelocity = std::min(debugContext.minVelocity, glm::length(body.velocity));
+		debugContext.maxForce = std::max(debugContext.maxForce, glm::length(body.force));
+		debugContext.maxMass = std::max(debugContext.maxMass, glm::length(body.mass));
+		debugContext.maxVelocity = std::max(debugContext.maxVelocity, glm::length(body.velocity));
+		debugContext.sumMass += body.mass;
+	}
+}
 
 glm::vec3 SpaceManager::CenteMassSpace()
 {
@@ -122,16 +142,14 @@ void SpaceManager::GenerateBox(int count, float minSpaceRange, float spaceRange)
 	generationData["count"] = (int)count;
 	generationData["minSize"] = (int)minSpaceRange;
 	generationData["size"] = (int)spaceRange;
-
-	Space& space = Current();
-	auto& objects = space._objects;
-	objects.clear();
-	objects.reserve(count);
+	
+	std::vector<Body> bodies;
+	bodies.reserve(count);
 
 	glm::vec3 vec3(1.f, 0.f, 0.f);
 
 	for (int i = 0; i < count; ++i) {
-		auto& object = objects.emplace_back();
+		auto& object = bodies.emplace_back();
 
 		object.pos.x = Engine::Random(-(float)spaceRange, (float)spaceRange);
 		object.pos.y = Engine::Random(-(float)spaceRange, (float)spaceRange);
@@ -144,6 +162,9 @@ void SpaceManager::GenerateBox(int count, float minSpaceRange, float spaceRange)
 
 		object.mass = Engine::Random(0.1f, 1.f);
 	}
+
+	// TODO: Current().AddBodies(std::move(bodies));
+	Current().AddBodies(bodies);
 }
 
 void SpaceManager::GeneratePlaneSphere(int count, float minSpaceRange, float spaceRange)
@@ -154,15 +175,13 @@ void SpaceManager::GeneratePlaneSphere(int count, float minSpaceRange, float spa
 	generationData["minSize"] = (int)minSpaceRange;
 	generationData["size"] = (int)spaceRange;
 
-	Space& space = Current();
-	auto& objects = space._objects;
-	objects.clear();
-	objects.reserve(count);
+	std::vector<Body> bodies;
+	bodies.reserve(count);
 
 	glm::vec3 vec3(1.f, 0.f, 0.f);
 
 	for (int i = 0; i < count; ++i) {
-		auto& object = objects.emplace_back();
+		auto& object = bodies.emplace_back();
 
 		float angle = Engine::Random<double>(0, std::numbers::pi * 2);
 
@@ -174,6 +193,9 @@ void SpaceManager::GeneratePlaneSphere(int count, float minSpaceRange, float spa
 		object.pos = objectVec3;
 		object.mass = Engine::Random(0.1f, 1.f);
 	}
+
+	// TODO: Current().AddBodies(std::move(bodies));
+	Current().AddBodies(bodies);
 }
 
 void SpaceManager::GenerateOnOrbitSphere(int count, float minSpaceRange, float spaceRange)
@@ -185,10 +207,8 @@ void SpaceManager::GenerateOnOrbitSphere(int count, float minSpaceRange, float s
 	generationData["minSize"] = (int)minSpaceRange;
 	generationData["size"] = (int)spaceRange;
 
-    Space& space = Current();
-	auto& objects = space._objects;
-	objects.clear();
-	objects.reserve(count);
+	std::vector<Body> bodies;
+	bodies.reserve(count);
 
 	float mainRadius = 10.f;
 	glm::vec3 mainPos(0.f, 0.f, 0.f);
@@ -217,7 +237,7 @@ void SpaceManager::GenerateOnOrbitSphere(int count, float minSpaceRange, float s
 
 		++i;
 
-		auto& body = Current()._objects.emplace_back();
+		auto& body = bodies.emplace_back();
 		body.mass = mass;
 		body.pos = pos;
     }
@@ -225,25 +245,28 @@ void SpaceManager::GenerateOnOrbitSphere(int count, float minSpaceRange, float s
 	float sumMass = 0.f;
 	glm::vec3 centerMass(0.f, 0.f, 0.f);
 
-	for (size_t i = 0; i < Current()._objects.size() - 1; ++i) {
-		auto& body = Current()._objects[i];
+	for (size_t i = 0; i < bodies.size() - 1; ++i) {
+		auto& body = bodies[i];
 		centerMass += body.pos * body.mass;
 		sumMass += body.mass;
 	}
 
 	centerMass /= sumMass;
 
-	auto& mainBody = objects.emplace_back();
+	auto& mainBody = bodies.emplace_back();
 	mainBody.mass = sumMass * massFactor;
 	mainBody.pos = centerMass;
 
-	for (size_t i = 0; i < Current()._objects.size() - 1; ++i) {
-		auto& body = Current()._objects[i];
+	for (size_t i = 0; i < bodies.size() - 1; ++i) {
+		auto& body = bodies[i];
 		body.velocity = GetVelocityOnOrbit(body, mainBody);
 	}
+
+	// TODO: Current().AddBodies(std::move(bodies));
+	Current().AddBodies(bodies);
 }
 
-void SpaceManager::AddBodyOnOrbit(const glm::vec3& pos, const Object& mainBody)
+/*void SpaceManager::AddBodyOnOrbit(const glm::vec3& pos, const Body& mainBody)
 {
 	Space& space = Current();
 	auto& objects = space._objects;
@@ -265,9 +288,9 @@ void SpaceManager::AddBodyOnOrbit(const glm::vec3& pos, const Object& mainBody)
 	body.mass = mass;
 	body.pos = pos;
 	body.velocity = velocity;
-}
+}*/
 
-glm::vec3 SpaceManager::GetVelocityOnOrbit(Object& body, const Object& mainBody)
+glm::vec3 SpaceManager::GetVelocityOnOrbit(Body& body, const Body& mainBody)
 {
 	glm::vec3 gravityVector = body.pos - mainBody.pos;
 	glm::vec3 normalizeGravityVector = glm::normalize(gravityVector);
@@ -276,20 +299,88 @@ glm::vec3 SpaceManager::GetVelocityOnOrbit(Object& body, const Object& mainBody)
 	glm::vec3 velocity(normalizeGravityVector.x * std::cos(g90) - normalizeGravityVector.y * std::sin(g90),
 		normalizeGravityVector.x * std::sin(g90) + normalizeGravityVector.y * std::cos(g90),
 		0.f);
-	velocity *= std::sqrtf(Object::gForce * mainBody.mass / glm::length(gravityVector));
+	velocity *= std::sqrtf(Body::constantGravity * mainBody.mass / glm::length(gravityVector));
 	return velocity;
 }
 
 
-void SpaceManager::GetBodyPositions(std::vector<glm::vec3>& bodiesVec3)
+glm::vec3 SpaceManager::PosOfMinSpeedObject()
 {
-	const Space& space = SpaceManager::Current();
-	std::vector<glm::vec3> temp;
-	temp.reserve(space.Bodies().size());
+	float speed = std::numeric_limits<float>::max();
+	const Body* obj = nullptr;
 
-	for (auto& object : space.Bodies()) {
-		temp.emplace_back(object.pos);
+	/*for (size_t i = 0; i < _objects.size(); ++i) {
+		if (glm::length(_objects[i].velocity) < speed) {
+			speed = glm::length(_objects[i].velocity);
+			obj = &_objects[i];
+		}
+	}*/
+
+	if (!obj) {
+		return {};
 	}
 
-	std::swap(temp, bodiesVec3);
+	// TODO: LOG("MIN SPEED: {} {} mass: {} pos: {}", glm::length(obj->velocity), obj->velocity, obj->mass, obj->pos);
+	return obj->velocity;
+}
+
+glm::vec3 SpaceManager::PosOfMaxSpeedObject()
+{
+	float velocity = 0.f;
+	const Body* obj = nullptr;
+
+	/*for (size_t i = 0; i < _objects.size(); ++i) {
+		if (glm::length(_objects[i].velocity) > velocity) {
+			velocity = glm::length(_objects[i].velocity);
+			obj = &_objects[i];
+		}
+	}*/
+
+	if (!obj) {
+		return {};
+	}
+
+	// TODO: LOG("MAX SPEED: {} {} mass: {} pos: {}", glm::length(obj->velocity), obj->velocity, obj->mass, obj->pos);
+	return obj->velocity;
+}
+
+glm::vec3 SpaceManager::PosOfMinMassObject()
+{
+	glm::vec3 pos(0.f, 0.f, 0.f);
+	float mass = std::numeric_limits<float>::max();
+	const Body* obj = nullptr;
+
+	/*for (size_t i = 0; i < _objects.size(); ++i) {
+		if (_objects[i].mass < mass) {
+			mass = _objects[i].mass;
+			obj = &_objects[i];
+		}
+	}*/
+
+	if (!obj) {
+		return {};
+	}
+
+	// TODO: LOG("MIN MASS: {}  velocity: {} {} pos: {}", obj->mass, glm::length(obj->velocity), obj->velocity, obj->pos);
+	return obj->pos;
+}
+
+glm::vec3 SpaceManager::PosOfMaxMassObject()
+{
+	const Body* obj = nullptr;
+	float mass = 0.f;
+
+	/*for (size_t i = 0; i < _objects.size(); ++i) {
+		if (_objects[i].mass > mass) {
+			mass = _objects[i].mass;
+			obj = &_objects[i];
+		}
+	}*/
+
+	if (!obj) {
+		return {};
+	}
+
+	// TODO: LOG("MAX MASS: {}  velocity: {} {} pos: {}", obj->mass, glm::length(obj->velocity), obj->velocity, obj->pos);
+	return obj->pos;
 }

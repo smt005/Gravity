@@ -86,7 +86,18 @@ void Gravity::InitCallback()
 		}
 
 		if (data.key == 'P') {
-			SpaceManager::Current().SwitchPause();
+			static int countOfIteration = 0;
+			
+			if (SpaceManager::countOfIteration != 0) {
+				countOfIteration = SpaceManager::countOfIteration;
+				SpaceManager::countOfIteration = 0;
+			}
+			else if (countOfIteration != 0) {
+				SpaceManager::countOfIteration = countOfIteration;
+			}
+			else {
+				SpaceManager::countOfIteration = 1;
+			}
 		}
 
 		if (Callback::KeyPressed(VirtualKey::CONTROL)) {

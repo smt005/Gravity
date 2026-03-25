@@ -4,16 +4,18 @@
 #include <numbers>
 #include <glm/vec3.hpp>
 
-// TODO
-struct Object final {
-	glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
+struct Body final {
 	float mass = 1.f;
-	glm::vec3 velocity = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
 	glm::vec3 force = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 velocity = glm::vec3(0.f, 0.f, 0.f);
+	
+	// TODO: Убрать/перенести в другое место
 	void* colapseData = nullptr;
 	float minDist = std::numeric_limits<float>::max();
 	float maxForce = std::numeric_limits<float>::min();
 
+public:
 	float Radius() const {
 		return std::cbrt((3.f * mass) / (4.f * std::numbers::pi));
 	}
@@ -23,6 +25,5 @@ struct Object final {
 	}
 
 public:
-	inline static float gForce = 6.67430e-11f; //6.67430e-5f; //6.67430e-11f; //  1.f; // Гравитационная постоянная
+	inline static float constantGravity = 6.67430e-11f; // Гравитационная постоянная
 };
-
