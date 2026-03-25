@@ -20,7 +20,4 @@ private:
 	void InitFileManagers();
 	void InitCallback();
 	void InitWidows();
-
-	void InitDraw();
-	void TestDraw();
 };

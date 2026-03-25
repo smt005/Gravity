@@ -74,6 +74,11 @@ const std::vector<Object>& Space::Objects() const
 	return _objects;
 }
 
+const std::vector<Body>& Space::Bodies() const
+{
+	return _objects;
+}
+
 void Space::Clean()
 {
 	_objects.clear();

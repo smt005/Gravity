@@ -7,6 +7,8 @@
 #include <glm/vec3.hpp>
 #include <mystd_memory.h>
 
+using Body = Object;
+
 class Space
 {
 public:
@@ -27,6 +29,7 @@ public:
 	bool IsPaused() const;
 
 	const std::vector<Object>& Objects() const;
+	const std::vector<Body>& Bodies() const;
 	glm::vec3 PosOfMinSpeedObject() const;
 	glm::vec3 PosOfMaxSpeedObject() const;
 	glm::vec3 PosOfMinMassObject() const;
@@ -47,5 +50,5 @@ public: // TODO
 	bool _pause = false;
 	mutable std::string _name;
 	mutable size_t _id;
-	std::vector<Object> _objects;
+	std::vector<Body> _objects;
 };

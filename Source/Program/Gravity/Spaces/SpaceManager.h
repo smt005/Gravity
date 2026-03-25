@@ -82,6 +82,7 @@ public:
 	static void GenerateBox(int count, float minSpaceRange, float spaceRange);
 	static void GeneratePlaneSphere(int count, float minSpaceRange, float spaceRange);
 	static void GenerateOnOrbitSphere(int count, float minSpaceRange, float spaceRange);
+	static void GetBodyPositions(std::vector<glm::vec3>& bodiesVec3);
 
 	template <typename ... Args>
 	static void Generate(GenerateType type, Args...args)

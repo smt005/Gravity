@@ -279,3 +279,17 @@ glm::vec3 SpaceManager::GetVelocityOnOrbit(Object& body, const Object& mainBody)
 	velocity *= std::sqrtf(Object::gForce * mainBody.mass / glm::length(gravityVector));
 	return velocity;
 }
+
+
+void SpaceManager::GetBodyPositions(std::vector<glm::vec3>& bodiesVec3)
+{
+	const Space& space = SpaceManager::Current();
+	std::vector<glm::vec3> temp;
+	temp.reserve(space.Bodies().size());
+
+	for (auto& object : space.Bodies()) {
+		temp.emplace_back(object.pos);
+	}
+
+	std::swap(temp, bodiesVec3);
+}

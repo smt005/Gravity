@@ -6,8 +6,8 @@
 #include <unordered_set>
 #include <string>
 #include <ostream>
+#include <StringUtils.h>
 #include <Singletone.h>
-#include <Common/Common.h>
 
 namespace Engine
 {
