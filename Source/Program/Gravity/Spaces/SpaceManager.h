@@ -104,6 +104,7 @@ public:
 	inline static int countOfIteration = 1;
 	inline static bool collapseBodies = true;
 
+	inline static std::vector<Body> bodies;
 	inline static mystd::shared_ptr<Space> currentSpace;
 	inline static std::vector<mystd::shared_ptr<Space>> spaces;
 	inline static const std::string_view currentSpaceKey = "currentSpace";

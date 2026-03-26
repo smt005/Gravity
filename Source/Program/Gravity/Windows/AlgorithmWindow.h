@@ -10,7 +10,7 @@
 #include "../Spaces/Space.h"
 #include "../Spaces/DefaultSpace.h"
 #include "../Spaces/MainThreadSpace.h"
-//#include "../Spaces/ParallelThreadSpace.h"
+#include "../Spaces/ParallelThreadSpace.h"
 
 namespace Windows
 {
@@ -38,7 +38,8 @@ namespace Windows
 
 			if (ImGui::Button(nameBtn.data(), buttonSize)) {
 				// TODO: Перенемти в SpaceManager
-				std::vector<Body> bodies = SpaceManager::Current().Bodies();
+				std::vector<Body> bodies;
+				SpaceManager::Current().Bodies(bodies);
 				auto& newSpace = SpaceManager::SetCurrent<T>();
 				newSpace.Clear();
 				newSpace.AddBodies(bodies);

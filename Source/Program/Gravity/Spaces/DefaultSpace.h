@@ -18,7 +18,7 @@ public:
 	void AddBody(Body&& body) override;
 	void AddBodies(std::vector<Body>& bodies) override;
 	void AddBodies(std::vector<Body>&& bodies) override;
-	const std::vector<Body>& Bodies() const override;
+	void Bodies(std::vector<Body>& bodies) const override;
 	void GetBodyPositions(std::vector<float>& positions) const override;
 	void GetBodyPositions(std::vector<glm::vec3>& positions) const override;
 

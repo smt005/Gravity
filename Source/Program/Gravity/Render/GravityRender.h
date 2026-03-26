@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <glm/vec3.hpp>
+#include "../Spaces/Body.h"
 
 class GravityRender final
 {

@@ -60,5 +60,5 @@ void AlgorithmWindow::Render() {
 
 	ButtonRender<DefaultSpace>();
 	ButtonRender<MainThreadSpace>();
-	//ButtonRender<ParallelThreadSpace>();
+	ButtonRender<ParallelThreadSpace>();
 }

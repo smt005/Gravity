@@ -25,12 +25,11 @@ void GravityRender::Render()
 	Draw::ClearColor();
 
 	if (typeDraw.model) {
-		Space& space = SpaceManager::Current();
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
 		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
-		for (auto& object : space.Bodies()) {
+		for (auto& object : SpaceManager::bodies) {
 			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
 			const float scale = object.Diameter();
 			mat = glm::scale(mat, glm::vec3(scale));
@@ -40,14 +39,13 @@ void GravityRender::Render()
 	}
 
 	if (typeDraw.sprite) {
-		Space& space = SpaceManager::Current();
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
 
 		Draw::DepthTest(false);
 		Draw::BindTexture(Texture::GetRef("Star.png").Id());
 
-		for (auto& object : space.Bodies()) {
+		for (auto& object : SpaceManager::bodies) {
 			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - object.pos);
 			glm::vec3 from(0.f, 0.f, 1.f);
 			glm::vec3 axis = glm::normalize(glm::cross(from, to));
@@ -72,14 +70,13 @@ void GravityRender::Render()
 	}
 
 	if (typeDraw.spriteShader) {
-		Space& space = SpaceManager::Current();
 		auto& shader = shaders::ForwardShaderSingle::Instance();
 		shader.UseProgram();
 
 		//Draw::BindTexture(Texture::GetRef("Star.png").Id());
 		Draw::BindTexture(Texture::GetRef("Rgba64.png").Id());
 
-		for (auto& object : space.Bodies()) {
+		for (auto& object : SpaceManager::bodies) {
 			shader.SetModelPos(object.pos);
 
 			//Draw::Render(SHAPES["Sprite", true, true].mesh);

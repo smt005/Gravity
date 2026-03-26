@@ -56,9 +56,9 @@ void DefaultSpace::AddBodies(std::vector<Body>&& bodies)
 	}
 }
 
-const std::vector<Body>& DefaultSpace::Bodies() const
+void DefaultSpace::Bodies(std::vector<Body>& bodies) const
 {
-	return _bodies;
+	bodies = _bodies;
 }
 
 void DefaultSpace::GetBodyPositions(std::vector<float>& positions) const

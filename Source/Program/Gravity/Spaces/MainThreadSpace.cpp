@@ -2,11 +2,7 @@
 
 #include "MainThreadSpace.h"
 #include <deque>
-//         #include <glm/detail/func_geometric.inl>
-//#include <Common/Common.h>
-//#include <Files/Settings.h>
 #include "../DebugContext.h"
-//#include <Common/JsonHelper.h>
 #include "SpaceManager.h"
 
 void MainThreadSpace::Update()

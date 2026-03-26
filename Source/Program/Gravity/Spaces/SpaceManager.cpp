@@ -29,6 +29,7 @@ void SpaceManager::Update(double deltaTime)
 	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
 	Current().Update();
+	Current().Bodies(bodies);
 	CollectDebugData();
 }
 
@@ -114,7 +115,7 @@ void SpaceManager::CollectDebugData()
 {
 	DebugContext& debugContext = DebugContext::Instance();
 
-	for (auto& body : Current().Bodies()) {
+	for (auto& body : bodies) {
 		debugContext.minForce = std::min(debugContext.minForce, glm::length(body.force));
 		debugContext.minMass = std::min(debugContext.minMass, glm::length(body.mass));
 		debugContext.minVelocity = std::min(debugContext.minVelocity, glm::length(body.velocity));
@@ -281,7 +282,7 @@ glm::vec3 SpaceManager::PosOfMinSpeedObject()
 	float velocity = std::numeric_limits<float>::max();
 	const Body* obj = nullptr;
 
-	for (const auto& body : Current().Bodies()) {
+	for (const auto& body : bodies) {
 		if (glm::length(body.velocity) < velocity) {
 			velocity = glm::length(body.velocity);
 			obj = &body;
@@ -301,7 +302,7 @@ glm::vec3 SpaceManager::PosOfMaxSpeedObject()
 	float velocity = 0.f;
 	const Body* obj = nullptr;
 
-	for (const auto& body : Current().Bodies()) {
+	for (const auto& body : bodies) {
 		if (glm::length(body.velocity) > velocity) {
 			velocity = glm::length(body.velocity);
 			obj = &body;
@@ -322,7 +323,7 @@ glm::vec3 SpaceManager::PosOfMinMassObject()
 	float mass = std::numeric_limits<float>::max();
 	const Body* obj = nullptr;
 
-	for (const auto& body : Current().Bodies()) {
+	for (const auto& body : bodies) {
 		if (body.mass < mass) {
 			mass = body.mass;
 			obj = &body;
@@ -342,7 +343,7 @@ glm::vec3 SpaceManager::PosOfMaxMassObject()
 	const Body* obj = nullptr;
 	float mass = 0.f;
 
-	for (const auto& body : Current().Bodies()) {
+	for (const auto& body : bodies) {
 		if (body.mass > mass) {
 			mass = body.mass;
 			obj = &body;
