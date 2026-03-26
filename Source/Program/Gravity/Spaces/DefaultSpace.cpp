@@ -60,29 +60,3 @@ void DefaultSpace::Bodies(std::vector<Body>& bodies) const
 {
 	bodies = _bodies;
 }
-
-void DefaultSpace::GetBodyPositions(std::vector<float>& positions) const
-{
-	std::vector<float> tempPositions;
-	tempPositions.reserve(_bodies.size() * 3);
-
-	for (const auto& body : _bodies) {
-		tempPositions.emplace_back(body.pos.x);
-		tempPositions.emplace_back(body.pos.y);
-		tempPositions.emplace_back(body.pos.z);
-	}
-
-	std::swap(positions, tempPositions);
-}
-
-void DefaultSpace::GetBodyPositions(std::vector<glm::vec3>& positions) const
-{
-	std::vector<glm::vec3> tempPositions;
-	tempPositions.reserve(_bodies.size());
-
-	for (const auto& body : _bodies) {
-		tempPositions.emplace_back(body.pos);
-	}
-
-	std::swap(positions, tempPositions);
-}

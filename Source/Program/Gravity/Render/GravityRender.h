@@ -10,11 +10,10 @@ class GravityRender final
 public:
 	struct TypeDraw
 	{
-		bool model = true;
-		bool sprite = false;
+		bool sprite = true;
+		bool point = true;
+		bool model = false;
 		bool spriteShader = false;
-		bool point = false;
-
 	};
 
 public:

@@ -7,6 +7,7 @@
 #include "Space.h"
 #include "DefaultSpace.h"
 #include "MainThreadSpace.h"
+#include "ParallelThreadSpace.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
 #include <Logs.h>
@@ -45,6 +46,9 @@ void SpaceManager::Load()
 	}
 	else if (currentSpaceName == Engine::GetClassName<MainThreadSpace>()) {
 		currentPtr = SetCurrentPtr<MainThreadSpace>();
+	}
+	else if (currentSpaceName == Engine::GetClassName<ParallelThreadSpace>()) {
+		currentPtr = SetCurrentPtr<ParallelThreadSpace>();
 	}
 	else {
 		currentPtr = SetCurrentPtr<DefaultSpace>();
@@ -96,6 +100,33 @@ void SpaceManager::StopUpdate()
 	countOfIteration = 0;
 }
 
+void SpaceManager::GetBodyPositions(std::vector<float>& positions)
+{
+	std::vector<float> tempPositions;
+	tempPositions.reserve(bodies.size() * 3);
+
+	for (const auto& body : bodies) {
+		tempPositions.emplace_back(body.pos.x);
+		tempPositions.emplace_back(body.pos.y);
+		tempPositions.emplace_back(body.pos.z);
+	}
+
+	std::swap(positions, tempPositions);
+}
+
+void SpaceManager::GetBodyPositions(std::vector<glm::vec3>& positions)
+{
+	std::vector<glm::vec3> tempPositions;
+	tempPositions.reserve(bodies.size());
+
+	for (const auto& body : bodies) {
+		tempPositions.emplace_back(body.pos);
+	}
+
+	std::swap(positions, tempPositions);
+}
+
+
 void SpaceManager::CheckOverload(double deltaTime)
 {
 	// TODO:
@@ -124,6 +155,10 @@ void SpaceManager::CollectDebugData()
 		debugContext.maxVelocity = std::max(debugContext.maxVelocity, glm::length(body.velocity));
 		debugContext.sumMass += body.mass;
 	}
+
+	auto& space = Current();
+	debugContext.subProgress = space.GetSubProgress();
+	debugContext.progress = space.GetProgress();
 }
 
 glm::vec3 SpaceManager::CenteMassSpace()

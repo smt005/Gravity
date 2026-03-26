@@ -46,45 +46,17 @@ void ParallelThreadSpace::AddBodies(std::vector<Body>&& bodies)
 
 void ParallelThreadSpace::Bodies(std::vector<Body>& bodies) const
 {
-	/*std::unique_lock lockMutex(_mutex);
-	if (lockMutex.try_lock()) {
-		bodies = _bodies;
-	}*/
 	bodies = _bufferBodies;
 }
 
-void ParallelThreadSpace::GetBodyPositions(std::vector<float>& positions) const
+float ParallelThreadSpace::GetSubProgress() const
 {
-	std::vector<float> tempPositions;
-
-	{
-		std::lock_guard lockMutex(_mutex);
-		tempPositions.reserve(_bodies.size() * 3);
-
-		for (const auto& body : _bodies) {
-			tempPositions.emplace_back(body.pos.x);
-			tempPositions.emplace_back(body.pos.y);
-			tempPositions.emplace_back(body.pos.z);
-		}
-	}
-
-	std::swap(positions, tempPositions);
+	return _subProcess.load();
 }
 
-void ParallelThreadSpace::GetBodyPositions(std::vector<glm::vec3>& positions) const
+float ParallelThreadSpace::GetProgress() const
 {
-	std::vector<glm::vec3> tempPositions;
-
-	{
-		std::lock_guard lockMutex(_mutex);
-		tempPositions.reserve(_bodies.size());
-
-		for (const auto& body : _bodies) {
-			tempPositions.emplace_back(body.pos);
-		}
-	}
-
-	std::swap(positions, tempPositions);
+	return _process.load();
 }
 
 void ParallelThreadSpace::Update()
@@ -99,18 +71,26 @@ void ParallelThreadSpace::Update()
 	debugContext.subProgress = 0.f;
 	debugContext.progress = 0.f;
 
+	debugContext.countObject = _bodies.size();
 	const float deltaTime = (float)SpaceManager::offsetIteration;
+	const float dSize = 1.f / static_cast<float>(SpaceManager::countOfIteration);
 
-	std::thread th([this, deltaTime]() {
+	std::thread th([this, deltaTime, dSize]() {
 		_isBusy.store(true);
+		_process.store(0.f);
+
 
 		for (int iter = 1; iter <= SpaceManager::countOfIteration; ++iter)
 		{
+			_subProcess.store(0.f);
 			std::lock_guard lockMutex(_mutex);
+
 			UpdateColapse();
 			UpdateForce();
 			UpdateSpeed(deltaTime);
 			UpdatePos(deltaTime);
+
+			_process.fetch_add(dSize);
 		}
 
 		_bufferBodies = _bodies;
@@ -118,17 +98,6 @@ void ParallelThreadSpace::Update()
 	});
 
 	th.detach();
-
-	//debugContext.progress = static_cast<float>(iter / SpaceManager::countOfIteration);
-	//debugContext.deltaTime = deltaTime;
-
-	/*{
-		std::lock_guard lockMutex(_mutex);
-		_bufferBodies = _bodies;
-	}*/
-	
-
-	//debugContext.countObject = _bufferBodies.size();
 }
 
 void ParallelThreadSpace::UpdateColapse()
@@ -150,6 +119,8 @@ void ParallelThreadSpace::UpdateColapse()
 	for (size_t i = 0; i < count; ++i) {
 		_bodies[i].colapseData = nullptr;
 	}
+
+	const float dSize = 1.f / static_cast<float>(count) / 2.f;
 
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
@@ -184,6 +155,8 @@ void ParallelThreadSpace::UpdateColapse()
 				}
 			}
 		}
+
+		_subProcess.fetch_add(dSize);
 	}
 
 	for (Colapce& colapses : colapses) {
@@ -214,6 +187,7 @@ void ParallelThreadSpace::UpdateForce()
 	}
 
 	const size_t count = bodies.size();
+	const float dSize = 1.f / static_cast<float>(count) / 2.f;
 
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = i + 1; j < count; ++j) {
@@ -232,6 +206,8 @@ void ParallelThreadSpace::UpdateForce()
 			_bodies[i].force += force;
 			_bodies[j].force -= force;
 		}
+
+		_subProcess.fetch_add(dSize);
 	}
 }
 

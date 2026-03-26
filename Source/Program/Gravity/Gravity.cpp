@@ -96,16 +96,16 @@ void Gravity::InitCallback()
 
 		if (Callback::KeyPressed(VirtualKey::CONTROL)) {
 			if (data.key == VirtualKey::VK_1) {
-				GravityRender::typeDraw.model = !GravityRender::typeDraw.model;
-			}
-			if (data.key == VirtualKey::VK_2) {
 				GravityRender::typeDraw.sprite = !GravityRender::typeDraw.sprite;
 			}
+			if (data.key == VirtualKey::VK_2) {
+				GravityRender::typeDraw.point = !GravityRender::typeDraw.point;
+			}
 			if (data.key == VirtualKey::VK_3) {
-				GravityRender::typeDraw.spriteShader = !GravityRender::typeDraw.spriteShader;
+				GravityRender::typeDraw.model = !GravityRender::typeDraw.model;
 			}
 			if (data.key == VirtualKey::VK_4) {
-				GravityRender::typeDraw.point = !GravityRender::typeDraw.point;
+				GravityRender::typeDraw.spriteShader = !GravityRender::typeDraw.spriteShader;
 			}
 		}
 	});

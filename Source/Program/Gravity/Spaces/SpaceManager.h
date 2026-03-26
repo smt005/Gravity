@@ -75,6 +75,8 @@ public:
 	static void StopUpdate();
 	static void CheckOverload(double deltaTime);
 	static void CollectDebugData();
+	static void GetBodyPositions(std::vector<float>& positions);
+	static void GetBodyPositions(std::vector<glm::vec3>& positions);
 
 	static glm::vec3 CenteMassSpace();
 	static glm::vec3 GetVelocityOnOrbit(Body& body, const Body& mainBody);

@@ -28,9 +28,7 @@ public:
 	virtual void AddBodies(std::vector<Body>& bodies) = 0;
 	virtual void AddBodies(std::vector<Body>&& bodies) = 0;
 	virtual void Bodies(std::vector<Body>& bodies) const = 0;
-	virtual void GetBodyPositions(std::vector<float>& positions) const = 0;
-	virtual void GetBodyPositions(std::vector<glm::vec3>& positions) const = 0;
-
+	
 	virtual float GetSubProgress() const {
 		return -1;
 	}

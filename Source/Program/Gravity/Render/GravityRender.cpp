@@ -24,20 +24,6 @@ void GravityRender::Render()
 
 	Draw::ClearColor();
 
-	if (typeDraw.model) {
-		auto& shader = shaders::BaseShaderSingle::Instance();
-		shader.UseProgram();
-		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
-
-		for (auto& object : SpaceManager::bodies) {
-			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
-			const float scale = object.Diameter();
-			mat = glm::scale(mat, glm::vec3(scale));
-			shader.SetModelMatrix(mat);
-			Draw::Render(SHAPES["Sphere", true, true].mesh);
-		}
-	}
-
 	if (typeDraw.sprite) {
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
@@ -69,6 +55,17 @@ void GravityRender::Render()
 		}
 	}
 
+	if (typeDraw.point) {
+		Draw::SetPointSize(1.f);
+		const auto& shader = shaders::LineShaderSingle::Instance();
+		shader.UseProgram();
+
+		std::vector<float> points;
+		GetBodyPositions(points);
+
+		Draw::RenderPoints(points.data(), points.size() / 3);
+	}
+
 	if (typeDraw.spriteShader) {
 		auto& shader = shaders::ForwardShaderSingle::Instance();
 		shader.UseProgram();
@@ -84,23 +81,25 @@ void GravityRender::Render()
 		}
 	}
 
-	if (typeDraw.point) {
-		Draw::SetPointSize(1.f);
-		const auto& shader = shaders::LineShaderSingle::Instance();
+	if (typeDraw.model) {
+		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
+		Draw::BindTexture(Texture::GetRef("orange_star.jpg").Id());
 
-		std::vector<float> points;
-		GetBodyPositions(points);
-
-		Draw::RenderPoints(points.data(), points.size() / 3);
+		for (auto& object : SpaceManager::bodies) {
+			glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), object.pos);
+			const float scale = object.Diameter();
+			mat = glm::scale(mat, glm::vec3(scale));
+			shader.SetModelMatrix(mat);
+			Draw::Render(SHAPES["Sphere", true, true].mesh);
+		}
 	}
 }
 
 void GravityRender::GetBodyPositions(std::vector<float>& data)
 {
-	const auto& space = SpaceManager::Current();
 	std::vector<glm::vec3> bodyPoses;
-	space.GetBodyPositions(bodyPoses);
+	SpaceManager::GetBodyPositions(bodyPoses);
 
 	std::vector<float> points;
 	points.reserve(bodyPoses.size() * 3);
@@ -116,6 +115,5 @@ void GravityRender::GetBodyPositions(std::vector<float>& data)
 
 void GravityRender::GetBodyPositions(std::vector<glm::vec3>& vec3Data)
 {
-	const auto& space = SpaceManager::Current();
-	space.GetBodyPositions(vec3Data);
+	SpaceManager::GetBodyPositions(vec3Data);
 }
