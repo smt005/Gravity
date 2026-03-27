@@ -16,11 +16,10 @@ void MainThreadSpace::Update()
 
 	debugContext.subProgress = 0.f;
 	debugContext.progress = 0.f;
+	float deltaTime = SpaceManager::offsetIteration.load();
 
 	for (int iter = 1; iter <= SpaceManager::countOfIteration; ++iter)
-	{
-		float deltaTime = (float)SpaceManager::offsetIteration;
-
+	{	
 		UpdateColapse();
 		UpdateForce();
 		UpdateSpeed(deltaTime);

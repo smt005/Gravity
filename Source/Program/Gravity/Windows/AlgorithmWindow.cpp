@@ -56,7 +56,10 @@ void AlgorithmWindow::Render() {
 	ImGui::Text(text.c_str());
 	ImGui::Separator();
 
-	ImGui::Checkbox(": collapse" , &SpaceManager::collapseBodies);
+	static bool collapseBodies = SpaceManager::collapseBodies.load();
+	if (ImGui::Checkbox(": collapse", &collapseBodies)) {
+		SpaceManager::collapseBodies.store(collapseBodies);
+	}
 
 	ButtonRender<DefaultSpace>();
 	ButtonRender<MainThreadSpace>();

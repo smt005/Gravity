@@ -97,7 +97,7 @@ nlohmann::json& SpaceManager::GetSettingData(std::string_view path, bool create)
 
 void SpaceManager::StopUpdate()
 {
-	countOfIteration = 0;
+	countOfIteration.store(0.f);
 }
 
 void SpaceManager::GetBodyPositions(std::vector<float>& positions)
@@ -130,15 +130,20 @@ void SpaceManager::GetBodyPositions(std::vector<glm::vec3>& positions)
 void SpaceManager::CheckOverload(double deltaTime)
 {
 	// TODO:
-	if (deltaTime > 0.25) {
-		SpaceManager::StopUpdate();
+	if (!Engine::IsDebugging() && deltaTime > 0.25) {
+		if (!Engine::IsDebugging()) {
+			SpaceManager::StopUpdate();
 
-		using namespace Windows;
-		std::list<InfoWindow::Element> elements;
-		elements.emplace_back(InfoWindow::TypeElement::TEXT, TO_STRING("\nSTOP: LOW FPS\ndeltaTime: {}\n", deltaTime), nullptr);
-		elements.emplace_back(InfoWindow::TypeElement::CLOSE_BUTTON, "Run.", []() {SpaceManager::countOfIteration = 1; });
-		elements.emplace_back(InfoWindow::TypeElement::CLOSE_BUTTON, "", nullptr);
-		InfoWindow::ShowMessageWindow(std::move(elements));
+			using namespace Windows;
+			std::list<InfoWindow::Element> elements;
+			elements.emplace_back(InfoWindow::TypeElement::TEXT, TO_STRING("\nSTOP: LOW FPS\ndeltaTime: {}\n", deltaTime), nullptr);
+			elements.emplace_back(InfoWindow::TypeElement::CLOSE_BUTTON, "Run.", []() { SpaceManager::countOfIteration.store(1.f); });
+			elements.emplace_back(InfoWindow::TypeElement::CLOSE_BUTTON, "", nullptr);
+			InfoWindow::ShowMessageWindow(std::move(elements));
+		}
+		else {
+			PRINT("\nSTOP: LOW FPS\ndeltaTime: {}\n", deltaTime);
+		}
 	}
 }
 

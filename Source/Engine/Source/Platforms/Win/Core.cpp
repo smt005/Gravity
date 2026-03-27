@@ -1,6 +1,7 @@
 // ◦ Xyz ◦
 
 #include "Core.h"
+#include <Defines.h>
 #include <windows.h>
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>

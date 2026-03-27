@@ -17,10 +17,8 @@ namespace Windows
 		void OnOpen() override;
 
 	private:
-		int _fps = 0;
-		int _minFps = std::numeric_limits<int>::max();
-		int _maxFps = std::numeric_limits<int>::min();
-		double timeOut = 1;
+		double _fps = 0;
+		double _ups = 0; // Update per second
 
 	public:
 		inline static const std::string_view windowName = "TopPanel";

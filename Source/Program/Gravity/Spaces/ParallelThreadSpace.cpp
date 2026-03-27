@@ -4,6 +4,7 @@
 #include <deque>
 #include <thread>
 #include <glm/gtc/quaternion.hpp>
+#include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
@@ -68,20 +69,17 @@ void ParallelThreadSpace::Update()
 	auto& debugContext = DebugContext::Instance();
 	debugContext.Clean();
 
-	debugContext.subProgress = 0.f;
-	debugContext.progress = 0.f;
-
 	debugContext.countObject = _bodies.size();
-	const float deltaTime = (float)SpaceManager::offsetIteration;
-	const float dSize = 1.f / static_cast<float>(SpaceManager::countOfIteration);
+	const float deltaTime = SpaceManager::offsetIteration.load();
+	_isBusy.store(true);
 
-	std::thread th([this, deltaTime, dSize]() {
-		_isBusy.store(true);
-		_process.store(0.f);
+	std::thread th([this, deltaTime]() {
+		const double beginTime = Engine::Callback::GetCurrentTime();
+		
+		float iter = 0.f;
 
-
-		for (int iter = 1; iter <= SpaceManager::countOfIteration; ++iter)
-		{
+		while (iter < SpaceManager::countOfIteration.load()) {
+			_process.store(iter / SpaceManager::countOfIteration.load());
 			_subProcess.store(0.f);
 			std::lock_guard lockMutex(_mutex);
 
@@ -90,10 +88,13 @@ void ParallelThreadSpace::Update()
 			UpdateSpeed(deltaTime);
 			UpdatePos(deltaTime);
 
-			_process.fetch_add(dSize);
+			iter += 1.f;
+			_process.store(iter / SpaceManager::countOfIteration.load());
+			_bufferBodies = _bodies;
 		}
 
-		_bufferBodies = _bodies;
+		const double deltaTime = (Engine::Callback::GetCurrentTime() - beginTime) / 1000;
+		DebugContext::Instance().updateDeltaTime.store(deltaTime);
 		_isBusy.store(false);
 	});
 

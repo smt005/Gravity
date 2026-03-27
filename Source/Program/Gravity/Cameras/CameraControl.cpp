@@ -30,7 +30,6 @@ void CameraControl::MakeCallback() {
 
 			if (Engine::Callback::KeyPressed(Engine::VirtualKey::CONTROL)) {
 				kForce = 0.2f;
-				return;
 			} else if (Engine::Callback::KeyPressed(Engine::VirtualKey::SHIFT)) {
 				kForce = 5.f;
 			}

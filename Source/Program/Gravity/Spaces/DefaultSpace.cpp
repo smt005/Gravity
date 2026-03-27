@@ -22,7 +22,7 @@ void DefaultSpace::Update() {
 	}
 
 	static volatile float angleSpeedFactor = 0.001f;
-	const float angleSpeed = static_cast<float>(SpaceManager::offsetIteration) * static_cast<float>(SpaceManager::countOfIteration) * angleSpeedFactor;
+	const float angleSpeed = SpaceManager::offsetIteration.load() * SpaceManager::countOfIteration.load() * angleSpeedFactor;
 	const glm::vec3 rotationAxis(0.f, 0.f, 1.f);
 	const glm::quat rotationQuat = glm::angleAxis(angleSpeed, rotationAxis);
 

@@ -4,7 +4,9 @@ message("Begin generate. . . . . . . . . . . . . . . .")
 
 set(PROJECT_NAME Gravity)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(PROJECT_MAIN_FILE "${SOURCE_DIR}/Engine/Platforms/Win/main.cpp")
+set(PROJECT_PLATFORM_DIR "${SOURCE_DIR}/Engine/Platforms/Win")
+set(PROJECT_MAIN_FILE "${PROJECT_PLATFORM_DIR}/main.cpp")
+set(PROJECT_DEFINE_FILE "${PROJECT_PLATFORM_DIR}/Defines.h")
 
 # Game
 set(PROGRAM_NAME Program)
@@ -64,7 +66,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOURCE_DIR}/../Bin)
 
 # Project
 project(${PROJECT_NAME} LANGUAGES CXX)
-add_executable(${PROJECT_NAME} ${PROJECT_MAIN_FILE})
+add_executable(${PROJECT_NAME} ${PROJECT_MAIN_FILE} ${PROJECT_DEFINE_FILE})
+include_directories(${PROJECT_PLATFORM_DIR})
+
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
 # FreeImage: choose arch after project() so CMAKE_SIZEOF_VOID_P is set

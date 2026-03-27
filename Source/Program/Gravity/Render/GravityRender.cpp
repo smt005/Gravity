@@ -23,16 +23,34 @@ void GravityRender::Render()
 	using namespace Engine;
 
 	Draw::ClearColor();
+	const glm::vec3 camPos = Camera::GetLink().Pos();
+
+	// TODO
+	std::sort(SpaceManager::bodies.begin(), SpaceManager::bodies.end(), [&camPos](const auto& leftBody, const auto& rightBody) {
+		const float leftDist = glm::distance(camPos, leftBody.pos);
+		const float rightDist = glm::distance(camPos, rightBody.pos);
+		return leftDist > rightDist;
+	});
+
+	// TODO:
+	if (SpaceManager::bodies.empty()) {
+		return;
+	}
 
 	if (typeDraw.sprite) {
+		
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
 
-		Draw::DepthTest(false);
+		Draw::DepthTest(true);
 		Draw::BindTexture(Texture::GetRef("Star.png").Id());
 
-		for (auto& object : SpaceManager::bodies) {
-			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - object.pos);
+		float farDist= glm::distance(camPos, SpaceManager::bodies.front().pos);
+		float nearDist = glm::distance(camPos, SpaceManager::bodies.back().pos);
+		float spaceDist = farDist - nearDist;
+
+		for (const auto& body : SpaceManager::bodies) {
+			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - body.pos);
 			glm::vec3 from(0.f, 0.f, 1.f);
 			glm::vec3 axis = glm::normalize(glm::cross(from, to));
 
@@ -41,15 +59,26 @@ void GravityRender::Render()
 
 			glm::mat4 mat(1.f);
 			static float scaleStar = Engine::GetJsonValue("scale", Engine::Settings::Instance().JsonData("test"), 1.f);
-			const float scale = object.Diameter() * scaleStar;
+			const float scale = body.Diameter() * scaleStar;
 
-			mat = glm::translate(mat, object.pos);
+			mat = glm::translate(mat, body.pos);
 
 			if (glm::length(axis)) {
 				mat = glm::rotate(mat, angle, axis);
 			}
 			mat = glm::scale(mat, glm::vec3(scale));
 			shader.SetModelMatrix(mat);
+
+			float distFactor = glm::distance(camPos, body.pos);
+			distFactor -= nearDist;
+			distFactor /= spaceDist;
+
+			std::array<float, 4> color;
+			color[0] = 1.f;
+			color[1] = 1.f - distFactor;
+			color[2] = 0.5f - distFactor * 0.5f;
+			color[3] = 1.f;
+			shader.SetColor(color.data());
 
 			Draw::Render(SHAPES["Sprite", true, true].mesh);
 		}
@@ -62,6 +91,9 @@ void GravityRender::Render()
 
 		std::vector<float> points;
 		GetBodyPositions(points);
+
+		std::array<float, 4> color = { 10.f, 0.f, 0.f, 1.f };
+		shader.SetColor(color.data());
 
 		Draw::RenderPoints(points.data(), points.size() / 3);
 	}

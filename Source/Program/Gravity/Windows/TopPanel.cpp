@@ -1,10 +1,11 @@
 // ◦ Xyz ◦
 
 #include "TopPanel.h"
-#include <GuiWindow/GuiWindows.h>
 #include <imgui.h>
 #include <Screen.h>
 #include <StringUtils.h>
+#include <GuiWindow/GuiWindows.h>
+#include "../DebugContext.h"
 #include <Logs.h>
 
 using namespace Windows;
@@ -33,47 +34,43 @@ void TopPanel::OnOpen()
 	OnResize();
 }
 
+static ImVec4 GetCollor(double ups) {
+	ImVec4 color = { 1.f, 1.f, 1.f, 1.f };
+	if (ups < 10) {
+		color = { 1.f, 0.f, 0.f, 1.f };
+	}
+	if (ups >= 30) {
+		color = { 0.f, 1.f, 0.f, 1.f };
+	}
+	return color;
+}
+
 void TopPanel::Render() {
 	{
-		ImVec4 color = { 1.f, 1.f, 1.f, 1.f };
-		if (_fps < 10) {
-			color = { 1.f, 0.f, 0.f, 1.f };
-		}
-		if (_fps >= 30) {
-			color = { 0.f, 1.f, 0.f, 1.f };
-		}
-
 		std::string_view prefix;
-		#ifdef _DEBUG
-			prefix = "DEBUG";
-		#endif
-
-		std::string text = TO_STRING("{} fps: {} ", prefix, _fps);
-		ImGui::TextColored(color, text.c_str());
+#ifdef _DEBUG
+		prefix = "DEBUG";
+#endif
+		std::string text = TO_STRING("{} fps: {} ", prefix, static_cast<int>(_fps));
+		ImGui::TextColored(GetCollor(_fps), text.c_str());
 	}
-
+	
 	{
-		std::string text = TO_STRING("[min: {} middle: {} max: {}]", _minFps, (_maxFps + _minFps) / 2, _maxFps);
+		std::string text;
+		if (_ups > 1) {
+			text = TO_STRING("\tups: {} ", static_cast<int>(_ups));
+		}
+		else {
+			text = TO_STRING("\tups: {}/1000", static_cast<int>(_ups * 1000));
+		}
 		ImGui::SameLine();
-		ImGui::Text(text.c_str());
-	}
-
-	ImGui::SameLine();
-	if (ImGui::Button("Reset", { 40.f, 16.f })) {
-		timeOut = 0.5;
-		_fps = 0;
-		_minFps = std::numeric_limits<int>::max();
-		_maxFps = std::numeric_limits<int>::min();
+		ImGui::TextColored(GetCollor(_ups), text.c_str());
 	}
 }
 
 void TopPanel::Update(double dTime) {
-	if (timeOut > 0 || dTime == 0) {
-		timeOut -= dTime;
-		return;
-	}
-
 	_fps = 1 / dTime;
-	_minFps = std::min(_fps, _minFps);
-	_maxFps = std::max(_fps, _maxFps);
+
+	const double updateDeltaTime = DebugContext::Instance().updateDeltaTime.load();
+	_ups = 1 / updateDeltaTime;
 }

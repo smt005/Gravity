@@ -4,8 +4,9 @@
 #include "../Spaces/SpaceManager.h"
 #include "../DebugContext.h"
 #include <Draw/Camera.h>
-#include <GuiWindow/GuiWindows.h>
 #include <imgui.h>
+#include <GuiWindow/ImGuiHelp.h>
+#include <GuiWindow/GuiWindows.h>
 #include <Screen.h>
 #include <StringUtils.h>
 #include <Logs.h>
@@ -68,15 +69,21 @@ void DebugWindow::Render() {
 	ImGui::Text("   Const force: %f", debugContext.constForce);
 	ImGui::Text("   Const speed: %f", debugContext.constSpeed);
 
-	if (debugContext.subProgress >= 0) {
-		char buf[32];
-		sprintf(buf, "sub: %d/%d", (int)(debugContext.subProgress * 100), 100);
-		ImGui::ProgressBar(debugContext.subProgress, ImVec2(0.f, 0.f), buf);
-	}
-	if (debugContext.progress >= 0) {
-		char buf[32];
-		sprintf(buf, "%d/%d", (int)(debugContext.progress * 100), 100);
-		ImGui::ProgressBar(debugContext.progress, ImVec2(0.f, 0.f), buf);
+	{
+		ImGuiColorScopeHandler colorhandlers(ImGuiCol_FrameBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f),
+											ImGuiCol_PlotHistogram, ImVec4(0.2f, 0.2f, 0.2f, 1.0f),
+											ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+
+		if (debugContext.subProgress >= 0) {
+			char buf[32];
+			sprintf(buf, "sub: %d/%d", (int)(debugContext.subProgress * 100), 100);
+			ImGui::ProgressBar(debugContext.subProgress, ImVec2(0.f, 0.f), buf);
+		}
+		if (debugContext.progress >= 0) {
+			char buf[32];
+			sprintf(buf, "%d/%d", (int)(debugContext.progress * 100), 100);
+			ImGui::ProgressBar(debugContext.progress, ImVec2(0.f, 0.f), buf);
+		}
 	}
 }
 

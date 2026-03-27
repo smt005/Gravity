@@ -1,6 +1,7 @@
 // ◦ Xyz ◦
 #pragma once
 
+#include <atomic>
 #include <vector>
 #include <glm/vec3.hpp>
 #include <mystd_memory.h>
@@ -102,9 +103,9 @@ public:
 
 //private: // TODO:
 public:
-	inline static int offsetIteration = 1; // 1000;
-	inline static int countOfIteration = 1;
-	inline static bool collapseBodies = true;
+	inline static std::atomic<float> offsetIteration = 1.f;
+	inline static std::atomic<float> countOfIteration = 1.f;
+	inline static std::atomic<bool> collapseBodies = true;
 
 	inline static std::vector<Body> bodies;
 	inline static mystd::shared_ptr<Space> currentSpace;

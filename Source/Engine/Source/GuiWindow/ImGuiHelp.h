@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <vector>
 #include <imgui.h>
 
 /*struct ImGuiFontHandler final {
@@ -60,6 +61,34 @@ struct ImGuiColorHandler final {
     {
         ImGui::PopStyleColor();
     }
+};
+
+struct ImGuiColorScopeHandler final {
+    template <typename ...Args>
+    ImGuiColorScopeHandler(Args&&... args)
+    {
+        Add(std::forward<Args>(args)...);
+    }
+
+    ~ImGuiColorScopeHandler()
+    {
+        ImGui::PopStyleColor(countPushed);
+    }
+
+private:
+    void Add(ImGuiCol idx, ImVec4&& color) {
+        ImGui::PushStyleColor(idx, std::forward<ImVec4>(color));
+        ++countPushed;
+    }
+    
+    template <typename ...Args>
+    void Add(ImGuiCol idx, ImVec4&& color, Args&&... args) {
+        ImGui::PushStyleColor(idx, std::forward<ImVec4>(color));
+        ++countPushed;
+        Add(std::forward<Args>(args)...);
+    }
+
+    size_t countPushed = 0;
 };
 
 struct ImGuiWidthHandler final {
