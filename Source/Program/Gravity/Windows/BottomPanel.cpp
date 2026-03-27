@@ -39,7 +39,7 @@ void BottomPanel::OnOpen()
 }
 
 void BottomPanel::Render() {
-    volatile static float border = 10.f;
+    constexpr float border = 10.f;
     float widthSlider = Engine::ScreenParams::Width() / 2.f;
     widthSlider -= border;
 

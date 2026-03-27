@@ -7,6 +7,7 @@
 #include "Space.h"
 #include "DefaultSpace.h"
 #include "MainThreadSpace.h"
+#include "MainThreadProtSpace.h"
 #include "ParallelThreadSpace.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
@@ -43,6 +44,9 @@ void SpaceManager::Load()
 
 	if (currentSpaceName == Engine::GetClassName<DefaultSpace>()) {
 		currentPtr = SetCurrentPtr<DefaultSpace>();
+	}
+	else if (currentSpaceName == Engine::GetClassName<MainThreadProtSpace>()) {
+		currentPtr = SetCurrentPtr<MainThreadProtSpace>();
 	}
 	else if (currentSpaceName == Engine::GetClassName<MainThreadSpace>()) {
 		currentPtr = SetCurrentPtr<MainThreadSpace>();

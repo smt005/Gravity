@@ -10,6 +10,7 @@
 #include "../Spaces/Space.h"
 #include "../Spaces/DefaultSpace.h"
 #include "../Spaces/MainThreadSpace.h"
+#include "../Spaces/MainThreadProtSpace.h"
 #include "../Spaces/ParallelThreadSpace.h"
 
 namespace Windows
