@@ -34,7 +34,7 @@ namespace Engine
 			const std::string_view text = "::";
 			pos = fullName.find_last_of(text);
 			if (pos != fullName.npos) {
-				pos += text.length();
+				pos += text.length() - 1;
 			}
 		}
 

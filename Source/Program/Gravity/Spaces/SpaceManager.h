@@ -72,7 +72,7 @@ public:
 	static void Update(double deltaTime);
 	static void Load();
 	static void Save();
-	static nlohmann::json& GetSettingData(std::string_view path, bool create = false);
+	static nlohmann::json& GetSettingData(std::string_view path = "", bool create = false);
 	static void StopUpdate();
 	static void CheckOverload(double deltaTime);
 	static void CollectDebugData();
@@ -80,21 +80,13 @@ public:
 	static void GetBodyPositions(std::vector<glm::vec3>& positions);
 
 	static glm::vec3 CenteMassSpace();
-	static glm::vec3 GetVelocityOnOrbit(Body& body, const Body& mainBody);
-	static void GenerateBox(int count, float minSpaceRange, float spaceRange);
-	static void GeneratePlaneSphere(int count, float minSpaceRange, float spaceRange);
-	static void GenerateOnOrbitSphere(int count, float minSpaceRange, float spaceRange);
 
-	template <typename ... Args>
-	static void Generate(GenerateType type, Args...args)
-	{
-		switch (type) {
-		case GenerateType::BOX: GenerateBox(std::forward<Args>(args)...); break;
-		case GenerateType::PLANE_SPHERE: GeneratePlaneSphere(std::forward<Args>(args)...); break;
-		case GenerateType::ORBIT_ON_MAIN_BODT: GenerateOnOrbitSphere(std::forward<Args>(args)...); break;
-		default: GenerateBox(std::forward<Args>(args)...);
-		}
-	}
+	template <typename TGenerator>
+	static void GenerateSpace() {
+		auto& space = Current();
+		space.Clear();
+		space.AddBodies(TGenerator::Generate());
+	};
 
 	static glm::vec3 PosOfMinSpeedObject();
 	static glm::vec3 PosOfMaxSpeedObject();
