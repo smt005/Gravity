@@ -16,6 +16,7 @@
 #include "../Spaces/MainThreadProtSpace.h"
 #include "../Spaces/ParallelThreadSpace.h"
 #include "../Spaces/MultiThreadSpace.h"
+#include "../Spaces/MultiAllThreadSpace.h"
 
 using namespace Windows;
 
@@ -72,9 +73,15 @@ void AlgorithmWindow::Render() {
 		SpaceManager::paramB.store(paramB);
 	}
 
+	static bool paramC = SpaceManager::paramC.load();
+	if (ImGui::Checkbox(": paramC", &paramC)) {
+		SpaceManager::paramC.store(paramC);
+	}
+
 	ButtonRender<DefaultSpace>();
 	ButtonRender<MainThreadProtSpace>();
 	ButtonRender<MainThreadSpace>();
 	ButtonRender<ParallelThreadSpace>();
 	ButtonRender<MultiThreadSpace>();
+	ButtonRender<MultiAllThreadSpace>();
 }

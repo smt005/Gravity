@@ -10,6 +10,7 @@
 #include "MainThreadProtSpace.h"
 #include "ParallelThreadSpace.h"
 #include "MultiThreadSpace.h"
+#include "MultiAllThreadSpace.h"
 #include "Generators/Generetors.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
@@ -57,6 +58,7 @@ void SpaceManager::Load()
 	else if (MakeSpace<MainThreadSpace>(className)) {}
 	else if (MakeSpace<ParallelThreadSpace>(className)) {}
 	else if (MakeSpace<MultiThreadSpace>(className)) {}
+	else if (MakeSpace<MultiAllThreadSpace>(className)) {}
 	else {
 		SetCurrentPtr<DefaultSpace>();
 	}
@@ -124,7 +126,7 @@ void SpaceManager::CheckOverload(double deltaTime)
 {
 	// TODO:
 	if (!Engine::IsDebugging() && deltaTime > 0.25) {
-		if (!Engine::IsDebugging()) {
+		if (!Engine::IsDebugging() && Current().GetThreadType() == Space::ThreadType::IN_MAIN) {
 			SpaceManager::StopUpdate();
 
 			using namespace Windows;

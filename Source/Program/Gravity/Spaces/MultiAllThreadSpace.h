@@ -7,7 +7,7 @@
 #include <MyMath.h>
 #include "BodyData.h"
 
-class ParallelThreadSpace final : public Space
+class MultiAllThreadSpace final : public Space
 {
 private:
 	struct Colapce {
@@ -44,7 +44,7 @@ private:
 	};
 
 public:
-	ParallelThreadSpace() = default;
+	MultiAllThreadSpace() = default;
 	void Clear() override;
 	void AddBody(const BodyData& body) override;
 	void AddBodies(const std::vector<BodyData>& bodies) override;
@@ -58,14 +58,19 @@ public:
 	void Update() override;
 	void UpdateInternal();
 	void Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress);
+	void IterationsNoMutex(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress);
+	void ColapseBodies();
 
 private:
-	std::atomic<bool> _isBusy;
+	std::atomic<int> _countBusy;
 	std::atomic<int> _countObject;
 	std::atomic<float> _subProcess;
 	std::atomic<float> _process;
+	double _beginTime;
 	std::vector<BodyData> _bufferBodies;
 	std::vector<Body> _bodies;
+	std::deque<Colapce> _colapses;
 	mutable std::mutex _mutex;
 	mutable std::mutex _bufferMutex;
+	mutable std::mutex _iterationMutex;
 };

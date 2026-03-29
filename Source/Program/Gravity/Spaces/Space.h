@@ -11,6 +11,12 @@
 class Space
 {
 public:
+	enum class ThreadType
+	{
+		IN_MAIN,
+		PARALEL
+	};
+
 	using Ptr = mystd::shared_ptr<Space>;
 
 	Space() = default;
@@ -27,13 +33,15 @@ public:
 	virtual void AddBodies(const std::vector<BodyData>& bodies) = 0;
 	virtual void Bodies(std::vector<BodyData>& bodies) = 0;
 	virtual std::vector<BodyData> GetBodies() = 0;
+	virtual ThreadType GetThreadType() = 0;
+
 	virtual float GetSubProgress() const {
 		return -1;
 	}
 	virtual float GetProgress() const {
 		return -1;
 	}
-
+	
 	const std::string& GetName() const {
 		if (_name.empty()) _name = Engine::ExtractClassName(typeid(*this).name());
 		return _name;

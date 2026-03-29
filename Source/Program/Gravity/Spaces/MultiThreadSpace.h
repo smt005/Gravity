@@ -51,6 +51,10 @@ public:
 	void Bodies(std::vector<BodyData>& bodies) override;
 	std::vector<BodyData> GetBodies() override;
 
+	ThreadType GetThreadType() override {
+		return Space::ThreadType::PARALEL;
+	}
+
 	void Update() override;
 	void UpdateInternal();
 	void Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress);

@@ -41,6 +41,10 @@ public:
 	void Bodies(std::vector<BodyData>& bodies) override;
 	std::vector<BodyData> GetBodies() override;
 
+	ThreadType GetThreadType() override {
+		return Space::ThreadType::IN_MAIN;
+	}
+
 	void Update() override;
 	void UpdateInternal();
 

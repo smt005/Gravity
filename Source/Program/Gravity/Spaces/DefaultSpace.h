@@ -44,6 +44,10 @@ public:
 	void AddBodies(const std::vector<BodyData>& bodies) override;
 	void Bodies(std::vector<BodyData>& bodies) override;
 	std::vector<BodyData> GetBodies() override;
+	
+	ThreadType GetThreadType() override {
+		return Space::ThreadType::IN_MAIN;
+	}
 
 protected:
 	std::vector<Body> _bodies;

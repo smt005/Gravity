@@ -72,7 +72,7 @@ void ParallelThreadSpace::Update()
 		_isBusy.store(false);
 		});
 
-	LOG("PARALLEL [{}] MAIN: {} SUB: {} countThread: {}", SpaceManager::paramA, std::this_thread::get_id(), th.get_id(), std::thread::hardware_concurrency());
+	if (SpaceManager::paramC) LOG("PARALLEL [{}] MAIN: {} SUB: {} countThread: {}", SpaceManager::paramA, std::this_thread::get_id(), th.get_id(), std::thread::hardware_concurrency());
 	th.detach();
 }
 
@@ -103,7 +103,7 @@ void ParallelThreadSpace::UpdateInternal()
 				const float distance = direction.Length();
 
 				if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
-					LOG("COLAPSE");
+					if (SpaceManager::paramC) LOG("COLAPSE");
 					Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
 					if (!colapcePtr) {
 						colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
@@ -191,7 +191,7 @@ void ParallelThreadSpace::Iterations(size_t iBegin, size_t iEnd, size_t count, s
 			const float distance = direction.Length();
 
 			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
-				LOG("COLAPSE");
+				if (SpaceManager::paramC) LOG("COLAPSE");
 				Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
 				if (!colapcePtr) {
 					colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
