@@ -26,7 +26,7 @@ public:
 	virtual void AddBody(const BodyData& body) = 0;
 	virtual void AddBodies(const std::vector<BodyData>& bodies) = 0;
 	virtual void Bodies(std::vector<BodyData>& bodies) = 0;
-	
+	virtual std::vector<BodyData> GetBodies() = 0;
 	virtual float GetSubProgress() const {
 		return -1;
 	}

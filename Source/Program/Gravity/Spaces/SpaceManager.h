@@ -88,6 +88,14 @@ public:
 		space.AddBodies(TGenerator::Generate());
 	};
 
+	template <typename T>
+	static void SwitchSpace() {
+		std::vector<BodyData> bodies = SpaceManager::Current().GetBodies();
+		auto& newSpace = SpaceManager::SetCurrent<T>();
+		newSpace.Clear();
+		newSpace.AddBodies(bodies);
+	}
+
 //private: // TODO:
 public:
 	inline static std::atomic<float> offsetIteration = 1.f;

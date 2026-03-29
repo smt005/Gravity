@@ -10,6 +10,12 @@
 #include <Files/Settings.h>
 #include <GuiWindow/ImGuiHelp.h>
 #include <Logs.h>
+#include "../Spaces/Space.h"
+#include "../Spaces/DefaultSpace.h"
+#include "../Spaces/MainThreadSpace.h"
+#include "../Spaces/MainThreadProtSpace.h"
+#include "../Spaces/ParallelThreadSpace.h"
+#include "../Spaces/MultiThreadSpace.h"
 
 using namespace Windows;
 
@@ -65,4 +71,5 @@ void AlgorithmWindow::Render() {
 	ButtonRender<MainThreadProtSpace>();
 	ButtonRender<MainThreadSpace>();
 	ButtonRender<ParallelThreadSpace>();
+	ButtonRender < MultiThreadSpace>();
 }

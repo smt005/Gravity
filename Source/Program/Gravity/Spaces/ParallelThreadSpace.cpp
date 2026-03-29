@@ -38,6 +38,19 @@ void ParallelThreadSpace::Bodies(std::vector<BodyData>& bodies)
 	}
 }
 
+std::vector<BodyData> ParallelThreadSpace::GetBodies()
+{
+	std::scoped_lock lockMutexes(_mutex, _bufferMutex);
+	std::vector<BodyData> bodies;
+	bodies.reserve(_bodies.size());
+
+	for (const auto& body : _bodies) {
+		bodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
+	}
+
+	return bodies;
+}
+
 float ParallelThreadSpace::GetSubProgress() const
 {
 	return _subProcess.load();

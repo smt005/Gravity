@@ -1,38 +1,46 @@
-﻿// ◦ Xyz ◦
+// ◦ Xyz ◦
 
-#include "MainThreadSpace.h"
+#include "MultiThreadSpace.h"
 #include <deque>
+#include <thread>
+#include <glm/gtc/quaternion.hpp>
 #include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
-void MainThreadSpace::Clear()
+void MultiThreadSpace::Clear()
 {
+	_bufferBodies.clear();
+
+	std::lock_guard lockMutex(_mutex);
 	_bodies.clear();
 }
 
-void MainThreadSpace::AddBody(const BodyData& body)
+void MultiThreadSpace::AddBody(const BodyData& body)
 {
+	std::lock_guard lockMutex(_mutex);
 	_bodies.emplace_back(body);
 }
 
-void MainThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
+void MultiThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
 {
+	std::lock_guard lockMutex(_mutex);
 	_bodies.append_range(bodies);
 }
 
-void MainThreadSpace::Bodies(std::vector<BodyData>& bodies)
+void MultiThreadSpace::Bodies(std::vector<BodyData>& bodies)
 {
-	bodies.clear();
-	bodies.reserve(_bodies.size());
+	std::lock_guard clockCopyBifferMutex(_bufferMutex);
 
-	for (const auto& body : _bodies) {
-		bodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
+	if (!_bufferBodies.empty()) {
+		std::swap(bodies, _bufferBodies);
+		_bufferBodies.clear();
 	}
 }
 
-std::vector<BodyData> MainThreadSpace::GetBodies()
+std::vector<BodyData> MultiThreadSpace::GetBodies()
 {
+	std::scoped_lock lockMutexes(_mutex, _bufferMutex);
 	std::vector<BodyData> bodies;
 	bodies.reserve(_bodies.size());
 
@@ -43,22 +51,38 @@ std::vector<BodyData> MainThreadSpace::GetBodies()
 	return bodies;
 }
 
-void MainThreadSpace::Update()
+float MultiThreadSpace::GetSubProgress() const
 {
-	if (SpaceManager::countOfIteration == 0) {
+	return _subProcess.load();
+}
+
+float MultiThreadSpace::GetProgress() const
+{
+	return _process.load();
+}
+
+void MultiThreadSpace::Update()
+{
+	auto& debugContext = DebugContext::Instance();
+	debugContext.countObject = _countObject.load();
+
+	if (_isBusy.load() || SpaceManager::countOfIteration.load() == 0) {
 		return;
 	}
 
-	auto& debugContext = DebugContext::Instance();
 	debugContext.Clean();
-
-	UpdateInternal();
-
 	debugContext.deltaTime = SpaceManager::offsetIteration.load();
-	debugContext.countObject = _bodies.size();
+
+	_isBusy.store(true);
+	std::thread th([this]() {	
+		UpdateInternal();
+		_isBusy.store(false);
+		});
+
+	th.detach();
 }
 
-void MainThreadSpace::UpdateInternal()
+void MultiThreadSpace::UpdateInternal()
 {
 	struct Colapce {
 		int objectIndex = -1;
@@ -69,7 +93,6 @@ void MainThreadSpace::UpdateInternal()
 
 	static mystd::Vec3 noForce;
 	_process.store(0.f);
-	float deltaTime = SpaceManager::offsetIteration.load();
 	float iter = 0.f;
 	const double beginTime = Engine::Callback::GetCurrentTime();
 
@@ -139,10 +162,24 @@ void MainThreadSpace::UpdateInternal()
 
 		_bodies.erase(removeIt, _bodies.end());
 
+		const float deltaTime = SpaceManager::offsetIteration.load();
+
 		for (auto& body : _bodies) {
 			const auto acceleration = body.force / body.mass;
 			body.velocity += acceleration * deltaTime;
 			body.pos += body.velocity * deltaTime;
+		}
+
+		_countObject.store(_bodies.size());
+
+		{
+			std::lock_guard lockCopyBufferMutex(_bufferMutex);
+			_bufferBodies.clear();
+			_bufferBodies.reserve(_bodies.size());
+
+			for (const auto& body : _bodies) {
+				_bufferBodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
+			}
 		}
 
 		_process.store(iter / SpaceManager::countOfIteration.load());

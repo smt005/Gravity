@@ -8,11 +8,6 @@
 #include <Common/Common.h>
 #include "../Spaces/BodyData.h"
 #include "../Spaces/SpaceManager.h"
-#include "../Spaces/Space.h"
-#include "../Spaces/DefaultSpace.h"
-#include "../Spaces/MainThreadSpace.h"
-#include "../Spaces/MainThreadProtSpace.h"
-#include "../Spaces/ParallelThreadSpace.h"
 
 namespace Windows
 {
@@ -39,12 +34,7 @@ namespace Windows
 			std::string nameBtn = Engine::ExtractClassName(typeid(T).name());
 
 			if (ImGui::Button(nameBtn.data(), buttonSize)) {
-				// TODO: Перенемти в SpaceManager
-				std::vector<BodyData> bodies;
-				SpaceManager::Current().Bodies(bodies);
-				auto& newSpace = SpaceManager::SetCurrent<T>();
-				newSpace.Clear();
-				newSpace.AddBodies(bodies);
+				SpaceManager::SwitchSpace<T>();
 				_currentSpace = typeid(T).hash_code();
 			}
 

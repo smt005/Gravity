@@ -39,6 +39,7 @@ public:
 	void AddBody(const BodyData& body) override;
 	void AddBodies(const std::vector<BodyData>& bodies) override;
 	void Bodies(std::vector<BodyData>& bodies) override;
+	std::vector<BodyData> GetBodies() override;
 
 	void Update() override;
 	void UpdateInternal();

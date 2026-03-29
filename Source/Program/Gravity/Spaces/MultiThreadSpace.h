@@ -6,7 +6,7 @@
 #include <MyMath.h>
 #include "BodyData.h"
 
-class ParallelThreadSpace final : public Space
+class MultiThreadSpace final : public Space
 {
 private:
 	struct Body final {
@@ -36,7 +36,7 @@ private:
 	};
 
 public:
-	ParallelThreadSpace() = default;
+	MultiThreadSpace() = default;
 	void Clear() override;
 	void AddBody(const BodyData& body) override;
 	void AddBodies(const std::vector<BodyData>& bodies) override;

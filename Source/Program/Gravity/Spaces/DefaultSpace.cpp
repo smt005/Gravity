@@ -50,3 +50,15 @@ void DefaultSpace::Bodies(std::vector<BodyData>& bodies)
 		bodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
 	}
 }
+
+std::vector<BodyData> DefaultSpace::GetBodies()
+{
+	std::vector<BodyData> bodies;
+	bodies.reserve(_bodies.size());
+
+	for (const auto& body : _bodies) {
+		bodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
+	}
+
+	return bodies;
+}
