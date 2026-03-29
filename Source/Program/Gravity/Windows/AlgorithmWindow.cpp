@@ -62,14 +62,19 @@ void AlgorithmWindow::Render() {
 	ImGui::Text(text.c_str());
 	ImGui::Separator();
 
-	static bool collapseBodies = SpaceManager::collapseBodies.load();
-	if (ImGui::Checkbox(": collapse", &collapseBodies)) {
-		SpaceManager::collapseBodies.store(collapseBodies);
+	static bool paramA = SpaceManager::paramA.load();
+	if (ImGui::Checkbox(": paramA", &paramA)) {
+		SpaceManager::paramA.store(paramA);
+	}
+
+	static bool paramB = SpaceManager::paramB.load();
+	if (ImGui::Checkbox(": paramB", &paramB)) {
+		SpaceManager::paramB.store(paramB);
 	}
 
 	ButtonRender<DefaultSpace>();
 	ButtonRender<MainThreadProtSpace>();
 	ButtonRender<MainThreadSpace>();
 	ButtonRender<ParallelThreadSpace>();
-	ButtonRender < MultiThreadSpace>();
+	ButtonRender<MultiThreadSpace>();
 }

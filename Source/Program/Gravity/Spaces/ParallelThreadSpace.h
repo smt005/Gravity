@@ -3,19 +3,27 @@
 
 #include "Space.h"
 #include <mutex>
+#include <deque>
 #include <MyMath.h>
 #include "BodyData.h"
 
 class ParallelThreadSpace final : public Space
 {
 private:
+	struct Colapce {
+		int objectIndex = -1;
+		mystd::Vec3 sumPos;
+		mystd::Vec3 sumVelocity;
+		float sumMass = 0.f;
+	};
+
 	struct Body final {
 		float mass = 1.f;
 		mystd::Vec3 pos;
 		mystd::Vec3 force;
 		mystd::Vec3 velocity;
 		float radius = 0.f;
-		void* colapseData = nullptr;
+		Colapce* colapseData = nullptr;
 
 	public:
 		Body() = default;
@@ -43,11 +51,9 @@ public:
 	void Bodies(std::vector<BodyData>& bodies) override;
 	std::vector<BodyData> GetBodies() override;
 
-	float GetSubProgress() const override;
-	float GetProgress() const override;
-
 	void Update() override;
 	void UpdateInternal();
+	void Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress);
 
 private:
 	std::atomic<bool> _isBusy;

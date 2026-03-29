@@ -1,7 +1,6 @@
 // ◦ Xyz ◦
 
 #include "ParallelThreadSpace.h"
-#include <deque>
 #include <thread>
 #include <glm/gtc/quaternion.hpp>
 #include <Callback/Callback.h>
@@ -51,16 +50,6 @@ std::vector<BodyData> ParallelThreadSpace::GetBodies()
 	return bodies;
 }
 
-float ParallelThreadSpace::GetSubProgress() const
-{
-	return _subProcess.load();
-}
-
-float ParallelThreadSpace::GetProgress() const
-{
-	return _process.load();
-}
-
 void ParallelThreadSpace::Update()
 {
 	auto& debugContext = DebugContext::Instance();
@@ -73,46 +62,48 @@ void ParallelThreadSpace::Update()
 	debugContext.Clean();
 	debugContext.deltaTime = SpaceManager::offsetIteration.load();
 
-	_isBusy.store(true);
+	{
+		std::lock_guard lockMutex(_mutex);
+		_isBusy.store(true);
+	}
+
 	std::thread th([this]() {	
 		UpdateInternal();
 		_isBusy.store(false);
 		});
 
+	LOG("PARALLEL [{}] MAIN: {} SUB: {} countThread: {}", SpaceManager::paramA, std::this_thread::get_id(), th.get_id(), std::thread::hardware_concurrency());
 	th.detach();
 }
 
 void ParallelThreadSpace::UpdateInternal()
 {
-	struct Colapce {
-		int objectIndex = -1;
-		mystd::Vec3 sumPos;
-		mystd::Vec3 sumVelocity;
-		float sumMass = 0.f;
-	};
-
 	static mystd::Vec3 noForce;
 	_process.store(0.f);
 	float iter = 0.f;
+
+	std::lock_guard lockMutex(_mutex);
 	const double beginTime = Engine::Callback::GetCurrentTime();
 
-	while (iter < SpaceManager::countOfIteration.load()) {
-		for (auto& body : _bodies) {
-			body.force = noForce;
-			body.colapseData = nullptr;
-			body.radius = body.Radius();
-		}
+	for (auto& body : _bodies) {
+		body.force = noForce;
+		body.colapseData = nullptr;
+		body.radius = body.Radius();
+	}
 
-		const size_t count = _bodies.size();
-		std::deque<Colapce> colapses;
-		_subProcess.store(0.f);
+	const size_t count = _bodies.size();
+	std::deque<Colapce> colapses;
+	const float dProgress = 1.f / static_cast<float>(count);
+	_subProcess.store(0.f);
 
+	if (!SpaceManager::paramA) {
 		for (size_t i = 0; i < count; ++i) {
 			for (size_t j = i + 1; j < count; ++j) {
 				const auto direction = _bodies[j].pos - _bodies[i].pos;
 				const float distance = direction.Length();
 
 				if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+					LOG("COLAPSE");
 					Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
 					if (!colapcePtr) {
 						colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
@@ -146,45 +137,94 @@ void ParallelThreadSpace::UpdateInternal()
 				}
 			}
 
-			_subProcess.store(static_cast<float>(i) / static_cast<float>(count));
+			_subProcess.fetch_add(dProgress);
 		}
+	}
+	else {
+		Iterations(0, count, count, colapses, dProgress);
+	}
 
-		for (Colapce& colapses : colapses) {
-			_bodies[colapses.objectIndex].pos = colapses.sumPos / colapses.sumMass;
-			_bodies[colapses.objectIndex].velocity = colapses.sumVelocity / colapses.sumMass;
-			_bodies[colapses.objectIndex].mass = colapses.sumMass;
-			_bodies[colapses.objectIndex].colapseData = nullptr;
+	for (Colapce& colapses : colapses) {
+		_bodies[colapses.objectIndex].pos = colapses.sumPos / colapses.sumMass;
+		_bodies[colapses.objectIndex].velocity = colapses.sumVelocity / colapses.sumMass;
+		_bodies[colapses.objectIndex].mass = colapses.sumMass;
+		_bodies[colapses.objectIndex].colapseData = nullptr;
+	}
+
+	const auto removeIt = std::remove_if(_bodies.begin(), _bodies.end(), [](const auto& object) {
+		return object.colapseData;
+		});
+
+	_bodies.erase(removeIt, _bodies.end());
+
+	const float deltaTime = SpaceManager::offsetIteration.load();
+
+	for (auto& body : _bodies) {
+		const auto acceleration = body.force / body.mass;
+		body.velocity += acceleration * deltaTime;
+		body.pos += body.velocity * deltaTime;
+	}
+
+	_countObject.store(_bodies.size());
+
+	{
+		std::lock_guard lockCopyBufferMutex(_bufferMutex);
+		_bufferBodies.clear();
+		_bufferBodies.reserve(_bodies.size());
+
+		for (const auto& body : _bodies) {
+			_bufferBodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
 		}
+	}
 
-		const auto removeIt = std::remove_if(_bodies.begin(), _bodies.end(), [](const auto& object) {
-			return object.colapseData;
-			});
+	_process.store(iter / SpaceManager::countOfIteration.load());
 
-		_bodies.erase(removeIt, _bodies.end());
 
-		const float deltaTime = SpaceManager::offsetIteration.load();
+	DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - beginTime);
+}
 
-		for (auto& body : _bodies) {
-			const auto acceleration = body.force / body.mass;
-			body.velocity += acceleration * deltaTime;
-			body.pos += body.velocity * deltaTime;
-		}
+void ParallelThreadSpace::Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress)
+{
+	for (size_t i = 0; i < count; ++i) {
+		for (size_t j = i + 1; j < count; ++j) {
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
 
-		_countObject.store(_bodies.size());
+			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				LOG("COLAPSE");
+				Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
+				if (!colapcePtr) {
+					colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
+				}
 
-		{
-			std::lock_guard lockCopyBufferMutex(_bufferMutex);
-			_bufferBodies.clear();
-			_bufferBodies.reserve(_bodies.size());
+				if (!colapcePtr) {
+					colapcePtr = &colapses.emplace_back();
+				}
 
-			for (const auto& body : _bodies) {
-				_bufferBodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
+				if (!_bodies[i].colapseData) {
+					_bodies[i].colapseData = colapcePtr;
+					colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
+					colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
+					colapcePtr->sumMass += _bodies[i].mass;
+					colapcePtr->objectIndex = i;
+				}
+				if (!_bodies[j].colapseData) {
+					_bodies[j].colapseData = colapcePtr;
+					colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
+					colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
+					colapcePtr->sumMass += _bodies[j].mass;
+				}
+			}
+			else {
+				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+				const auto forceDirection = direction.Normalized();
+				const auto force = forceDirection * forceMagnitude;
+
+				_bodies[i].force += force;
+				_bodies[j].force -= force;
 			}
 		}
 
-		_process.store(iter / SpaceManager::countOfIteration.load());
-		iter += 1.f;
+		_subProcess.fetch_add(dProgress);
 	}
-
-	DebugContext::Instance().updateDeltaTime.store((Engine::Callback::GetCurrentTime() - beginTime) / 1000);
 }

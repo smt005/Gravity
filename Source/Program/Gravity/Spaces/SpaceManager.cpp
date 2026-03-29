@@ -153,10 +153,6 @@ void SpaceManager::CollectDebugData()
 		debugContext.maxVelocity = std::max(debugContext.maxVelocity, glm::length(body.velocity));
 		debugContext.sumMass += body.mass;
 	}
-
-	auto& space = Current();
-	debugContext.subProgress = space.GetSubProgress();
-	debugContext.progress = space.GetProgress();
 }
 
 glm::vec3 SpaceManager::CenteMassSpace()

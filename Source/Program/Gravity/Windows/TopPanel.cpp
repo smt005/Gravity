@@ -58,10 +58,10 @@ void TopPanel::Render() {
 	{
 		std::string text;
 		if (_ups > 1) {
-			text = TO_STRING("\tups: {} ", static_cast<int>(_ups));
+			text = TO_STRING("\tups: {} ut: {}", static_cast<int>(_ups), static_cast<int>(_uTime));
 		}
 		else {
-			text = TO_STRING("\tups: {}/1000", static_cast<int>(_ups * 1000));
+			text = TO_STRING("\tups: {}/1000 ut: {}", static_cast<int>(_ups * 1000), static_cast<int>(_uTime));
 		}
 		ImGui::SameLine();
 		ImGui::TextColored(GetCollor(_ups), text.c_str());
@@ -71,6 +71,6 @@ void TopPanel::Render() {
 void TopPanel::Update(double dTime) {
 	_fps = 1 / dTime;
 
-	const double updateDeltaTime = DebugContext::Instance().updateDeltaTime.load();
-	_ups = 1 / updateDeltaTime;
+	_uTime = DebugContext::Instance().updateDeltaTime.load();
+	_ups = 1 / _uTime * 1000;
 }

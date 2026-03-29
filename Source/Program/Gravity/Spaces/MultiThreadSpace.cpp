@@ -1,8 +1,8 @@
 // ◦ Xyz ◦
 
 #include "MultiThreadSpace.h"
-#include <deque>
 #include <thread>
+#include <atomic>
 #include <glm/gtc/quaternion.hpp>
 #include <Callback/Callback.h>
 #include "../DebugContext.h"
@@ -51,16 +51,6 @@ std::vector<BodyData> MultiThreadSpace::GetBodies()
 	return bodies;
 }
 
-float MultiThreadSpace::GetSubProgress() const
-{
-	return _subProcess.load();
-}
-
-float MultiThreadSpace::GetProgress() const
-{
-	return _process.load();
-}
-
 void MultiThreadSpace::Update()
 {
 	auto& debugContext = DebugContext::Instance();
@@ -73,30 +63,31 @@ void MultiThreadSpace::Update()
 	debugContext.Clean();
 	debugContext.deltaTime = SpaceManager::offsetIteration.load();
 
-	_isBusy.store(true);
-	std::thread th([this]() {	
+	{
+		std::lock_guard lockMutex(_mutex);
+		_isBusy.store(true);
+	}
+
+	std::thread th([this]() {
 		UpdateInternal();
 		_isBusy.store(false);
 		});
 
+	LOG("MULTI [{}, {}] MAIN: {} SUB: {} countThread: {}", SpaceManager::paramA, SpaceManager::paramB, std::this_thread::get_id(), th.get_id(), std::thread::hardware_concurrency());
 	th.detach();
 }
 
 void MultiThreadSpace::UpdateInternal()
 {
-	struct Colapce {
-		int objectIndex = -1;
-		mystd::Vec3 sumPos;
-		mystd::Vec3 sumVelocity;
-		float sumMass = 0.f;
-	};
-
 	static mystd::Vec3 noForce;
-	_process.store(0.f);
+	
 	float iter = 0.f;
-	const double beginTime = Engine::Callback::GetCurrentTime();
 
-	while (iter < SpaceManager::countOfIteration.load()) {
+	std::lock_guard lockMutex(_mutex);
+	const double beginTime = Engine::Callback::GetCurrentTime();
+	_process.store(0.f);
+
+	{
 		for (auto& body : _bodies) {
 			body.force = noForce;
 			body.colapseData = nullptr;
@@ -105,48 +96,41 @@ void MultiThreadSpace::UpdateInternal()
 
 		const size_t count = _bodies.size();
 		std::deque<Colapce> colapses;
+		const float dProgress = 1.f / static_cast<float>(count);
 		_subProcess.store(0.f);
 
-		for (size_t i = 0; i < count; ++i) {
-			for (size_t j = i + 1; j < count; ++j) {
-				const auto direction = _bodies[j].pos - _bodies[i].pos;
-				const float distance = direction.Length();
+		if (!SpaceManager::paramA) {
+			const size_t countThread = std::thread::hardware_concurrency();
+			const size_t dSize = count / countThread;
+			std::vector<std::pair<size_t, size_t>> ranges;
+			ranges.emplace_back(0, dSize);
 
-				if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
-					Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
-					if (!colapcePtr) {
-						colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
-					}
+			for (size_t iTh = 1; iTh < countThread; ++iTh) {
+				ranges.emplace_back(ranges.back().first + dSize, ranges.back().second + dSize);
+			}
+			ranges.back().second = count;
 
-					if (!colapcePtr) {
-						colapcePtr = &colapses.emplace_back();
-					}
-
-					if (!_bodies[i].colapseData) {
-						_bodies[i].colapseData = colapcePtr;
-						colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
-						colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
-						colapcePtr->sumMass += _bodies[i].mass;
-						colapcePtr->objectIndex = i;
-					}
-					if (!_bodies[j].colapseData) {
-						_bodies[j].colapseData = colapcePtr;
-						colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
-						colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
-						colapcePtr->sumMass += _bodies[j].mass;
-					}
-				}
-				else {
-					const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
-					const auto forceDirection = direction.Normalized();
-					const auto force = forceDirection * forceMagnitude;
-
-					_bodies[i].force += force;
-					_bodies[j].force -= force;
+			if (!SpaceManager::paramB) {
+				for (const auto& rengePair : ranges) {
+					std::thread th([this, iBegin = rengePair.first, iEnd = rengePair.second, count, &colapses, dProgress]() {
+						Iterations(iBegin, iEnd, count, colapses, dProgress);
+						});
+					LOG("   sub thread: {}", th.get_id());
+					th.join();
 				}
 			}
-
-			_subProcess.store(static_cast<float>(i) / static_cast<float>(count));
+			else {
+				for (const auto& rengePair : ranges) {
+					std::thread th([this, iBegin = rengePair.first, iEnd = rengePair.second, count, &colapses, dProgress]() {
+						IterationsNoMutex(iBegin, iEnd, count, colapses, dProgress);
+						});
+					LOG("   sub thread: {} NO MUTEX", th.get_id());
+					th.join();
+				}
+			}
+		}
+		else {
+			IterationsNoMutex(0, count, count, colapses, dProgress);
 		}
 
 		for (Colapce& colapses : colapses) {
@@ -186,5 +170,100 @@ void MultiThreadSpace::UpdateInternal()
 		iter += 1.f;
 	}
 
-	DebugContext::Instance().updateDeltaTime.store((Engine::Callback::GetCurrentTime() - beginTime) / 1000);
+	DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - beginTime);
+}
+
+void MultiThreadSpace::Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress)
+{
+	for (size_t i = iBegin; i < iEnd; ++i) {
+		for (size_t j = i + 1; j < count; ++j) {
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
+
+			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				std::lock_guard lockIterationMutex(_iterationMutex);
+				LOG("COLAPSE");
+
+				Colapce* colapcePtr = _bodies[i].colapseData;
+				if (!colapcePtr) {
+					colapcePtr = _bodies[j].colapseData;
+				}
+				if (!colapcePtr) {
+					colapcePtr = &colapses.emplace_back();
+				}
+
+				if (!_bodies[i].colapseData) {
+					_bodies[i].colapseData = colapcePtr;
+					colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
+					colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
+					colapcePtr->sumMass += _bodies[i].mass;
+					colapcePtr->objectIndex = i;
+				}
+				if (!_bodies[j].colapseData) {
+					_bodies[j].colapseData = colapcePtr;
+					colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
+					colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
+					colapcePtr->sumMass += _bodies[j].mass;
+				}
+			}
+			else {
+				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+				const auto forceDirection = direction.Normalized();
+				const auto force = forceDirection * forceMagnitude;
+
+				std::lock_guard lockIterationMutex(_iterationMutex);
+				_bodies[i].force += force;
+				_bodies[j].force -= force;
+			}
+		}
+
+		_subProcess.fetch_add(dProgress);
+	}
+}
+
+void MultiThreadSpace::IterationsNoMutex(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress)
+{
+	for (size_t i = iBegin; i < iEnd; ++i) {
+		for (size_t j = i + 1; j < count; ++j) {
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
+
+			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				std::lock_guard lockIterationMutex(_iterationMutex);
+				LOG("COLAPSE");
+
+				Colapce* colapcePtr = _bodies[i].colapseData;
+				if (!colapcePtr) {
+					colapcePtr = _bodies[j].colapseData;
+				}
+				if (!colapcePtr) {
+					colapcePtr = &colapses.emplace_back();
+				}
+
+				if (!_bodies[i].colapseData) {
+					_bodies[i].colapseData = colapcePtr;
+					colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
+					colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
+					colapcePtr->sumMass += _bodies[i].mass;
+					colapcePtr->objectIndex = i;
+				}
+				if (!_bodies[j].colapseData) {
+					_bodies[j].colapseData = colapcePtr;
+					colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
+					colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
+					colapcePtr->sumMass += _bodies[j].mass;
+				}
+			}
+			else {
+				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+				const auto forceDirection = direction.Normalized();
+				const auto force = forceDirection * forceMagnitude;
+
+				_bodies[i].force += force;
+				_bodies[j].force -= force;
+			}
+		}
+
+		_subProcess.fetch_add(dProgress);
+	}
 }

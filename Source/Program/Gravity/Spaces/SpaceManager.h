@@ -100,7 +100,8 @@ public:
 public:
 	inline static std::atomic<float> offsetIteration = 1.f;
 	inline static std::atomic<float> countOfIteration = 1.f;
-	inline static std::atomic<bool> collapseBodies = true;
+	inline static std::atomic<bool> paramA = false;
+	inline static std::atomic<bool> paramB = false;
 
 	inline static std::vector<BodyData> bodies;
 	inline static mystd::shared_ptr<Space> currentSpace;

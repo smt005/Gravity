@@ -2,6 +2,8 @@
 
 #include "MainThreadProtSpace.h"
 #include <deque>
+#include <atomic>
+#include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
@@ -20,10 +22,12 @@ void MainThreadProtSpace::Update()
 
 	for (int iter = 1; iter <= SpaceManager::countOfIteration; ++iter)
 	{	
+		const double beginTime = Engine::Callback::GetCurrentTime();
 		UpdateColapse();
 		UpdateForce();
 		UpdateSpeed(deltaTime);
 		UpdatePos(deltaTime);
+		DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - beginTime);
 
 		debugContext.progress = static_cast<float>(iter / SpaceManager::countOfIteration);
 		debugContext.deltaTime = deltaTime;
@@ -34,10 +38,6 @@ void MainThreadProtSpace::Update()
 
 void MainThreadProtSpace::UpdateColapse()
 {
-	if (!SpaceManager::collapseBodies) {
-		return;
-	}
-
 	struct Colapce {
 		int objectIndex = -1;
 		glm::vec3 sumPos;

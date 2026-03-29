@@ -2,6 +2,7 @@
 
 #include "MainThreadSpace.h"
 #include <deque>
+#include <atomic>
 #include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
@@ -149,5 +150,5 @@ void MainThreadSpace::UpdateInternal()
 		iter += 1.f;
 	}
 
-	DebugContext::Instance().updateDeltaTime.store((Engine::Callback::GetCurrentTime() - beginTime) / 1000);
+	DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - beginTime);
 }

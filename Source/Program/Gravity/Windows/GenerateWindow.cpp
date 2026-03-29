@@ -86,7 +86,7 @@ void GenerateWindow::OnOpen()
 
 void GenerateWindow::Render()
 {
-	ImGuiWidthHandler width(100.f);
+	ImGuiWidthHandler width(125.f);
 
 	_countInput->Render();
 	_sizeInput->Render();
