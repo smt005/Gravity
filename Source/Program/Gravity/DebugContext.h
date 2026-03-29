@@ -28,7 +28,7 @@ public:
 	float progress = 0.f;
 
 	void Clean() {
-		countObject = 0;
+		countObject = 0.f;
 		diameterSpace = 0.f;
 		minForce = std::numeric_limits<float>::max();
 		maxForce = std::numeric_limits<float>::min();

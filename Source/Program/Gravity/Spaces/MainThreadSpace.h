@@ -2,6 +2,7 @@
 #pragma once
 
 #include "DefaultSpace.h"
+#include <atomic>
 #include <MyMath.h>
 
 class MainThreadSpace : public Space
@@ -9,6 +10,7 @@ class MainThreadSpace : public Space
 private:
 	struct Body final {
 		float mass = 1.f;
+		float radius = 1.f;
 		mystd::Vec3 pos;
 		mystd::Vec3 force;
 		mystd::Vec3 velocity;
@@ -39,11 +41,10 @@ public:
 	void Bodies(std::vector<BodyData>& bodies) override;
 
 	void Update() override;
-	void UpdateColapse();
-	void UpdateForce();
-	void UpdateSpeed(float deltaTime);
-	void UpdatePos(float deltaTime);
+	void UpdateInternal();
 
 protected:
 	std::vector<Body> _bodies;
+	std::atomic<float> _process;
+	std::atomic<float> _subProcess;
 };

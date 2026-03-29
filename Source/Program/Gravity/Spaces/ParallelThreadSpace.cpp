@@ -30,7 +30,7 @@ void ParallelThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
 
 void ParallelThreadSpace::Bodies(std::vector<BodyData>& bodies)
 {
-	std::lock_guard clockCopyBifferMutex(_copyBifferMutex);
+	std::lock_guard clockCopyBifferMutex(_bufferMutex);
 
 	if (!_bufferBodies.empty()) {
 		std::swap(bodies, _bufferBodies);
@@ -50,174 +50,128 @@ float ParallelThreadSpace::GetProgress() const
 
 void ParallelThreadSpace::Update()
 {
-	if (SpaceManager::countOfIteration == 0 || _isBusy.load()) {
+	auto& debugContext = DebugContext::Instance();
+	debugContext.countObject = _countObject.load();
+
+	if (_isBusy.load() || SpaceManager::countOfIteration.load() == 0) {
 		return;
 	}
 
-	auto& debugContext = DebugContext::Instance();
 	debugContext.Clean();
+	debugContext.deltaTime = SpaceManager::offsetIteration.load();
 
-	debugContext.countObject = _bodies.size();
-	const float deltaTime = SpaceManager::offsetIteration.load();
 	_isBusy.store(true);
-
-	std::thread th([this, deltaTime]() {
-		const double beginTime = Engine::Callback::GetCurrentTime();
-		
-		float iter = 0.f;
-
-		while (iter < SpaceManager::countOfIteration.load()) {
-			_process.store(iter / SpaceManager::countOfIteration.load());
-			_subProcess.store(0.f);
-			std::lock_guard lockMutex(_mutex);
-
-			UpdateColapse();
-			UpdateForce();
-			UpdateSpeed(deltaTime);
-			UpdatePos(deltaTime);
-
-			iter += 1.f;
-			_process.store(iter / SpaceManager::countOfIteration.load());
-			
-			{
-				std::lock_guard clockCopyBifferMutex(_copyBifferMutex);
-				_bufferBodies.clear();
-				for (const auto& body : _bodies) {
-					_bufferBodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
-				}
-			}
-		}
-
-		const double deltaTime = (Engine::Callback::GetCurrentTime() - beginTime) / 1000;
-		DebugContext::Instance().updateDeltaTime.store(deltaTime);
+	std::thread th([this]() {	
+		UpdateInternal();
 		_isBusy.store(false);
-	});
+		});
 
 	th.detach();
 }
 
-void ParallelThreadSpace::UpdateColapse()
+void ParallelThreadSpace::UpdateInternal()
 {
-	if (!SpaceManager::collapseBodies) {
-		return;
-	}
-
 	struct Colapce {
 		int objectIndex = -1;
-		glm::vec3 sumPos;
-		glm::vec3 sumVelocity;
-		float sumMass = 0;
+		mystd::Vec3 sumPos;
+		mystd::Vec3 sumVelocity;
+		float sumMass = 0.f;
 	};
 
-	std::deque<Colapce> colapses;
-	const size_t count = _bodies.size();
+	static mystd::Vec3 noForce;
+	_process.store(0.f);
+	float iter = 0.f;
+	const double beginTime = Engine::Callback::GetCurrentTime();
 
-	for (size_t i = 0; i < count; ++i) {
-		_bodies[i].colapseData = nullptr;
-	}
+	while (iter < SpaceManager::countOfIteration.load()) {
+		for (auto& body : _bodies) {
+			body.force = noForce;
+			body.colapseData = nullptr;
+			body.radius = body.Radius();
+		}
 
-	const float dSize = 1.f / static_cast<float>(count) / 2.f;
+		const size_t count = _bodies.size();
+		std::deque<Colapce> colapses;
+		_subProcess.store(0.f);
 
-	for (size_t i = 0; i < count; ++i) {
-		for (size_t j = 0; j < count; ++j) {
-			if (i == j) {
-				continue;
+		for (size_t i = 0; i < count; ++i) {
+			for (size_t j = i + 1; j < count; ++j) {
+				const auto direction = _bodies[j].pos - _bodies[i].pos;
+				const float distance = direction.Length();
+
+				if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+					Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
+					if (!colapcePtr) {
+						colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
+					}
+
+					if (!colapcePtr) {
+						colapcePtr = &colapses.emplace_back();
+					}
+
+					if (!_bodies[i].colapseData) {
+						_bodies[i].colapseData = colapcePtr;
+						colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
+						colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
+						colapcePtr->sumMass += _bodies[i].mass;
+						colapcePtr->objectIndex = i;
+					}
+					if (!_bodies[j].colapseData) {
+						_bodies[j].colapseData = colapcePtr;
+						colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
+						colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
+						colapcePtr->sumMass += _bodies[j].mass;
+					}
+				}
+				else {
+					const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+					const auto forceDirection = direction.Normalized();
+					const auto force = forceDirection * forceMagnitude;
+
+					_bodies[i].force += force;
+					_bodies[j].force -= force;
+				}
 			}
 
-			const float dist = glm::distance(_bodies[i].pos, _bodies[j].pos);
+			_subProcess.store(static_cast<float>(i) / static_cast<float>(count));
+		}
 
-			if (dist <= (_bodies[i].Radius() + _bodies[j].Radius())) {
-				Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
-				if (!colapcePtr) {
-					colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
-				}
+		for (Colapce& colapses : colapses) {
+			_bodies[colapses.objectIndex].pos = colapses.sumPos / colapses.sumMass;
+			_bodies[colapses.objectIndex].velocity = colapses.sumVelocity / colapses.sumMass;
+			_bodies[colapses.objectIndex].mass = colapses.sumMass;
+			_bodies[colapses.objectIndex].colapseData = nullptr;
+		}
 
-				if (!colapcePtr) {
-					colapcePtr = &colapses.emplace_back();
-				}
+		const auto removeIt = std::remove_if(_bodies.begin(), _bodies.end(), [](const auto& object) {
+			return object.colapseData;
+			});
 
-				if (!_bodies[i].colapseData) {
-					_bodies[i].colapseData = colapcePtr;
-					colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
-					colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
-					colapcePtr->sumMass += _bodies[i].mass;
-					colapcePtr->objectIndex = i;
-				}
-				if (!_bodies[j].colapseData) {
-					_bodies[j].colapseData = colapcePtr;
-					colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
-					colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
-					colapcePtr->sumMass += _bodies[j].mass;
-				}
+		_bodies.erase(removeIt, _bodies.end());
+
+		const float deltaTime = SpaceManager::offsetIteration.load();
+
+		for (auto& body : _bodies) {
+			const auto acceleration = body.force / body.mass;
+			body.velocity += acceleration * deltaTime;
+			body.pos += body.velocity * deltaTime;
+		}
+
+		_countObject.store(_bodies.size());
+
+		{
+			std::lock_guard lockCopyBufferMutex(_bufferMutex);
+			_bufferBodies.clear();
+			_bufferBodies.reserve(_bodies.size());
+
+			for (const auto& body : _bodies) {
+				_bufferBodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
 			}
 		}
 
-		_subProcess.fetch_add(dSize);
+		_process.store(iter / SpaceManager::countOfIteration.load());
+		iter += 1.f;
 	}
 
-	for (Colapce& colapses : colapses) {
-		_bodies[colapses.objectIndex].pos = colapses.sumPos / colapses.sumMass;
-		_bodies[colapses.objectIndex].velocity = colapses.sumVelocity / colapses.sumMass;
-		_bodies[colapses.objectIndex].mass = colapses.sumMass;
-		_bodies[colapses.objectIndex].colapseData = nullptr;
-	}
-
-	const auto removeIt = std::remove_if(_bodies.begin(), _bodies.end(), [](const auto& object) {
-		return object.colapseData;
-		});
-
-	size_t removed = std::distance(removeIt, _bodies.end());
-	_bodies.erase(removeIt, _bodies.end());
-
-	colapses.clear();
-}
-
-void ParallelThreadSpace::UpdateForce()
-{
-	// TODO:
-	auto& bodies = _bodies;
-	static glm::vec3 noForce(0.0f);
-
-	for (auto& body : bodies) {
-		body.force = noForce;
-	}
-
-	const size_t count = bodies.size();
-	const float dSize = 1.f / static_cast<float>(count) / 2.f;
-
-	for (size_t i = 0; i < count; ++i) {
-		for (size_t j = i + 1; j < count; ++j) {
-			const glm::vec3 direction = _bodies[j].pos - _bodies[i].pos;
-			float distanceSquared = glm::length(direction);
-			if (distanceSquared < 1.0f) {
-				distanceSquared = 1.f;
-				//throw; // TODO:
-			}
-
-			const float distance = std::sqrt(distanceSquared);
-			const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
-			const glm::vec3 forceDirection = glm::normalize(direction);
-			const glm::vec3 force = forceMagnitude * forceDirection;
-
-			_bodies[i].force += force;
-			_bodies[j].force -= force;
-		}
-
-		_subProcess.fetch_add(dSize);
-	}
-}
-
-void ParallelThreadSpace::UpdateSpeed(float deltaTime)
-{
-	for (auto& body : _bodies) {
-		glm::vec3 acceleration = body.force / body.mass;
-		body.velocity += acceleration * deltaTime;
-	}
-}
-
-void ParallelThreadSpace::UpdatePos(float deltaTime)
-{
-	for (auto& body : _bodies) {
-		body.pos += body.velocity * deltaTime;
-	}
+	DebugContext::Instance().updateDeltaTime.store((Engine::Callback::GetCurrentTime() - beginTime) / 1000);
 }

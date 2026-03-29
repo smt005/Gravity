@@ -3,28 +3,26 @@
 
 #include "Space.h"
 #include <mutex>
+#include <MyMath.h>
 #include "BodyData.h"
 
-class ParallelThreadSpace : public Space
+class ParallelThreadSpace final : public Space
 {
 private:
 	struct Body final {
 		float mass = 1.f;
-		glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
-		glm::vec3 force = glm::vec3(0.f, 0.f, 0.f);
-		glm::vec3 velocity = glm::vec3(0.f, 0.f, 0.f);
-
-		// TODO: Убрать/перенести в другое место
+		mystd::Vec3 pos;
+		mystd::Vec3 force;
+		mystd::Vec3 velocity;
+		float radius = 0.f;
 		void* colapseData = nullptr;
-		float minDist = std::numeric_limits<float>::max();
-		float maxForce = std::numeric_limits<float>::min();
 
 	public:
 		Body() = default;
 		Body(const BodyData& bodyData)
 			: mass(bodyData.mass)
-			, pos(bodyData.pos)
-			, velocity(bodyData.velocity)
+			, pos(bodyData.pos.x, bodyData.pos.y, bodyData.pos.z)
+			, velocity(bodyData.velocity.x, bodyData.velocity.y, bodyData.velocity.z)
 		{
 		}
 
@@ -48,18 +46,15 @@ public:
 	float GetProgress() const override;
 
 	void Update() override;
-	void UpdateColapse();
-	void UpdateForce();
-	void UpdateSpeed(float deltaTime);
-	void UpdatePos(float deltaTime);
+	void UpdateInternal();
 
-
-protected:
+private:
 	std::atomic<bool> _isBusy;
+	std::atomic<int> _countObject;
 	std::atomic<float> _subProcess;
 	std::atomic<float> _process;
 	std::vector<BodyData> _bufferBodies;
 	std::vector<Body> _bodies;
 	mutable std::mutex _mutex;
-	mutable std::mutex _copyBifferMutex;
+	mutable std::mutex _bufferMutex;
 };
