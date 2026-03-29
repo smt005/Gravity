@@ -7,10 +7,10 @@
 
 using namespace GeneratorSpace;
 
-std::vector<Body> Default::Generate()
+std::vector<BodyData> Default::Generate()
 {
 	GetData()["generator"] = Engine::GetClassName<Default>();
-	std::vector<Body> bodies(3);
+	std::vector<BodyData> bodies(3);
 
 	auto& mainBody = bodies[0];
 	mainBody.mass = 1000;

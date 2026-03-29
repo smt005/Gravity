@@ -126,7 +126,7 @@ void MainThreadProtSpace::UpdateForce()
 			}
 
 			const float distance = std::sqrt(distanceSquared);
-			const float forceMagnitude = Body::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
+			const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
 			const glm::vec3 forceDirection = glm::normalize(direction);
 			const glm::vec3 force = forceMagnitude * forceDirection;
 

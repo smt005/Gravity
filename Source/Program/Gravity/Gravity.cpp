@@ -13,12 +13,15 @@
 #include "Windows/AlgorithmWindow.h"
 #include "Windows/BottomPanel.h"
 #include "Render/GravityRender.h"
+#include "Tests/Test.h"
 #include <Logs.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
 bool Gravity::Init(std::string_view params)
 {
+	//Tests::FunVec3();
+
 	InitFileManagers();
 	InitCallback();
 	InitWidows();

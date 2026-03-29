@@ -6,7 +6,7 @@
 #include <glm/vec3.hpp>
 #include <mystd_memory.h>
 #include <Common/Common.h>
-#include "Body.h"
+#include "BodyData.h"
 
 class Space
 {
@@ -23,11 +23,9 @@ public:
 
 	virtual void Clear() = 0;
 	virtual void Update() = 0;
-	virtual void AddBody(Body& body) = 0;
-	virtual void AddBody(Body&& body) = 0;
-	virtual void AddBodies(std::vector<Body>& bodies) = 0;
-	virtual void AddBodies(std::vector<Body>&& bodies) = 0;
-	virtual void Bodies(std::vector<Body>& bodies) const = 0;
+	virtual void AddBody(const BodyData& body) = 0;
+	virtual void AddBodies(const std::vector<BodyData>& bodies) = 0;
+	virtual void Bodies(std::vector<BodyData>& bodies) = 0;
 	
 	virtual float GetSubProgress() const {
 		return -1;
@@ -48,4 +46,7 @@ public:
 private:
 	mutable std::string _name;
 	mutable size_t _id;
+
+public:
+	inline static float constantGravity = 6.67430e-11f; // Гравитационная постоянная
 };

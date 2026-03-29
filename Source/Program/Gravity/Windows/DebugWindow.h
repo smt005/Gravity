@@ -16,9 +16,6 @@ namespace Windows
 		void OnOpen() override;
 		void OnClose() override;
 
-		void CameraToMinMassObject();
-		void CameraToMaxMassObject();
-
 	private:
 		int _fps = 0;
 		int _minFps = std::numeric_limits<int>::max();

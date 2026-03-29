@@ -7,7 +7,7 @@
 
 using namespace GeneratorSpace;
 
-std::vector<Body> Box::Generate()
+std::vector<BodyData> Box::Generate()
 {
 	auto& jsonData = GetData();
 	jsonData["generator"] = Engine::GetClassName<Box>();
@@ -20,7 +20,7 @@ std::vector<Body> Box::Generate()
 	const float minPos = -static_cast<float>(size) / 2.f;
 	const float maxPos =  static_cast<float>(size) / 2.f;
 
-	std::vector<Body> bodies;
+	std::vector<BodyData> bodies;
 	bodies.reserve(count);
 
 	for (size_t i = 0; i < count; ++i) {

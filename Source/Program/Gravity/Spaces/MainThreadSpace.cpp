@@ -5,6 +5,31 @@
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
+void MainThreadSpace::Clear()
+{
+	_bodies.clear();
+}
+
+void MainThreadSpace::AddBody(const BodyData& body)
+{
+	_bodies.emplace_back(body);
+}
+
+void MainThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
+{
+	_bodies.append_range(bodies);
+}
+
+void MainThreadSpace::Bodies(std::vector<BodyData>& bodies)
+{
+	bodies.clear();
+	bodies.reserve(_bodies.size());
+
+	for (const auto& body : _bodies) {
+		bodies.emplace_back(body.mass, body.pos.x(), body.pos.y(), body.pos.z(), body.velocity.x(), body.velocity.y(), body.velocity.z());
+	}
+}
+
 void MainThreadSpace::Update()
 {
 	if (SpaceManager::countOfIteration == 0) {
@@ -19,7 +44,7 @@ void MainThreadSpace::Update()
 	float deltaTime = SpaceManager::offsetIteration.load();
 
 	for (int iter = 1; iter <= SpaceManager::countOfIteration; ++iter)
-	{	
+	{
 		UpdateColapse();
 		UpdateForce();
 		UpdateSpeed(deltaTime);
@@ -40,8 +65,8 @@ void MainThreadSpace::UpdateColapse()
 
 	struct Colapce {
 		int objectIndex = -1;
-		glm::vec3 sumPos;
-		glm::vec3 sumVelocity;
+		mystd::Vec3 sumPos;
+		mystd::Vec3 sumVelocity;
 		float sumMass = 0;
 	};
 
@@ -58,7 +83,7 @@ void MainThreadSpace::UpdateColapse()
 				continue;
 			}
 
-			const float dist = glm::distance(_bodies[i].pos, _bodies[j].pos);
+			const float dist = mystd::Vec3::Distance(_bodies[i].pos, _bodies[j].pos);
 
 			if (dist <= (_bodies[i].Radius() + _bodies[j].Radius())) {
 				Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
@@ -108,7 +133,7 @@ void MainThreadSpace::UpdateForce()
 {
 	// TODO:
 	auto& bodies = _bodies;
-	static glm::vec3 noForce(0.0f);
+	static mystd::Vec3 noForce;
 
 	for (auto& body : bodies) {
 		body.force = noForce;
@@ -118,17 +143,17 @@ void MainThreadSpace::UpdateForce()
 
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = i + 1; j < count; ++j) {
-			const glm::vec3 direction = _bodies[j].pos - _bodies[i].pos;
-			float distanceSquared = glm::length(direction);
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			float distanceSquared = direction.Length();
 			if (distanceSquared < 1.0f) {
 				distanceSquared = 1.f;
 				//throw; // TODO:
 			}
 
 			const float distance = std::sqrt(distanceSquared);
-			const float forceMagnitude = Body::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
-			const glm::vec3 forceDirection = glm::normalize(direction);
-			const glm::vec3 force = forceMagnitude * forceDirection;
+			const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
+			const auto forceDirection = direction.Normalized();
+			const auto force = forceDirection * forceMagnitude;
 
 			_bodies[i].force += force;
 			_bodies[j].force -= force;
@@ -139,7 +164,7 @@ void MainThreadSpace::UpdateForce()
 void MainThreadSpace::UpdateSpeed(float deltaTime)
 {
 	for (auto& body : _bodies) {
-		glm::vec3 acceleration = body.force / body.mass;
+		const auto acceleration = body.force / body.mass;
 		body.velocity += acceleration * deltaTime;
 	}
 }

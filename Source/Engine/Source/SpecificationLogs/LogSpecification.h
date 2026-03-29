@@ -9,8 +9,8 @@
 
 namespace glm
 {
-	std::ostream& operator<<(std::ostream& os, mat4x4 const& m);
-	std::ostream& operator<<(std::ostream& os, vec4 const& v);
-	std::ostream& operator<<(std::ostream& os, vec3 const& v);
-	std::ostream& operator<<(std::ostream& os, vec2 const& v);
+	std::ostream& operator<<(std::ostream& os, const mat4x4& m);
+	std::ostream& operator<<(std::ostream& os, const vec4& v);
+	std::ostream& operator<<(std::ostream& os, const vec3& v);
+	std::ostream& operator<<(std::ostream& os, const vec2& v);
 }

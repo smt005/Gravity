@@ -2,8 +2,8 @@
 #pragma once
 
 #include <iostream>
-#include <sstream>
 #include <mystd_memory.h>
+#include <MyMath.h>
 
 namespace mystd
 {
@@ -17,4 +17,6 @@ namespace mystd
 		os << *sPtr;
 		return os;
 	};
+
+	std::ostream& operator<<(std::ostream& os, const Vec3& v);
 }

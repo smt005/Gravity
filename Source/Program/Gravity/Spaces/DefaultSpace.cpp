@@ -31,32 +31,22 @@ void DefaultSpace::Update() {
 	}
 }
 
-void DefaultSpace::AddBody(Body& body)
+void DefaultSpace::AddBody(const BodyData& body)
 {
 	_bodies.emplace_back(body);
 }
 
-void DefaultSpace::AddBody(Body&& body)
-{
-	_bodies.emplace_back(std::forward<Body>(body));
-}
-
-void DefaultSpace::AddBodies(std::vector<Body>& bodies)
+void DefaultSpace::AddBodies(const std::vector<BodyData>& bodies)
 {
 	_bodies.append_range(bodies);
 }
 
-void DefaultSpace::AddBodies(std::vector<Body>&& bodies)
+void DefaultSpace::Bodies(std::vector<BodyData>& bodies)
 {
-	if (_bodies.empty()) {
-		std::swap(_bodies, bodies);
-	}
-	else {
-		_bodies.append_range(bodies);
-	}
-}
+	bodies.clear();
+	bodies.reserve(_bodies.size());
 
-void DefaultSpace::Bodies(std::vector<Body>& bodies) const
-{
-	bodies = _bodies;
+	for (const auto& body : _bodies) {
+		bodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
+	}
 }

@@ -7,7 +7,7 @@
 
 using namespace GeneratorSpace;
 
-std::vector<Body> OnOrbit::Generate()
+std::vector<BodyData> OnOrbit::Generate()
 {
 	auto& jsonData = GetData();
 	jsonData["generator"] = Engine::GetClassName<OnOrbit>();
@@ -21,7 +21,7 @@ std::vector<Body> OnOrbit::Generate()
 	const float minPos = -static_cast<float>(size) / 2.f;
 	const float maxPos =  static_cast<float>(size) / 2.f;
 
-	std::vector<Body> bodies;
+	std::vector<BodyData> bodies;
 	bodies.reserve(count);
 
 	glm::vec3 pos(0.f, 0.f, 0.f);

@@ -84,7 +84,6 @@ void GenerateWindow::OnOpen()
 	OnResize();
 }
 
-
 void GenerateWindow::Render()
 {
 	ImGuiWidthHandler width(100.f);

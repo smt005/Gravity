@@ -16,38 +16,26 @@ void ParallelThreadSpace::Clear()
 	_bodies.clear();
 }
 
-void ParallelThreadSpace::AddBody(Body& body)
+void ParallelThreadSpace::AddBody(const BodyData& body)
 {
 	std::lock_guard lockMutex(_mutex);
 	_bodies.emplace_back(body);
 }
 
-void ParallelThreadSpace::AddBody(Body&& body)
-{
-	std::lock_guard lockMutex(_mutex);
-	_bodies.emplace_back(std::forward<Body>(body));
-}
-
-void ParallelThreadSpace::AddBodies(std::vector<Body>& bodies)
+void ParallelThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
 {
 	std::lock_guard lockMutex(_mutex);
 	_bodies.append_range(bodies);
 }
 
-void ParallelThreadSpace::AddBodies(std::vector<Body>&& bodies)
+void ParallelThreadSpace::Bodies(std::vector<BodyData>& bodies)
 {
-	std::lock_guard lockMutex(_mutex);
-	if (_bodies.empty()) {
-		std::swap(_bodies, bodies);
-	}
-	else {
-		_bodies.append_range(bodies);
-	}
-}
+	std::lock_guard clockCopyBifferMutex(_copyBifferMutex);
 
-void ParallelThreadSpace::Bodies(std::vector<Body>& bodies) const
-{
-	bodies = _bufferBodies;
+	if (!_bufferBodies.empty()) {
+		std::swap(bodies, _bufferBodies);
+		_bufferBodies.clear();
+	}
 }
 
 float ParallelThreadSpace::GetSubProgress() const
@@ -90,7 +78,14 @@ void ParallelThreadSpace::Update()
 
 			iter += 1.f;
 			_process.store(iter / SpaceManager::countOfIteration.load());
-			_bufferBodies = _bodies;
+			
+			{
+				std::lock_guard clockCopyBifferMutex(_copyBifferMutex);
+				_bufferBodies.clear();
+				for (const auto& body : _bodies) {
+					_bufferBodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
+				}
+			}
 		}
 
 		const double deltaTime = (Engine::Callback::GetCurrentTime() - beginTime) / 1000;
@@ -200,7 +195,7 @@ void ParallelThreadSpace::UpdateForce()
 			}
 
 			const float distance = std::sqrt(distanceSquared);
-			const float forceMagnitude = Body::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
+			const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / (distanceSquared * distanceSquared);
 			const glm::vec3 forceDirection = glm::normalize(direction);
 			const glm::vec3 force = forceMagnitude * forceDirection;
 

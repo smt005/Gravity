@@ -64,7 +64,7 @@ void GeneratorSpace::Load()
 	ApplyGenerate<Default>();
 }
 
-glm::vec3 GeneratorSpace::GetVelocityOnOrbit(Body& body, const Body& mainBody)
+glm::vec3 GeneratorSpace::GetVelocityOnOrbit(BodyData& body, const BodyData& mainBody)
 {
 	glm::vec3 gravityVector = body.pos - mainBody.pos;
 	glm::vec3 normalizeGravityVector = glm::normalize(gravityVector);
@@ -74,6 +74,6 @@ glm::vec3 GeneratorSpace::GetVelocityOnOrbit(Body& body, const Body& mainBody)
 		normalizeGravityVector.x * std::sin(g90) + normalizeGravityVector.y * std::cos(g90),
 		0.f);
 
-	velocity *= std::sqrtf(Body::constantGravity * mainBody.mass / glm::length(gravityVector));
+	velocity *= std::sqrtf(Space::constantGravity * mainBody.mass / glm::length(gravityVector));
 	return velocity;
 }

@@ -88,18 +88,13 @@ public:
 		space.AddBodies(TGenerator::Generate());
 	};
 
-	static glm::vec3 PosOfMinSpeedObject();
-	static glm::vec3 PosOfMaxSpeedObject();
-	static glm::vec3 PosOfMinMassObject();
-	static glm::vec3 PosOfMaxMassObject();
-
 //private: // TODO:
 public:
 	inline static std::atomic<float> offsetIteration = 1.f;
 	inline static std::atomic<float> countOfIteration = 1.f;
 	inline static std::atomic<bool> collapseBodies = true;
 
-	inline static std::vector<Body> bodies;
+	inline static std::vector<BodyData> bodies;
 	inline static mystd::shared_ptr<Space> currentSpace;
 	inline static std::vector<mystd::shared_ptr<Space>> spaces;
 	inline static const std::string_view currentSpaceKey = "currentSpace";

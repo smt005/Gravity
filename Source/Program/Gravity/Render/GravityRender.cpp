@@ -8,7 +8,6 @@
 #include <Object/Texture.h>
 #include "../Shaders/GravityShader.h"
 #include "../Cameras/GravityCameras.h"
-#include "../Spaces/Body.h"
 #include "../Spaces/SpaceManager.h"
 
 void GravityRender::Init()
@@ -48,6 +47,7 @@ void GravityRender::Render()
 		float farDist= glm::distance(camPos, SpaceManager::bodies.front().pos);
 		float nearDist = glm::distance(camPos, SpaceManager::bodies.back().pos);
 		float spaceDist = farDist - nearDist;
+		std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.f };
 
 		for (const auto& body : SpaceManager::bodies) {
 			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - body.pos);
@@ -73,11 +73,9 @@ void GravityRender::Render()
 			distFactor -= nearDist;
 			distFactor /= spaceDist;
 
-			std::array<float, 4> color;
-			color[0] = 1.f;
 			color[1] = 1.f - distFactor;
-			color[2] = 0.5f - distFactor * 0.5f;
-			color[3] = 1.f;
+			color[2] = 1.f - distFactor;
+
 			shader.SetColor(color.data());
 
 			Draw::Render(SHAPES["Sprite", true, true].mesh);

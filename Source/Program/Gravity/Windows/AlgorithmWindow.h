@@ -6,6 +6,7 @@
 #include <functional>
 #include <GuiWindow/ImGuiHelp.h>
 #include <Common/Common.h>
+#include "../Spaces/BodyData.h"
 #include "../Spaces/SpaceManager.h"
 #include "../Spaces/Space.h"
 #include "../Spaces/DefaultSpace.h"
@@ -39,7 +40,7 @@ namespace Windows
 
 			if (ImGui::Button(nameBtn.data(), buttonSize)) {
 				// TODO: Перенемти в SpaceManager
-				std::vector<Body> bodies;
+				std::vector<BodyData> bodies;
 				SpaceManager::Current().Bodies(bodies);
 				auto& newSpace = SpaceManager::SetCurrent<T>();
 				newSpace.Clear();

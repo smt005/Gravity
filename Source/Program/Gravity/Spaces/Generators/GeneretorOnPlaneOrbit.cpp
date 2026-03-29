@@ -7,10 +7,10 @@
 
 using namespace GeneratorSpace;
 
-std::vector<Body> OnPlaneOrbit::Generate()
+std::vector<BodyData> OnPlaneOrbit::Generate()
 {
 	auto& jsonData = GetData();
-	jsonData["generator"] = Engine::GetClassName<Box>();
+	jsonData["generator"] = Engine::GetClassName<OnPlaneOrbit>();
 
 	const int count = Engine::GetJsonValue("count", jsonData, 300);
 	const int size = Engine::GetJsonValue("size", jsonData, 100);
@@ -21,7 +21,7 @@ std::vector<Body> OnPlaneOrbit::Generate()
 	const float minPos = -static_cast<float>(size) / 2.f;
 	const float maxPos =  static_cast<float>(size) / 2.f;
 
-	std::vector<Body> bodies;
+	std::vector<BodyData> bodies;
 	bodies.reserve(count);
 
 	glm::vec3 pos(0.f, 0.f, 0.f);

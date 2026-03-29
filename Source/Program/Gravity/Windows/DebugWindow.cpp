@@ -41,8 +41,8 @@ void DebugWindow::Render() {
 	ImGui::Text("Diameter space: %f", debugContext.diameterSpace);
 	
 	ImGui::Separator();
-	ImGui::Text("     Min force: %f", debugContext.minForce * 1000000.f);
-	ImGui::Text("     Max force: %f", debugContext.maxForce * 1000000.f);
+	//ImGui::Text("     Min force: %f", debugContext.minForce * 1000000.f);
+	//ImGui::Text("     Max force: %f", debugContext.maxForce * 1000000.f);
 	
 	ImGui::Separator();
 	ImGui::Text("     Min speed: %f", debugContext.minVelocity * 1000000.f);
@@ -50,19 +50,7 @@ void DebugWindow::Render() {
 	
 	ImGui::Separator();
 	ImGui::Text("      Min mass: %f", debugContext.minMass);
-	if (ImGui::IsItemHovered()) {
-		if (ImGui::IsItemClicked()) {
-			CameraToMinMassObject();
-		}
-	}
-
 	ImGui::Text("      Max mass: %f", debugContext.maxMass);
-	if (ImGui::IsItemHovered()) {
-		if (ImGui::IsItemClicked()) {
-			CameraToMaxMassObject();
-		}
-	}
-
 	ImGui::Text("      Sum mass: %f", debugContext.sumMass);
 
 	ImGui::Separator();
@@ -96,14 +84,4 @@ void DebugWindow::Update(double dTime) {
 	_fps = 1 / dTime;
 	_minFps = std::min(_fps, _minFps);
 	_maxFps = std::max(_fps, _maxFps);
-}
-
-void DebugWindow::CameraToMinMassObject()
-{
-	Engine::Camera::GetLink().SetPos(SpaceManager::PosOfMinMassObject());
-}
-
-void DebugWindow::CameraToMaxMassObject()
-{
-	Engine::Camera::GetLink().SetPos(SpaceManager::PosOfMaxMassObject());
 }
