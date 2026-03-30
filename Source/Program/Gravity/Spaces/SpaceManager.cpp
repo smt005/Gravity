@@ -2,7 +2,9 @@
 
 #include "SpaceManager.h"
 #include <numbers>
+#include <chrono>
 #include <glm/glm.hpp>
+#include <Files/FileManager.h>
 #include <Common/Common.h>
 #include "Space.h"
 #include "DefaultSpace.h"
@@ -15,6 +17,11 @@
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
 #include <Logs.h>
+
+namespace {
+	std::string_view spaceDirectory = "Spaces";
+	std::string_view curentSpaceFileNamePath = "Spaces/Current.space";
+}
 
 Space& SpaceManager::Current()
 {
@@ -63,13 +70,47 @@ void SpaceManager::Load()
 		SetCurrentPtr<DefaultSpace>();
 	}
 
-	GeneratorSpace::Load();
+	if (!LoadSpace()) {
+		GeneratorSpace::Load();
+	}
 }
 
 void SpaceManager::Save()
 {
 	auto& settingData = GeneratorSpace::GetData();
 	settingData["class"] = Current().GetName();
+	SaveSpace();
+}
+
+bool SpaceManager::LoadSpace()
+{
+	const std::vector<BodyData> spaceData = Engine::FileManager::Get("write").ReadFile<std::vector<BodyData>>(curentSpaceFileNamePath);
+	if (spaceData.empty()) {
+		return false;
+	}
+
+	auto& space = Current();
+	space.Clear();
+	space.AddBodies(spaceData);
+
+	return true;
+}
+
+void SpaceManager::SaveSpace(bool addTimeToName)
+{
+	std::vector<BodyData> spaceData = Current().GetBodies();
+
+	if (addTimeToName) {
+		using namespace std::chrono;
+		auto now = system_clock::now();
+		auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;
+		const std::string timeStr = std::format("{:%d_%m_%Y_%H_%M_%S}", now);
+		const std::string fileNamePath = TO_STRING("Spaces/Current_{}.space", timeStr);
+		Engine::FileManager::Get("write").WriteFile(spaceData, fileNamePath);
+	}
+	else {
+		Engine::FileManager::Get("write").WriteFile(spaceData, curentSpaceFileNamePath);
+	}
 }
 
 nlohmann::json& SpaceManager::GetSettingData(std::string_view path, bool create)

@@ -21,6 +21,7 @@ namespace Engine
 		const std::string& GetName() const;
 		const std::filesystem::path& GetRoot() const;
 		const std::filesystem::path& SetRoot(const std::filesystem::path& path);
+		std::vector<std::filesystem::path> GetFilesRecursive(const std::filesystem::path& directory);
 
 		std::string ReadTextFile(const std::filesystem::path& filePath) const;
 
@@ -71,7 +72,7 @@ namespace Engine
 		{
 			const std::filesystem::path fullFilepath = _rootPath / filePath;
 			std::filesystem::create_directories(fullFilepath.parent_path());
-			std::ofstream out(fullFilepath);
+			std::ofstream out(fullFilepath, std::ios::binary);
 
 			if (!out) {
 				LOG("[FileManager::WriteTextFile] Failed write file: '{}': '{}'", filePath, fullFilepath);
@@ -79,7 +80,7 @@ namespace Engine
 			}
 
 			using TypeElement = std::ranges::range_value_t<T>;
-;			const std::uintmax_t size = data.size() * sizeof(TypeElement);
+			const std::uintmax_t size = data.size() * sizeof(TypeElement);
 			out.write(reinterpret_cast<const char*>(data.data()), size);
 
 			return out.good();

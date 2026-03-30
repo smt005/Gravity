@@ -31,6 +31,19 @@ const std::filesystem::path& FileManager::SetRoot(const std::filesystem::path& p
     return GetRoot();
 }
 
+std::vector<std::filesystem::path> FileManager::GetFilesRecursive(const std::filesystem::path& directory)
+{
+    std::vector<std::filesystem::path> files;
+    const std::filesystem::path fullDirectoryPath = _rootPath / directory;
+
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(fullDirectoryPath)) {
+        if (entry.is_regular_file())
+            files.push_back(entry.path());
+    }
+
+    return files;
+}
+
 std::string FileManager::ReadTextFile(const std::filesystem::path& filePath) const
 {
     return ReadFile<std::string>(filePath);

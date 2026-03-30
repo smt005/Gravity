@@ -106,6 +106,16 @@ void GenerateWindow::Render()
 	const static ImVec2 buttonSize(200.f, 20.f);
 
 	ImGui::Separator();
+	if (ImGui::Button("Save space", buttonSize)) {
+		SpaceManager::SaveSpace(true);
+	}
+
+	ImGui::Dummy(ImVec2(0.f, 0.f));
+	if (ImGui::Button("Load space", buttonSize)) {
+		SpaceManager::LoadSpace();
+	}
+
+	ImGui::Separator();
 	if (ImGui::Button("Reset camera", buttonSize)) {
 		cameras::ResetCamera();
 	}
