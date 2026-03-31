@@ -2,7 +2,7 @@
 #pragma once
 
 #include <string>
-#include <nlohmann/json.hpp>
+#include <Common/JsonHelper.h>
 #include <Singletone.h>
 
 namespace Engine
@@ -10,17 +10,17 @@ namespace Engine
 	class Settings : public mystd::Singletone<Settings>
 	{
 	public:
-		nlohmann::json& LoadSettings();
+		Json& LoadSettings();
 		void SaveSettings();
-		nlohmann::json& JsonData();
-		const nlohmann::json& JsonData() const;
-		const nlohmann::json* JsonData(std::string_view path) const;
-		nlohmann::json* JsonData(std::string_view path, bool create);
+		Json& JsonData();
+		const Json& JsonData() const;
+		const Json* JsonData(std::string_view path) const;
+		Json* JsonData(std::string_view path, bool create);
 
-		nlohmann::json operator [](std::string_view keys);
+		Json operator [](std::string_view keys);
 
 		template <typename T>
-		nlohmann::json operator [](std::string_view keys, T&& defValue) {
+		Json operator [](std::string_view keys, T&& defValue) {
 			auto* jsonValue = JsonData(keys);
 			return jsonValue ? jsonValue->get<T>() : std::forward<T>(defValue);
 		}
@@ -33,7 +33,7 @@ namespace Engine
 		bool fullScreen = false; // TODO:
 
 	private:
-		nlohmann::json _jsonData;
+		Json _jsonData;
 
 	private:
 		inline static const std::string_view settingsFileName = "Settings.json";

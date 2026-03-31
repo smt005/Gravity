@@ -2,7 +2,6 @@
 #include "Camera.h"
 #include <glm/ext/matrix_clip_space.hpp>
 #include <Files/Settings.h>
-#include <Common/JsonHelper.h>
 #include "Callback/Callback.h"
 
 using namespace Engine;
@@ -69,9 +68,7 @@ void Camera::Save()
 	}
 }
 
-bool Camera::Load(const nlohmann::json& data) {
-	using Json = nlohmann::json;
-
+bool Camera::Load(const Json& data) {
 	if (data.empty()) {
 		return false;
 	}
@@ -140,9 +137,7 @@ bool Camera::Load(const nlohmann::json& data) {
 	return true;
 }
 
-void Camera::Save(nlohmann::json& data) {
-	using Json = nlohmann::json;
-
+void Camera::Save(Json& data) {
 	data["type"] = _type == Type::PERSPECTIVE ? "perspective" : "ortho";
 
 	if (_pos.length() == 0.f) {

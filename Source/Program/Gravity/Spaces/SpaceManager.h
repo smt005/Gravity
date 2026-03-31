@@ -75,7 +75,7 @@ public:
 	static bool LoadSpace();
 	static void SaveSpace(bool addTimeToName = false);
 
-	static nlohmann::json& GetSettingData(std::string_view path = "", bool create = false);
+	static Json& GetSettingData(std::string_view path = "", bool create = false);
 	static void StopUpdate();
 	static void CheckOverload(double deltaTime);
 	static void CollectDebugData();

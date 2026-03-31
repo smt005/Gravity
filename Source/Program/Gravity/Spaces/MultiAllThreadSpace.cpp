@@ -10,21 +10,26 @@
 
 void MultiAllThreadSpace::Clear()
 {
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+	
 	_bufferBodies.clear();
-
-	std::lock_guard lockMutex(_mutex);
 	_bodies.clear();
 }
 
 void MultiAllThreadSpace::AddBody(const BodyData& body)
 {
-	std::lock_guard lockMutex(_mutex);
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+
 	_bodies.emplace_back(body);
 }
 
 void MultiAllThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
 {
-	std::lock_guard lockMutex(_mutex);
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+
 	_bodies.append_range(bodies);
 }
 
@@ -40,7 +45,9 @@ void MultiAllThreadSpace::Bodies(std::vector<BodyData>& bodies)
 
 std::vector<BodyData> MultiAllThreadSpace::GetBodies()
 {
-	std::scoped_lock lockMutexes(_mutex, _bufferMutex);
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+
 	std::vector<BodyData> bodies;
 	bodies.reserve(_bodies.size());
 
@@ -145,7 +152,7 @@ void MultiAllThreadSpace::ColapseBodies()
 	_countObject.store(_bodies.size());
 
 	{
-		std::lock_guard lockCopyBufferMutex(_bufferMutex);
+		std::scoped_lock lockCopyBufferMutex(_mutex, _bufferMutex);
 		_bufferBodies.clear();
 		_bufferBodies.reserve(_bodies.size());
 
@@ -155,7 +162,9 @@ void MultiAllThreadSpace::ColapseBodies()
 	}
 
 	DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - _beginTime);
+
 	_countBusy.fetch_sub(1);
+	_conditionMutex.notify_one();
 }
 
 void MultiAllThreadSpace::Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress)

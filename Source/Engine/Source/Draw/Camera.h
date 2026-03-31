@@ -7,7 +7,7 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <nlohmann/json.hpp>
+#include <Common/JsonHelper.h>
 #include "Screen.h"
 
 namespace Engine
@@ -118,8 +118,8 @@ namespace Engine
 
 		virtual bool Load();
 		virtual void Save();
-		virtual bool Load(const nlohmann::json& data);
-		virtual void Save(nlohmann::json& data);
+		virtual bool Load(const Json& data);
+		virtual void Save(Json& data);
 
 	protected:
 

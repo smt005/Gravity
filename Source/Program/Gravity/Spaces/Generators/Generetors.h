@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
+#include <Common/JsonHelper.h>
 #include "../BodyData.h"
 
 namespace GeneratorSpace
@@ -39,7 +39,7 @@ namespace GeneratorSpace
 	};
 	
 	std::string_view NameData();
-	nlohmann::json& GetData();
+	Json& GetData();
 	void Load();
 
 	glm::vec3 GetVelocityOnOrbit(BodyData& body, const BodyData& mainBody);

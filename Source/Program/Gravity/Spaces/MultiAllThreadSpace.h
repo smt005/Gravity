@@ -3,6 +3,7 @@
 
 #include "Space.h"
 #include <mutex>
+#include <condition_variable>
 #include <deque>
 #include <MyMath.h>
 #include "BodyData.h"
@@ -71,6 +72,7 @@ private:
 	std::vector<Body> _bodies;
 	std::deque<Colapce> _colapses;
 	mutable std::mutex _mutex;
+	mutable std::condition_variable _conditionMutex;
 	mutable std::mutex _bufferMutex;
 	mutable std::mutex _iterationMutex;
 };

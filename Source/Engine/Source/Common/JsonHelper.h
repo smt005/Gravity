@@ -5,10 +5,12 @@
 #include <nlohmann/json.hpp>
 #include <Logs.h>
 
+using Json = nlohmann::json;
+
 namespace Engine
 {
 	template <typename T>
-	T GetJsonValue(std::string_view key, const nlohmann::json& jsonData, const T& defaultValue = T())
+	T GetJsonValue(std::string_view key, const Json& jsonData, const T& defaultValue = T())
 	{
 		if (!jsonData.contains(key)) {
 			return defaultValue;
@@ -28,8 +30,11 @@ namespace Engine
 	}
 
 	template <typename T>
-	T GetJsonValue(std::string_view key, const nlohmann::json* jsonData, const T& defaultValue = T())
+	T GetJsonValue(std::string_view key, const Json* jsonData, const T& defaultValue = T())
 	{
 		return jsonData ? GetJsonValue<T>(key, *jsonData, defaultValue) : defaultValue;
 	}
+	
+	Json LoadJson(const std::string& fileName, const std::string& fileSystemName = "base");
+	bool SaveJson(const Json& value, const std::string& fileName, const std::string& fileSystemName = "base");
 }

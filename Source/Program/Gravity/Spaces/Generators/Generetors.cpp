@@ -3,7 +3,6 @@
 #include "Generetors.h"
 #include <glm/geometric.hpp>
 #include <Files/Settings.h>
-#include <Common/JsonHelper.h>
 #include <Common/Common.h>
 #include "../SpaceManager.h"
 
@@ -31,7 +30,7 @@ std::string_view GeneratorSpace::NameData()
 	return nameData;
 }
 
-nlohmann::json& GeneratorSpace::GetData()
+Json& GeneratorSpace::GetData()
 {
 	auto* jsonData = Engine::Settings::Instance().JsonData(NameData(), true);
 	if (!jsonData) {
