@@ -12,17 +12,22 @@
 #include "Windows/GenerateWindow.h"
 #include "Windows/AlgorithmWindow.h"
 #include "Windows/BottomPanel.h"
+#include "Windows/RenderWindow.h"
 #include "Render/GravityRender.h"
 #include "Tests/Test.h"
 #include <Logs.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Gravity>();
 
+bool Gravity::InitFileManagers(std::string_view params)
+{
+	Engine::FileManager::Make("write");
+	Engine::FileManager::Make("base", "../../Source/Resources/Files");
+	return true;
+}
+
 bool Gravity::Init(std::string_view params)
 {
-	//Tests::FunVec3();
-
-	InitFileManagers();
 	InitCallback();
 	InitWidows();
 
@@ -45,12 +50,6 @@ void Gravity::OnResize()
 {
 	Engine::Draw::Viewport();
 	Engine::Camera::GetLink().Resize();
-}
-
-void Gravity::InitFileManagers()
-{
-	Engine::FileManager::Make("write");
-	Engine::FileManager::Make("base", "../../Source/Resources/Files");
 }
 
 void Gravity::Draw() {
@@ -80,6 +79,9 @@ void Gravity::InitCallback()
 		}
 		if (data.key == VirtualKey::F9) {
 			Engine::GuiWindows::SwitchVisibleWindow<Windows::BottomPanel>();
+		}
+		if (data.key == VirtualKey::F10) {
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::RenderWindow>();
 		}
 
 		if (data.key == 'P') {

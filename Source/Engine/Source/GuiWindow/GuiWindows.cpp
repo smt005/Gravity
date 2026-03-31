@@ -1,12 +1,16 @@
-﻿// ◦ Xyz ◦
+// ◦ Xyz ◦
 
 #include "GuiWindows.h"
 #include "GuiWindow.h"
+#include <exception>
 #include <imgui.h>
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <Screen.h>
+#include <Files/FileManager.h>
+#include <Files/Settings.h>
+#include <Common/JsonHelper.h>
 
 using namespace Engine;
 
@@ -15,11 +19,47 @@ bool GuiWindows::Init(void* window)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
+    LoadStyle();
+
 
 	ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window, true);
 	return ImGui_ImplOpenGL3_Init();
+}
+
+void GuiWindows::LoadStyle()
+{
+    bool styleColorsDark = true;
+    std::string fontFileName = "DefaultFont.ttf";
+    float sizeFont = 13.f;
+
+    if (const Json* guiWindowsSettings = Settings::Instance().JsonData("GuiWindows")) {
+        const std::string style = Engine::GetJsonValue("style", guiWindowsSettings, std::string("Dark")); // Light
+        styleColorsDark = style == "Dark";
+
+        fontFileName = Engine::GetJsonValue("font", guiWindowsSettings, fontFileName);
+        sizeFont = Engine::GetJsonValue("sizeFont", guiWindowsSettings, 12.f);
+        if (sizeFont < 1.f) {
+            sizeFont = 10.f;
+        }
+    }
+
+    auto& fileManager = Engine::FileManager::Get("base");
+    auto fontFileNamePath = Engine::FileManager::Get("base").GetRoot() / "Fonts" / fontFileName;
+
+    if (std::filesystem::exists(fontFileNamePath)) {
+        ImGuiIO& io = ImGui::GetIO();
+        ImFontConfig fontConfig;
+        io.Fonts->AddFontFromFileTTF(fontFileNamePath.string().c_str(), sizeFont, &fontConfig, io.Fonts->GetGlyphRangesCyrillic());
+
+        LOG("[GuiWindows::Init] load font: {} size: {}", fontFileName, sizeFont);
+    }
+    
+    if (styleColorsDark) {
+        ImGui::StyleColorsDark();
+    }
+    else {
+        ImGui::StyleColorsLight();
+    }
 }
 
 void GuiWindows::Cleanup()

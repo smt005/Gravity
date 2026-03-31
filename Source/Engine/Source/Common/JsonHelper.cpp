@@ -14,7 +14,7 @@ bool Engine::SaveJson(const Json& jsonData, const std::string& fileName, const s
 {
 #ifdef _DEBUG
 	constexpr unsigned int indentStep = 2;
-#elif
+#else
 	constexpr unsigned int indentStep = 0;
 #endif
 

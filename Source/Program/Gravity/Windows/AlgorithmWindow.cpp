@@ -40,6 +40,7 @@ void AlgorithmWindow::OnOpen()
 	_currentSpace = SpaceManager::Current().GetId();
 }
 
+// TODO: Вынести в родительский класс
 void AlgorithmWindow::FixSize()
 {
 	ImVec2 windowPos = ImGui::GetWindowPos();
@@ -50,8 +51,17 @@ void AlgorithmWindow::FixSize()
 		if (windowPos.y < 0) {
 			windowPos.y = 0;
 		}
-		ImGui::SetWindowPos(windowPos);
 	}
+
+	ImVec2 windowSize = ImGui::GetWindowSize();
+	if (windowPos.x > (Engine::ScreenParams::Width() - windowSize.x)) {
+		windowPos.x = Engine::ScreenParams::Width() - windowSize.x;
+	}
+	if (windowPos.y > (Engine::ScreenParams::Height() - windowSize.y)) {
+		windowPos.y = Engine::ScreenParams::Height() - windowSize.y;
+	}
+
+	ImGui::SetWindowPos(windowPos);
 }
 
 void AlgorithmWindow::OnClose()
@@ -60,7 +70,7 @@ void AlgorithmWindow::OnClose()
 
 void AlgorithmWindow::Render() {
 	size_t spaceHash = typeid(*SpaceManager::CurrentPtr().get()).hash_code();
-	std::string text = TO_STRING("Current: {}", SpaceManager::Current().GetName());
+	std::string text = TO_STRING("Current:\n{}", SpaceManager::Current().GetName());
 	ImGui::Text(text.c_str());
 	ImGui::Separator();
 

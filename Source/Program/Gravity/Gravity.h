@@ -10,6 +10,7 @@ public:
 	using Uptr = std::unique_ptr<Gravity>;
 
 	Gravity() = default;
+	bool InitFileManagers(std::string_view params) override;
 	bool Init(std::string_view params) override;
 	void Update(double deltaTime) override;
 	void Draw() override;
@@ -17,7 +18,6 @@ public:
 	void OnClose() override;
 
 private:
-	void InitFileManagers();
 	void InitCallback();
 	void InitWidows();
 };

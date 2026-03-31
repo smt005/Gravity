@@ -50,6 +50,9 @@ namespace Engine
 		static bool ExistWindow(const std::string& name);
 
 	private:
+		static void LoadStyle();
+
+	private:
 		inline static bool _allWindowsResize = false;
 		inline static std::unordered_set<std::string_view> _windowsResize;
 		inline static std::unordered_set<std::string_view> _windowsOpen;

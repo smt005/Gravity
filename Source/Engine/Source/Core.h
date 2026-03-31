@@ -12,11 +12,12 @@ namespace Engine
 		using Uptr = std::unique_ptr<Program>;
 
 		virtual ~Program() = default;
-		virtual bool Init(std::string_view params) { return false; };
-		virtual void Update(double deltaTime) {};
-		virtual void Draw() {};
-		virtual void OnResize() {};
-		virtual void OnClose() {};
+		virtual bool InitFileManagers(std::string_view params) = 0;
+		virtual bool Init(std::string_view params) = 0;
+		virtual void Update(double deltaTime) = 0;
+		virtual void Draw() = 0;
+		virtual void OnResize() = 0;
+		virtual void OnClose() = 0;
 
 		template<typename T>
 		static Uptr MakeProgram()

@@ -24,6 +24,7 @@ public:
 
 public:
 	inline static TypeDraw typeDraw;
+	inline static float scaleBody = 1.f;
 
 private:
 	inline static std::vector<float> _data;

@@ -5,17 +5,9 @@
 #include <vector>
 #include <imgui.h>
 
-/*struct ImGuiFontHandler final {
+struct ImGuiFontHandler final {
     ImGuiFontHandler(ImFont* _font)
         : font(_font)
-    {
-        if (font) {
-            ImGui::PushFont(font);
-        }
-    }
-
-    ImGuiFontHandler(int size)
-        : font(WindowsManager::GetFont(size))
     {
         if (font) {
             ImGui::PushFont(font);
@@ -30,7 +22,7 @@
     }
 
     ImFont* font;
-};*/
+};
 
 struct ImGuiIdHandler final {
     ImGuiIdHandler(void* _id)

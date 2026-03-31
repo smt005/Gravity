@@ -16,12 +16,12 @@
 using namespace Engine;
 
 #if _DEBUG
-#define ApplicationInfo	" DEBUG ["__DATE__" "__TIME__"]"
+#define ApplicationInfo	" [DEBUG "__TIME__" "__DATE__"]"
 #else
 #define ApplicationInfo ""
 #endif
 
-const std::string_view windowTitle = "Gravity";
+const std::string_view windowTitle = "Гравитация";
 GLFWwindow* glfwWindow = nullptr;
 
 void CursorPosCallback(GLFWwindow* Window, double x, double y);
@@ -98,6 +98,11 @@ int Core::Main(std::string_view params)
 	int height = ScreenParams::Height();
 	glfwGetFramebufferSize(glfwWindow, &width, &height);
 	glViewport(0, 0, width, height);
+
+	if (!instanceProgram->InitFileManagers(params)) {
+		LOG("[Core::Main] Program::Init fail.");
+		return 5;
+	}
 
 	if (!GuiWindows::Init(glfwWindow)) {
 		LOG("[Core::Main] GuiWindows::Init fail.");

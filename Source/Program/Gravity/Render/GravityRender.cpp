@@ -58,8 +58,7 @@ void GravityRender::Render()
 			float angle = acos(dot);
 
 			glm::mat4 mat(1.f);
-			static float scaleStar = Engine::GetJsonValue("scale", Engine::Settings::Instance().JsonData("test"), 1.f);
-			const float scale = body.Diameter() * scaleStar;
+			const float scale = body.Diameter() * scaleBody;
 
 			mat = glm::translate(mat, body.pos);
 
