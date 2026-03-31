@@ -56,17 +56,16 @@ void MultiThreadSpace::Update()
 	auto& debugContext = DebugContext::Instance();
 	debugContext.countObject = _countObject.load();
 
-	if (_isBusy.load() || SpaceManager::countOfIteration.load() == 0) {
-		return;
+	{
+		std::lock_guard lockMutex(_mutex);
+		if (_isBusy.load() || SpaceManager::countOfIteration.load() == 0) {
+			return;
+		}
+		_isBusy.store(true);
 	}
 
 	debugContext.Clean();
 	debugContext.deltaTime = SpaceManager::offsetIteration.load();
-
-	{
-		std::lock_guard lockMutex(_mutex);
-		_isBusy.store(true);
-	}
 
 	std::thread th([this]() {
 		UpdateInternal();

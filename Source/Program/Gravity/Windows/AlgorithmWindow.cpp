@@ -17,6 +17,7 @@
 #include "../Spaces/ParallelThreadSpace.h"
 #include "../Spaces/MultiThreadSpace.h"
 #include "../Spaces/MultiAllThreadSpace.h"
+#include "../Spaces/MultiAllThreadNoMutexSpace.h"
 
 using namespace Windows;
 
@@ -84,4 +85,5 @@ void AlgorithmWindow::Render() {
 	ButtonRender<ParallelThreadSpace>();
 	ButtonRender<MultiThreadSpace>();
 	ButtonRender<MultiAllThreadSpace>();
+	ButtonRender<MultiAllThreadNoMutexSpace>();
 }

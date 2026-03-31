@@ -63,11 +63,14 @@ void MultiAllThreadSpace::Update()
 	auto& debugContext = DebugContext::Instance();
 	debugContext.countObject = _countObject.load();
 
-	if (_countBusy.load() || SpaceManager::countOfIteration.load() == 0) {
-		return;
+	{
+		std::lock_guard lockMutex(_mutex);
+		if (_countBusy.load() != 0 || SpaceManager::countOfIteration.load() == 0) {
+			return;
+		}
+		_countBusy.fetch_add(1);
 	}
 
-	_countBusy.fetch_add(1);
 	debugContext.Clean();
 	debugContext.deltaTime = SpaceManager::offsetIteration.load();
 

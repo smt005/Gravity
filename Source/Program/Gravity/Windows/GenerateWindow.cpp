@@ -102,7 +102,6 @@ void GenerateWindow::Render()
 	ButtonRender<GeneratorSpace::OnPlaneOrbit>();
 	ButtonRender<GeneratorSpace::OnOrbit>();
 	
-
 	const static ImVec2 buttonSize(200.f, 20.f);
 
 	ImGui::Separator();

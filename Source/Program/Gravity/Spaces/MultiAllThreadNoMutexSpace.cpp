@@ -1,33 +1,39 @@
 // ◦ Xyz ◦
 
-#include "ParallelThreadSpace.h"
+#include "MultiAllThreadNoMutexSpace.h"
 #include <thread>
+#include <atomic>
 #include <glm/gtc/quaternion.hpp>
 #include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
-void ParallelThreadSpace::Clear()
+void MultiAllThreadNoMutexSpace::Clear()
 {
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+	
 	_bufferBodies.clear();
-
-	std::lock_guard lockMutex(_mutex);
 	_bodies.clear();
 }
 
-void ParallelThreadSpace::AddBody(const BodyData& body)
+void MultiAllThreadNoMutexSpace::AddBody(const BodyData& body)
 {
-	std::lock_guard lockMutex(_mutex);
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+
 	_bodies.emplace_back(body);
 }
 
-void ParallelThreadSpace::AddBodies(const std::vector<BodyData>& bodies)
+void MultiAllThreadNoMutexSpace::AddBodies(const std::vector<BodyData>& bodies)
 {
-	std::lock_guard lockMutex(_mutex);
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+
 	_bodies.append_range(bodies);
 }
 
-void ParallelThreadSpace::Bodies(std::vector<BodyData>& bodies)
+void MultiAllThreadNoMutexSpace::Bodies(std::vector<BodyData>& bodies)
 {
 	std::lock_guard clockCopyBifferMutex(_bufferMutex);
 
@@ -37,9 +43,11 @@ void ParallelThreadSpace::Bodies(std::vector<BodyData>& bodies)
 	}
 }
 
-std::vector<BodyData> ParallelThreadSpace::GetBodies()
+std::vector<BodyData> MultiAllThreadNoMutexSpace::GetBodies()
 {
-	std::scoped_lock lockMutexes(_mutex, _bufferMutex);
+	std::unique_lock lockMutex(_mutex);
+	_conditionMutex.wait(lockMutex, [this]() { return _countBusy.load() == 0; });
+
 	std::vector<BodyData> bodies;
 	bodies.reserve(_bodies.size());
 
@@ -50,39 +58,32 @@ std::vector<BodyData> ParallelThreadSpace::GetBodies()
 	return bodies;
 }
 
-void ParallelThreadSpace::Update()
+void MultiAllThreadNoMutexSpace::Update()
 {
 	auto& debugContext = DebugContext::Instance();
 	debugContext.countObject = _countObject.load();
 
 	{
 		std::lock_guard lockMutex(_mutex);
-		if (_isBusy.load() || SpaceManager::countOfIteration.load() == 0) {
+		if (_countBusy.load() != 0 || SpaceManager::countOfIteration.load() == 0) {
 			return;
 		}
-		_isBusy.store(true);
+		_countBusy.fetch_add(1);
 	}
 
 	debugContext.Clean();
 	debugContext.deltaTime = SpaceManager::offsetIteration.load();
 
-	std::thread th([this]() {	
-		UpdateInternal();
-		_isBusy.store(false);
-		});
-
-	if (SpaceManager::paramC) LOG("PARALLEL [{}] MAIN: {} SUB: {} countThread: {}", SpaceManager::paramA, std::this_thread::get_id(), th.get_id(), std::thread::hardware_concurrency());
-	th.detach();
+	UpdateInternal();
 }
 
-void ParallelThreadSpace::UpdateInternal()
+void MultiAllThreadNoMutexSpace::UpdateInternal()
 {
 	static mystd::Vec3 noForce;
-	_process.store(0.f);
-	float iter = 0.f;
 
 	std::lock_guard lockMutex(_mutex);
-	const double beginTime = Engine::Callback::GetCurrentTime();
+	_beginTime = Engine::Callback::GetCurrentTime();
+	_process.store(0.f);
 
 	for (auto& body : _bodies) {
 		body.force = noForce;
@@ -91,59 +92,41 @@ void ParallelThreadSpace::UpdateInternal()
 	}
 
 	const size_t count = _bodies.size();
-	std::deque<Colapce> colapses;
-	const float dProgress = 1.f / static_cast<float>(count);
+	_colapses.clear();
 	_subProcess.store(0.f);
 
-	if (!SpaceManager::paramA) {
-		for (size_t i = 0; i < count; ++i) {
-			for (size_t j = i + 1; j < count; ++j) {
-				const auto direction = _bodies[j].pos - _bodies[i].pos;
-				const float distance = direction.Length();
+	const size_t countThread = std::thread::hardware_concurrency();
+	const size_t dSize = count / countThread;
+	std::vector<std::pair<size_t, size_t>> ranges;
+	ranges.emplace_back(0, dSize);
 
-				if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
-					if (SpaceManager::paramC) LOG("COLAPSE");
-					Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
-					if (!colapcePtr) {
-						colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
-					}
+	for (size_t iTh = 1; iTh < countThread; ++iTh) {
+		ranges.emplace_back(ranges.back().first + dSize, ranges.back().second + dSize);
+	}
+	ranges.back().second = count;
 
-					if (!colapcePtr) {
-						colapcePtr = &colapses.emplace_back();
-					}
+	const float dProgress = 1.f / static_cast<float>(count);
 
-					if (!_bodies[i].colapseData) {
-						_bodies[i].colapseData = colapcePtr;
-						colapcePtr->sumPos += _bodies[i].pos * _bodies[i].mass;
-						colapcePtr->sumVelocity += _bodies[i].velocity * _bodies[i].mass;
-						colapcePtr->sumMass += _bodies[i].mass;
-						colapcePtr->objectIndex = i;
-					}
-					if (!_bodies[j].colapseData) {
-						_bodies[j].colapseData = colapcePtr;
-						colapcePtr->sumPos += _bodies[j].pos * _bodies[j].mass;
-						colapcePtr->sumVelocity += _bodies[j].velocity * _bodies[j].mass;
-						colapcePtr->sumMass += _bodies[j].mass;
-					}
-				}
-				else {
-					const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
-					const auto forceDirection = direction.Normalized();
-					const auto force = forceDirection * forceMagnitude;
-
-					_bodies[i].force += force;
-					_bodies[j].force -= force;
-				}
+	for (const auto& rengePair : ranges) {
+		_countBusy.fetch_add(1);
+	
+		std::thread th([this, iBegin = rengePair.first, iEnd = rengePair.second, count, dProgress]() {
+			IterationsNoMutex(iBegin, iEnd, count, _colapses, dProgress);
+			
+			_countBusy.fetch_sub(1);
+			if (_countBusy.load() == 1) {
+				ColapseBodies();
 			}
+		});
 
-			_subProcess.fetch_add(dProgress);
-		}
+		if (SpaceManager::paramC) LOG("MULTI ALL [{}, {}] MAIN: {} SUB: {} countThread: {}", SpaceManager::paramA, SpaceManager::paramB, std::this_thread::get_id(), th.get_id(), std::thread::hardware_concurrency());
+		th.detach();
 	}
-	else {
-		Iterations(0, count, count, colapses, dProgress);
-	}
+}
 
-	for (Colapce& colapses : colapses) {
+void MultiAllThreadNoMutexSpace::ColapseBodies()
+{
+	for (Colapce& colapses : _colapses) {
 		_bodies[colapses.objectIndex].pos = colapses.sumPos / colapses.sumMass;
 		_bodies[colapses.objectIndex].velocity = colapses.sumVelocity / colapses.sumMass;
 		_bodies[colapses.objectIndex].mass = colapses.sumMass;
@@ -167,7 +150,7 @@ void ParallelThreadSpace::UpdateInternal()
 	_countObject.store(_bodies.size());
 
 	{
-		std::lock_guard lockCopyBufferMutex(_bufferMutex);
+		std::scoped_lock lockCopyBufferMutex(_mutex, _bufferMutex);
 		_bufferBodies.clear();
 		_bufferBodies.reserve(_bodies.size());
 
@@ -176,26 +159,31 @@ void ParallelThreadSpace::UpdateInternal()
 		}
 	}
 
-	_process.store(iter / SpaceManager::countOfIteration.load());
+	DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - _beginTime);
 
-
-	DebugContext::Instance().updateDeltaTime.store(Engine::Callback::GetCurrentTime() - beginTime);
+	_countBusy.fetch_sub(1);
+	_conditionMutex.notify_one();
 }
 
-void ParallelThreadSpace::Iterations(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress)
+void MultiAllThreadNoMutexSpace::IterationsNoMutex(size_t iBegin, size_t iEnd, size_t count, std::deque<Colapce>& colapses, float dProgress)
 {
-	for (size_t i = 0; i < count; ++i) {
+	for (size_t i = iBegin; i < iEnd; ++i) {
 		for (size_t j = i + 1; j < count; ++j) {
+			if (i == j) {
+				continue;
+			}
+
 			const auto direction = _bodies[j].pos - _bodies[i].pos;
 			const float distance = direction.Length();
 
 			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				std::lock_guard lockIterationMutex(_iterationMutex);
 				if (SpaceManager::paramC) LOG("COLAPSE");
-				Colapce* colapcePtr = static_cast<Colapce*>(_bodies[i].colapseData);
-				if (!colapcePtr) {
-					colapcePtr = static_cast<Colapce*>(_bodies[j].colapseData);
-				}
 
+				Colapce* colapcePtr = _bodies[i].colapseData;
+				if (!colapcePtr) {
+					colapcePtr = _bodies[j].colapseData;
+				}
 				if (!colapcePtr) {
 					colapcePtr = &colapses.emplace_back();
 				}
@@ -220,7 +208,6 @@ void ParallelThreadSpace::Iterations(size_t iBegin, size_t iEnd, size_t count, s
 				const auto force = forceDirection * forceMagnitude;
 
 				_bodies[i].force += force;
-				_bodies[j].force -= force;
 			}
 		}
 

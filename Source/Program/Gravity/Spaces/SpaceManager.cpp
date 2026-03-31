@@ -13,6 +13,7 @@
 #include "ParallelThreadSpace.h"
 #include "MultiThreadSpace.h"
 #include "MultiAllThreadSpace.h"
+#include "MultiAllThreadNoMutexSpace.h"
 #include "Generators/Generetors.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
@@ -66,6 +67,7 @@ void SpaceManager::Load()
 	else if (MakeSpace<ParallelThreadSpace>(className)) {}
 	else if (MakeSpace<MultiThreadSpace>(className)) {}
 	else if (MakeSpace<MultiAllThreadSpace>(className)) {}
+	else if (MakeSpace<MultiAllThreadNoMutexSpace>(className)) {}
 	else {
 		SetCurrentPtr<DefaultSpace>();
 	}
