@@ -56,6 +56,11 @@ set(IMGUI_INCLUDES "${IMGUI_DIR}")
 set(FREEIMAGE_NAME FreeImage)
 set(FREEIMAGE_DIR "${ENGINE_DIR}/ThirdParty/${FREEIMAGE_NAME}")
 
+# CUDA
+set(CUDA_NAME CUDA)
+set(CUDA_DIR "${ENGINE_DIR}/${CUDA_NAME}")
+set(CUDA_SOURCE "${CUDA_DIR}/Source")
+
 # properties
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -120,6 +125,11 @@ include_directories(${MYSTL_SOURCE})
 add_subdirectory(${MYSTL_DIR})
 target_link_libraries(${PROJECT_NAME} ${MYSTL_NAME})
 link_directories(${MYSTL_SOURCE})
+
+include_directories(${CUDA_SOURCE})
+add_subdirectory(${CUDA_DIR})
+target_link_libraries(${PROJECT_NAME} ${CUDA_NAME})
+link_directories(${CUDA_SOURCE})
 
 # Engine
 include_directories(${ENGINE_SOURCE})

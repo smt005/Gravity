@@ -4,6 +4,7 @@
 #include <GuiWindow/GuiWindows.h>
 #include <Files/FileManager.h>
 #include <Callback/VirtualKey.h>
+#include <Cuda.h>
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
 #include "Spaces/SpaceManager.h"
@@ -33,7 +34,9 @@ bool Gravity::Init(std::string_view params)
 
 	SpaceManager::Load();
 	GravityRender::Init();
-	
+
+	Cuda::CudaManager::PrintInfo();
+
 	return true;
 }
 
