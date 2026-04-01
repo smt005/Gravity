@@ -29,7 +29,9 @@ include_directories(${JSON_INCLUDES})
 include_directories(${GLM_INCLUDES})
 include_directories(${FREEIMAGE_INCLUDES})
 include_directories(${MYSTL_SOURCE})
-include_directories(${CUDA_SOURCE})
+if(GRAVITY_HAS_CUDA)
+    include_directories(${CUDA_SOURCE})
+endif()
 
 add_library(${ENGINE_NAME} STATIC ${INCLUDES} ${SOURCES})
 

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 4.2)
 
 message("Begin generate. . . . . . . . . . . . . . . .")
 
+include(CheckLanguage)
+
 set(PROJECT_NAME Gravity)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(PROJECT_PLATFORM_DIR "${SOURCE_DIR}/Engine/Platforms/Win")
@@ -28,7 +30,8 @@ set(GLFW_NAME glfw)
 set(GLFW_DIR "${ENGINE_DIR}/ThirdParty/${GLFW_NAME}")
 set(GLFW_INCLUDES "${GLFW_DIR}/include")
 set(GLFW_SOURCE "${GLFW_DIR}/src")
-set(GLFW_LIB "${PROJECT_DIR}/../build/Win/Engine/ThirdParty/glfw/src")
+#set(GLFW_LIB "${PROJECT_DIR}/../build/Win/Engine/ThirdParty/glfw/src")
+set(GLFW_LIB "${SOURCE_DIR}/../build/Win/Engine/ThirdParty/glfw/src")
 
 # GLAD
 set(GLAD_NAME glad)
@@ -57,7 +60,7 @@ set(FREEIMAGE_NAME FreeImage)
 set(FREEIMAGE_DIR "${ENGINE_DIR}/ThirdParty/${FREEIMAGE_NAME}")
 
 # CUDA
-set(CUDA_NAME CUDA)
+set(CUDA_NAME CudaWrapper)
 set(CUDA_DIR "${ENGINE_DIR}/${CUDA_NAME}")
 set(CUDA_SOURCE "${CUDA_DIR}/Source")
 
@@ -75,6 +78,19 @@ add_executable(${PROJECT_NAME} ${PROJECT_MAIN_FILE} ${PROJECT_DEFINE_FILE})
 include_directories(${PROJECT_PLATFORM_DIR})
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+
+# CUDA (optional)
+option(GRAVITY_ENABLE_CUDA "Build Gravity with CUDA acceleration" ON)
+set(GRAVITY_HAS_CUDA OFF)
+if(GRAVITY_ENABLE_CUDA)
+    check_language(CUDA)
+    if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+        set(GRAVITY_HAS_CUDA ON)
+    else()
+        message(WARNING "CUDA requested but no CUDA compiler found; building without CUDA.")
+    endif()
+endif()
 
 # FreeImage: choose arch after project() so CMAKE_SIZEOF_VOID_P is set
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -126,10 +142,28 @@ add_subdirectory(${MYSTL_DIR})
 target_link_libraries(${PROJECT_NAME} ${MYSTL_NAME})
 link_directories(${MYSTL_SOURCE})
 
-include_directories(${CUDA_SOURCE})
-add_subdirectory(${CUDA_DIR})
-target_link_libraries(${PROJECT_NAME} ${CUDA_NAME})
-link_directories(${CUDA_SOURCE})
+# CUDA
+#target_link_libraries(${CUDA_NAME} PUBLIC CUDA::cudart)
+if(GRAVITY_HAS_CUDA)
+    # When the executable has CUDA sources, CMake requires CUDA_ARCHITECTURES.
+    # Use "native" unless the user already set CMAKE_CUDA_ARCHITECTURES.
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "")
+        set(CMAKE_CUDA_ARCHITECTURES native)
+    endif()
+
+    include_directories(${CUDA_SOURCE})
+    add_subdirectory(${CUDA_DIR})
+    target_link_libraries(${PROJECT_NAME} ${CUDA_NAME})
+    link_directories(${CUDA_SOURCE})
+
+    # Ensure the final executable gets a CUDA device-link step.
+    target_sources(${PROJECT_NAME} PRIVATE "${CUDA_SOURCE}/GravityCudaLink.cu")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        CUDA_STANDARD 20
+        CUDA_STANDARD_REQUIRED ON
+        CUDA_SEPARABLE_COMPILATION ON
+    )
+endif()
 
 # Engine
 include_directories(${ENGINE_SOURCE})
@@ -138,6 +172,7 @@ target_link_libraries(${PROJECT_NAME} ${ENGINE_NAME})
 link_directories(${ENGINE_SOURCE})
 
 # Game
+#include_directories(${PROGRAM_SOURCE})
 include_directories(${PROGRAM_SOURCE})
 add_subdirectory(${PROGRAM_SOURCE})
 target_link_libraries(${PROJECT_NAME} ${PROGRAM_NAME})
