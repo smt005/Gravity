@@ -56,8 +56,7 @@ set(IMGUI_INCLUDES "${IMGUI_DIR}")
 set(FREEIMAGE_NAME FreeImage)
 set(FREEIMAGE_DIR "${ENGINE_DIR}/ThirdParty/${FREEIMAGE_NAME}")
 
-# CUDA
-set(CUDA_NAME CUDA)
+set(CUDA_NAME CudaWrapper)
 set(CUDA_DIR "${ENGINE_DIR}/${CUDA_NAME}")
 set(CUDA_SOURCE "${CUDA_DIR}/Source")
 
@@ -76,6 +75,30 @@ include_directories(${PROJECT_PLATFORM_DIR})
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
+# Keep MSVC runtime consistent across all subprojects/targets.
+# Mismatched runtime settings can surface as unresolved externals in MSVC STL
+# (e.g. __std_find_not_ch_1) depending on which libraries/objects get linked.
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
+
+# CUDA (optional)
+option(GRAVITY_ENABLE_CUDA "Build Gravity with CUDA acceleration" ON)
+#set(GRAVITY_ENABLE_CUDA OFF)
+set(GRAVITY_HAS_CUDA OFF)
+if(GRAVITY_ENABLE_CUDA)
+	include(CheckLanguage)
+    check_language(CUDA)
+    
+	if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+        set(GRAVITY_HAS_CUDA ON)
+		message("CUDA enabled")		
+    else()
+        message(WARNING "CUDA requested but no CUDA compiler found; building without CUDA.")
+    endif()
+endif()
+
 # FreeImage: choose arch after project() so CMAKE_SIZEOF_VOID_P is set
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(FREEIMAGE_DIST_ARCH "x64")
@@ -92,6 +115,7 @@ include_directories(${GLM_INCLUDES})
 
 # glfw
 include_directories(${GLFW_INCLUDES})
+set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "Use MSVC runtime library DLL" FORCE)
 add_subdirectory(${GLFW_DIR})
 target_link_libraries(${PROJECT_NAME} ${GLFW_NAME})
 link_directories(${GLFW_LIB})

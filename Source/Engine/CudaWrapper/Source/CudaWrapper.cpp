@@ -1,11 +1,11 @@
 // ◦ Xyz ◦
 
-#include "Cuda.h"
+#include "CudaWrapper.h"
 #include <Logs.h>
 
 using namespace Cuda;
 
-void CudaManager::PrintInfo()
+void CudaWrapper::PrintInfo()
 {
 	LOG("[CudaManager::PrintInfo] disable CUDA.");
 }
