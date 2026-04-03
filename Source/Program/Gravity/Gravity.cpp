@@ -35,8 +35,12 @@ bool Gravity::Init(std::string_view params)
 	SpaceManager::Load();
 	GravityRender::Init();
 
-	std::vector<Cuda::Body> data;
-	Cuda::CudaWrapper::Calculate(data);
+	std::vector<Cuda::Body> data = { {1.f, {1.f, 2.f, 3.f}, {1.f, 2.f, 3.f}}, {2.f, {10.f, 20.f, 30.f}, {11.f, 22.f, 33.f}} };
+	//float ans = 123.f;
+	Cuda::ValueWrapper<float> valueW(123);
+	LOG("AFTER: ans: {}", valueW);
+	Cuda::CudaWrapper::Calculate(data, valueW);
+	LOG("BEFORE: ans: {}", valueW);
 
 	return true;
 }

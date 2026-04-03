@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include "../../../Program/Gravity/Spaces/BodyData.h"
 
 namespace Cuda
@@ -19,36 +20,105 @@ namespace Cuda
 		float mass = 1.f;
 		Vec3 pos;
 		Vec3 velocity;
+
+		Body() {}
+		Body(float _mass, const Vec3& _pos, const Vec3& _velocity);
 	};
 
 	template <typename T>
 	struct ValueWrapper
 	{
-		ValueWrapper(T _value = {});
+		ValueWrapper();
+		ValueWrapper(T _value);
 		~ValueWrapper();
 
-		operator T () {
+		operator T () const {
 			return value;
 		}
-		operator T* () {
+		operator T* () const {
 			return valuePtr;
 		}
-		T GetValue() {
+		T GetValue() const {
 			return value;
 		}
-		void* Get() {
+		void* Get() const {
 			return valuePtr;
 		}
 
-		T RetrieveValue();
+		T RetrieveData() const;
 
 	private:
-		T value;
+		mutable T value;
+		T* valuePtr;
+	};
+	
+	template <typename T>
+	struct VectorWrapper
+	{
+		VectorWrapper(size_t _size);
+		VectorWrapper(const std::vector<T>& data);
+		VectorWrapper(std::vector<T>&& data) noexcept;
+		~VectorWrapper();
+
+		/*operator const std::vector<T>() const {
+			return data;
+		}
+		operator T* () const {
+			return valuePtr;
+		}*/
+		const std::vector<T>& GetValue() const {
+			return data;
+		}
+		void* Get() const {
+			return valuePtr;
+		}
+
+		const std::vector<T>& RetrieveData() const;
+
+	private:
+		mutable std::vector<T> data;
+		size_t size;
 		T* valuePtr;
 	};
 
+	static std::ostream& operator<<(std::ostream& os, const Vec3& vec)
+	{
+		os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+		return os;
+	}
+
+	static std::ostream& operator<<(std::ostream& os, const Body& body)
+	{
+		os << '{' << body.mass << '_' << body.pos << '_' << body.velocity << '}';
+		return os;
+	}
+
+	template <typename T>
+	std::ostream& operator<<(std::ostream& os, const ValueWrapper<T>& value)
+	{
+		os << value.RetrieveData();
+		return os;
+	}
+
+	template <typename T>
+	std::ostream& operator << (std::ostream& os, const VectorWrapper<T>& wrapper)
+	{
+		const std::vector<T>& container = wrapper.RetrieveData();
+		const size_t size = container.size();
+		size_t number = 0;
+		os << '[';
+		for (auto&& item : container) {
+			os << item;
+			if (++number != size) {
+				os << ',';
+			}
+		}
+		os << ']';
+		return os;
+	}
+
 	class CudaWrapper final {
 	public:
-		static void Calculate(std::vector<Body>& bodies);
+		static void Calculate(std::vector<Body>& bodies, ValueWrapper<float>& ans);
 	};
 }
