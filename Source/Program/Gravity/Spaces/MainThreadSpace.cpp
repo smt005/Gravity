@@ -53,16 +53,24 @@ std::vector<BodyData> MainThread::GetBodies()
 
 void MainThread::Update()
 {
-	size_t size = _bodies.size();
-	std::vector<glm::vec3> forces(size);
-	std::vector<Colapce*> colapseOfBodies(size, nullptr);
+	const size_t size = _bodies.size();
+	std::vector<glm::vec3> forces(size, glm::vec3(0.f, 0.f, 0.f));
 	std::deque<Colapce> colapses;
+	std::vector<Colapce*> colapseOfBodies(size, nullptr);
 
-	for (size_t i = 0; i < size; ++i) {
+	UpdateForce(0, size, size, forces, colapses, colapseOfBodies);
+	ColapceBodies(forces, colapses, colapseOfBodies);
+	UpdatePositions(forces);
+}
+
+void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<glm::vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+{
+	for (size_t i = iBegin; i < iEnd; ++i) {
 		for (size_t j = 0; j < size; ++j) {
 			if (i == j) {
 				continue;
 			}
+
 			auto& force = forces[i];
 			const glm::vec3 direction = _bodies[j].pos - _bodies[i].pos;
 			const float distance = glm::length(direction);
@@ -79,15 +87,15 @@ void MainThread::Update()
 					colapseOfBodies[i] = colapcePtr;
 					const auto& body = _bodies[i];
 					colapcePtr->sumPos += body.pos * body.mass;
-					colapcePtr->sumVelocity += _velocities[i] * body.mass;
 					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += _velocities[i] * body.mass;
 				}
 				if (!colapseOfBodies[j]) {
 					colapseOfBodies[j] = colapcePtr;
 					const auto& body = _bodies[j];
 					colapcePtr->sumPos += body.pos * body.mass;
-					colapcePtr->sumVelocity += _velocities[i] * body.mass;
 					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += _velocities[j] * body.mass;
 				}
 			}
 			else {
@@ -97,22 +105,34 @@ void MainThread::Update()
 			}
 		}
 	}
+}
 
+void MainThread::ColapceBodies(std::vector<glm::vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+{
 	for (Colapce& colapses : colapses) {
-		_bodies[colapses.objectIndex].pos = colapses.sumPos / colapses.sumMass;
+		auto& body = _bodies[colapses.objectIndex];
+		body.mass = colapses.sumMass;
+		body.pos = colapses.sumPos / colapses.sumMass;
+		body.radius = Diameter(body.mass);
 		_velocities[colapses.objectIndex] = colapses.sumVelocity / colapses.sumMass;
-		_bodies[colapses.objectIndex].mass = colapses.sumMass;
 		colapseOfBodies[colapses.objectIndex] = nullptr;
 	}
 
+	size_t size = _bodies.size();
 	size_t iLast = size - 1;
+	size_t i = 0;
 
-	for (size_t i = 0; i < size; ++i) {
+	while (i < iLast) {
 		if (colapseOfBodies[i]) {
-			std::swap(_bodies[i], _bodies[iLast]);
-			std::swap(_velocities[i], _velocities[iLast]);
-			std::swap(forces[i], forces[iLast]);
+			forces[colapseOfBodies[i]->objectIndex] += forces[i];
+			colapseOfBodies[i] = colapseOfBodies[iLast];
+			_bodies[i] = _bodies[iLast];
+			_velocities[i] = _velocities[iLast];
+			forces[i] = forces[iLast];
 			--iLast;
+		}
+		else {
+			++i;
 		}
 	}
 
@@ -120,9 +140,13 @@ void MainThread::Update()
 	_bodies.resize(size);
 	_velocities.resize(size);
 	forces.resize(size);
+}
 
+void MainThread::UpdatePositions(const std::vector<glm::vec3>& forces)
+{
 	volatile static float velocityFactor = 1.f;
 	const float deltaTime = SpaceManager::offsetIteration.load() * velocityFactor;
+	const size_t size = _bodies.size();
 
 	for (size_t i = 0; i < size; ++i) {
 		const auto acceleration = forces[i] / _bodies[i].mass;
