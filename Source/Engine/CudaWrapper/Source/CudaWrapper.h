@@ -7,8 +7,9 @@ namespace Cuda
 {
 	class CudaWrapper final {
 	public:
-		static void PrintInfo();
-	
+		static bool Init(std::string& info);
+		static int Process();
+
 	public:
 		static bool processGPU;
 		static bool multithread;

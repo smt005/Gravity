@@ -35,9 +35,14 @@ bool Gravity::Init(std::string_view params)
 	SpaceManager::Load();
 	GravityRender::Init();
 
-	Cuda::CudaWrapper::PrintInfo();
-	LOG("CUDA:  nameGPU:{}, deviceCount:{}, multithread:{}, maxThreadsPerMultiProcessor:{}, maxThreadsPerBlock:{}", Cuda::CudaWrapper::nameGPU, Cuda::CudaWrapper::deviceCount, Cuda::CudaWrapper::multithread, Cuda::CudaWrapper::maxThreadsPerMultiProcessor, Cuda::CudaWrapper::maxThreadsPerBlock);
-
+	std::string cudaInfo;
+	if (Cuda::CudaWrapper::Init(cudaInfo)) {
+		LOG("CUDA OK!");
+	}
+	else {
+		LOG("CUDA FAIL: {}", cudaInfo);
+	}
+	
 	return true;
 }
 

@@ -5,7 +5,8 @@
 
 using namespace Cuda;
 
-void CudaWrapper::PrintInfo()
+bool CudaWrapper::Init(std::string& info)
 {
-	LOG("[CudaManager::PrintInfo] disable CUDA.");
+	LOG("[CudaWrapper::Init] CUDA disabled");
+	return false;
 }
