@@ -13,11 +13,11 @@
 #include "../Spaces/Space.h"
 #include "../Spaces/DefaultSpace.h"
 #include "../Spaces/MainThreadSpace.h"
-#include "../Spaces/MainThreadProtSpace.h"
-#include "../Spaces/ParallelThreadSpace.h"
-#include "../Spaces/MultiThreadSpace.h"
-#include "../Spaces/MultiAllThreadSpace.h"
-#include "../Spaces/MultiAllThreadNoMutexSpace.h"
+//#include "../Spaces/MainThreadProtSpace.h"
+//#include "../Spaces/ParallelThreadSpace.h"
+//#include "../Spaces/MultiThreadSpace.h"
+//#include "../Spaces/MultiAllThreadSpace.h"
+//#include "../Spaces/MultiAllThreadNoMutexSpace.h"
 
 using namespace Windows;
 
@@ -89,11 +89,11 @@ void AlgorithmWindow::Render() {
 		SpaceManager::paramC.store(paramC);
 	}
 
-	ButtonRender<DefaultSpace>();
-	ButtonRender<MainThreadProtSpace>();
-	ButtonRender<MainThreadSpace>();
-	ButtonRender<ParallelThreadSpace>();
-	ButtonRender<MultiThreadSpace>();
-	ButtonRender<MultiAllThreadSpace>();
-	ButtonRender<MultiAllThreadNoMutexSpace>();
+	ButtonRender<Spaces::Default>();
+	ButtonRender<MainThread>();
+	//ButtonRender<MainThreadSpace>();
+	//ButtonRender<ParallelThreadSpace>();
+	//ButtonRender<MultiThreadSpace>();
+	//ButtonRender<MultiAllThreadSpace>();
+	//ButtonRender<MultiAllThreadNoMutexSpace>();
 }

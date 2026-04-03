@@ -1,26 +1,18 @@
 ﻿// ◦ Xyz ◦
 
 #include "DefaultSpace.h"
-#include <deque>
-#include <numbers>
-#include <glm/vec3.hpp>
-#include <glm/ext/vector_common.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <Common/Common.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
-#include <Logs.h>
 
-void DefaultSpace::Clear()
+using namespace Spaces;
+
+void Default::Clear()
 {
 	_bodies.clear();
 }
 
-void DefaultSpace::Update() {
-	if (SpaceManager::countOfIteration == 0) {
-		return;
-	}
-
+void Default::Update() {
 	static volatile float angleSpeedFactor = 0.001f;
 	const float angleSpeed = SpaceManager::offsetIteration.load() * SpaceManager::countOfIteration.load() * angleSpeedFactor;
 	const glm::vec3 rotationAxis(0.f, 0.f, 1.f);
@@ -31,33 +23,33 @@ void DefaultSpace::Update() {
 	}
 }
 
-void DefaultSpace::AddBody(const BodyData& body)
+void Default::AddBody(const BodyData& body)
 {
 	_bodies.emplace_back(body);
 }
 
-void DefaultSpace::AddBodies(const std::vector<BodyData>& bodies)
+void Default::AddBodies(const std::vector<BodyData>& bodies)
 {
 	_bodies.append_range(bodies);
 }
 
-void DefaultSpace::Bodies(std::vector<BodyData>& bodies)
+void Default::Bodies(std::vector<GravityRender::Body>& bodies)
 {
 	bodies.clear();
-	bodies.reserve(_bodies.size());
+	bodies.resize(_bodies.size());
 
-	for (const auto& body : _bodies) {
-		bodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
-	}
+	std::transform(_bodies.begin(), _bodies.end(), bodies.begin(), [](const Body& body) {
+		return GravityRender::Body{ Diameter(body.mass), body.pos };
+	});
 }
 
-std::vector<BodyData> DefaultSpace::GetBodies()
+std::vector<BodyData> Default::GetBodies()
 {
 	std::vector<BodyData> bodies;
 	bodies.reserve(_bodies.size());
-
-	for (const auto& body : _bodies) {
-		bodies.emplace_back(body.mass, body.pos.x, body.pos.y, body.pos.z, body.velocity.x, body.velocity.y, body.velocity.z);
+	
+	for (const Body& body : _bodies) {
+		bodies.emplace_back(body.mass, body.pos, body.velocity);
 	}
 
 	return bodies;

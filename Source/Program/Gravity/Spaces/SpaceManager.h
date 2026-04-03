@@ -11,6 +11,8 @@
 #include <Common/JsonHelper.h>
 #include <Common/Common.h>
 
+using namespace Spaces;
+
 class SpaceManager final
 {
 public:
@@ -79,8 +81,6 @@ public:
 	static void StopUpdate();
 	static void CheckOverload(double deltaTime);
 	static void CollectDebugData();
-	static void GetBodyPositions(std::vector<float>& positions);
-	static void GetBodyPositions(std::vector<glm::vec3>& positions);
 
 	static glm::vec3 CenteMassSpace();
 
@@ -107,7 +107,6 @@ public:
 	inline static std::atomic<bool> paramB = false;
 	inline static std::atomic<bool> paramC = false;
 
-	inline static std::vector<BodyData> bodies;
 	inline static mystd::shared_ptr<Space> currentSpace;
 	inline static std::vector<mystd::shared_ptr<Space>> spaces;
 	inline static const std::string_view currentSpaceKey = "currentSpace";

@@ -1,55 +1,54 @@
 ﻿// ◦ Xyz ◦
 #pragma once
 
-#include "DefaultSpace.h"
-#include <atomic>
-#include <MyMath.h>
+#include <vector>
+#include <deque>
+#include <string>
+#include <glm/vec3.hpp>
+#include <mystd_memory.h>
+#include "BodyData.h"
+#include "Space.h"
 
-class MainThreadSpace : public Space
+namespace Spaces
 {
-private:
-	struct Body final {
-		float mass = 1.f;
-		float radius = 1.f;
-		mystd::Vec3 pos;
-		mystd::Vec3 force;
-		mystd::Vec3 velocity;
-		void* colapseData = nullptr;
+	class MainThread : public Space
+	{
+	private:
+		struct Body final {
+			float mass = 1.f;
+			glm::vec3 pos;
+			float radius = 0.f;
+
+		public:
+			Body() = default;
+			Body(const BodyData& bodyData)
+				: mass(bodyData.mass)
+				, pos(bodyData.pos)
+				, radius(Space::Radius(mass))
+			{}
+			float Radius() {
+				return Diameter(mass);
+			}
+		};
+
+		struct Colapce {
+			Colapce(size_t _objectIndex) : objectIndex(_objectIndex) {}
+			size_t objectIndex;
+			float sumMass = 0.f;
+			glm::vec3 sumPos;
+			glm::vec3 sumVelocity;
+		};
 
 	public:
-		Body() = default;
-		Body(const BodyData& bodyData)
-			: mass(bodyData.mass)
-			, pos(bodyData.pos.x, bodyData.pos.y, bodyData.pos.z)
-			, velocity(bodyData.velocity.x, bodyData.velocity.y, bodyData.velocity.z)
-		{
-		}
+		void Clear() override;
+		void Update() override;
+		void AddBody(const BodyData& body) override;
+		void AddBodies(const std::vector<BodyData>& bodies) override;
+		void Bodies(std::vector<GravityRender::Body>& bodies) override;
+		std::vector<BodyData> GetBodies() override;
 
-		float Radius() const {
-			return std::cbrt((3.f * mass) / (4.f * std::numbers::pi));
-		}
-
-		float Diameter() const {
-			return Radius() * 2.f;
-		}
+	protected:
+		std::vector<Body> _bodies;
+		std::vector<glm::vec3> _velocities;
 	};
-
-public:
-	void Clear() override;
-	void AddBody(const BodyData& body) override;
-	void AddBodies(const std::vector<BodyData>& bodies) override;
-	void Bodies(std::vector<BodyData>& bodies) override;
-	std::vector<BodyData> GetBodies() override;
-
-	ThreadType GetThreadType() override {
-		return Space::ThreadType::IN_MAIN;
-	}
-
-	void Update() override;
-	void UpdateInternal();
-
-protected:
-	std::vector<Body> _bodies;
-	std::atomic<float> _process;
-	std::atomic<float> _subProcess;
-};
+}

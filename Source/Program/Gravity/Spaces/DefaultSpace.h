@@ -8,47 +8,36 @@
 #include "BodyData.h"
 #include "Space.h"
 
-class DefaultSpace : public Space
+namespace Spaces
 {
-private:
-	struct Body final {
-		float mass = 1.f;
-		glm::vec3 pos = glm::vec3(0.f, 0.f, 0.f);
-		glm::vec3 force = glm::vec3(0.f, 0.f, 0.f);
-		glm::vec3 velocity = glm::vec3(0.f, 0.f, 0.f);
-		void* colapseData = nullptr;
+	class Default : public Space
+	{
+	private:
+		struct Body final {
+			float mass = 1.f;
+			glm::vec3 pos;
+			glm::vec3 velocity;
+			glm::vec3 force;
+			void* colapseData = nullptr;
+
+		public:
+			Body() = default;
+			Body(const BodyData& bodyData)
+				: mass(bodyData.mass)
+				, pos(bodyData.pos)
+				, velocity(bodyData.velocity)
+			{}
+		};
 
 	public:
-		Body() = default;
-		Body(const BodyData& bodyData)
-			: mass(bodyData.mass)
-			, pos(bodyData.pos)
-			, velocity(bodyData.velocity)
-		{
-		}
+		void Clear() override;
+		void Update() override;
+		void AddBody(const BodyData& body) override;
+		void AddBodies(const std::vector<BodyData>& bodies) override;
+		void Bodies(std::vector<GravityRender::Body>& bodies) override;
+		std::vector<BodyData> GetBodies() override;
 
-		float Radius() const {
-			return std::cbrt((3.f * mass) / (4.f * std::numbers::pi));
-		}
-
-		float Diameter() const {
-			return Radius() * 2.f;
-		}
+	protected:
+		std::vector<Body> _bodies;
 	};
-
-public:
-	DefaultSpace() = default;
-	void Clear() override;
-	void Update() override;
-	void AddBody(const BodyData& body) override;
-	void AddBodies(const std::vector<BodyData>& bodies) override;
-	void Bodies(std::vector<BodyData>& bodies) override;
-	std::vector<BodyData> GetBodies() override;
-	
-	ThreadType GetThreadType() override {
-		return Space::ThreadType::IN_MAIN;
-	}
-
-protected:
-	std::vector<Body> _bodies;
-};
+}

@@ -9,11 +9,11 @@
 #include "Space.h"
 #include "DefaultSpace.h"
 #include "MainThreadSpace.h"
-#include "MainThreadProtSpace.h"
-#include "ParallelThreadSpace.h"
-#include "MultiThreadSpace.h"
-#include "MultiAllThreadSpace.h"
-#include "MultiAllThreadNoMutexSpace.h"
+//#include "MainThreadProtSpace.h"
+//#include "ParallelThreadSpace.h"
+//#include "MultiThreadSpace.h"
+//#include "MultiAllThreadSpace.h"
+//#include "MultiAllThreadNoMutexSpace.h"
 #include "Generators/Generetors.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
@@ -32,7 +32,7 @@ Space& SpaceManager::Current()
 const Space::Ptr& SpaceManager::CurrentPtr()
 {
 	if (!currentSpace) {
-		return GetPtr<DefaultSpace>(true);
+		return GetPtr<Spaces::Default>(true);
 	}
 	return currentSpace;
 }
@@ -42,7 +42,6 @@ void SpaceManager::Update(double deltaTime)
 	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
 	Current().Update();
-	Current().Bodies(bodies);
 	CollectDebugData();
 }
 
@@ -61,15 +60,15 @@ void SpaceManager::Load()
 	
 	const std::string className = Engine::GetJsonValue<std::string>("class", GeneratorSpace::GetData());
 
-	if (MakeSpace<DefaultSpace>(className)) {}
-	else if (MakeSpace<MainThreadProtSpace>(className)) {}
-	else if (MakeSpace<MainThreadSpace>(className)) {}
+	if (MakeSpace<Spaces::Default>(className)) {}
+	else if (MakeSpace<MainThread>(className)) {}
+	/*else if (MakeSpace<MainThreadSpace>(className)) {}
 	else if (MakeSpace<ParallelThreadSpace>(className)) {}
 	else if (MakeSpace<MultiThreadSpace>(className)) {}
 	else if (MakeSpace<MultiAllThreadSpace>(className)) {}
-	else if (MakeSpace<MultiAllThreadNoMutexSpace>(className)) {}
+	else if (MakeSpace<MultiAllThreadNoMutexSpace>(className)) {}*/
 	else {
-		SetCurrentPtr<DefaultSpace>();
+		SetCurrentPtr<Spaces::Default>();
 	}
 
 	if (!LoadSpace()) {
@@ -138,38 +137,11 @@ void SpaceManager::StopUpdate()
 	countOfIteration.store(0.f);
 }
 
-void SpaceManager::GetBodyPositions(std::vector<float>& positions)
-{
-	std::vector<float> tempPositions;
-	tempPositions.reserve(bodies.size() * 3);
-
-	for (const auto& body : bodies) {
-		tempPositions.emplace_back(body.pos.x);
-		tempPositions.emplace_back(body.pos.y);
-		tempPositions.emplace_back(body.pos.z);
-	}
-
-	std::swap(positions, tempPositions);
-}
-
-void SpaceManager::GetBodyPositions(std::vector<glm::vec3>& positions)
-{
-	std::vector<glm::vec3> tempPositions;
-	tempPositions.reserve(bodies.size());
-
-	for (const auto& body : bodies) {
-		tempPositions.emplace_back(body.pos);
-	}
-
-	std::swap(positions, tempPositions);
-}
-
-
 void SpaceManager::CheckOverload(double deltaTime)
 {
 	// TODO:
 	if (!Engine::IsDebugging() && deltaTime > 0.25) {
-		if (!Engine::IsDebugging() && Current().GetThreadType() == Space::ThreadType::IN_MAIN) {
+		if (!Engine::IsDebugging() && Current().type == Space::ThreadType::IN_MAIN) {
 			SpaceManager::StopUpdate();
 
 			using namespace Windows;
@@ -189,7 +161,7 @@ void SpaceManager::CollectDebugData()
 {
 	DebugContext& debugContext = DebugContext::Instance();
 
-	for (auto& body : bodies) {
+	/*for (auto& body : bodies) {
 		debugContext.minForce = 0.f;// std::min(debugContext.minForce, glm::length(body.force));
 		debugContext.minMass = std::min(debugContext.minMass, glm::length(body.mass));
 		debugContext.minVelocity = std::min(debugContext.minVelocity, glm::length(body.velocity));
@@ -197,7 +169,7 @@ void SpaceManager::CollectDebugData()
 		debugContext.maxMass = std::max(debugContext.maxMass, glm::length(body.mass));
 		debugContext.maxVelocity = std::max(debugContext.maxVelocity, glm::length(body.velocity));
 		debugContext.sumMass += body.mass;
-	}
+	}*/
 }
 
 glm::vec3 SpaceManager::CenteMassSpace()
