@@ -4,7 +4,8 @@
 #include <GuiWindow/GuiWindows.h>
 #include <Files/FileManager.h>
 #include <Callback/VirtualKey.h>
-#include <Cuda.h>
+#include <CudaWrapper.h>
+#include <CudaExample.h>
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
 #include "Spaces/SpaceManager.h"
@@ -35,7 +36,19 @@ bool Gravity::Init(std::string_view params)
 	SpaceManager::Load();
 	GravityRender::Init();
 
-	Cuda::CudaManager::PrintInfo();
+	{
+		Cuda::ValueWrapper<float> valueW(10000);
+		Cuda::VectorWrapper<Cuda::Body> dataW = std::vector<Cuda::Body>{ {1.f, {1.f, 2.f, 3.f}, {1.f, 2.f, 3.f}}, {2.f, {10.f, 20.f, 30.f}, {11.f, 22.f, 33.f}} };
+
+		LOG("AFTER: valueW: '{}' dataW: {}", valueW, dataW);
+
+		Cuda::CudaWrapper::Calculate(dataW, valueW);
+
+		std::vector<BodyData> bodies = BodyData::Copy(dataW.GetValue());
+
+		LOG("BEFORE: valueW: '{}' dataW: {} : bodies: {}", valueW, dataW, bodies);
+	}
+
 
 	return true;
 }

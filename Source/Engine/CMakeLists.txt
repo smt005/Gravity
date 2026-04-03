@@ -30,6 +30,7 @@ include_directories(${GLM_INCLUDES})
 include_directories(${FREEIMAGE_INCLUDES})
 include_directories(${MYSTL_SOURCE})
 include_directories(${CUDA_SOURCE})
+include_directories(${CUDA_SOURCE})
 
 add_library(${ENGINE_NAME} STATIC ${INCLUDES} ${SOURCES})
 

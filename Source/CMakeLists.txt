@@ -1,5 +1,46 @@
 cmake_minimum_required(VERSION 4.2)
 
+option(GRAVITY_ENABLE_CUDA "Build Gravity with CUDA acceleration" ON)
+
+# VS MSBuild normally imports CUDA from $(VCTargetsPath)\BuildCustomizations, which is only
+# populated when the CUDA installer integrated with that exact VS version. Newer VS builds
+# often lack those files even when the toolkit is installed. Using -T cuda=<toolkit root>
+# makes CMake reference NVIDIA's copies under extras/visual_studio_integration/MSBuildExtensions.
+if(GRAVITY_ENABLE_CUDA AND CMAKE_GENERATOR MATCHES "Visual Studio"
+    AND NOT CMAKE_GENERATOR_TOOLSET MATCHES [[cuda=]])
+	set(_gravity_cuda_root "")
+	if(DEFINED ENV{CUDA_PATH} AND IS_DIRECTORY "$ENV{CUDA_PATH}")
+		set(_gravity_cuda_root "$ENV{CUDA_PATH}")
+	elseif(DEFINED ENV{CUDAToolkit_ROOT} AND IS_DIRECTORY "$ENV{CUDAToolkit_ROOT}")
+		set(_gravity_cuda_root "$ENV{CUDAToolkit_ROOT}")
+	else()
+		file(GLOB _gravity_cuda_dirs
+			"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/*")
+		if(_gravity_cuda_dirs)
+			list(SORT _gravity_cuda_dirs COMPARE NATURAL ORDER DESCENDING)
+			foreach(_d IN LISTS _gravity_cuda_dirs)
+				if(IS_DIRECTORY "${_d}" AND EXISTS "${_d}/bin/nvcc.exe")
+					file(GLOB _gravity_cuda_msbuild
+						"${_d}/extras/visual_studio_integration/MSBuildExtensions/CUDA *.targets")
+					if(_gravity_cuda_msbuild)
+						set(_gravity_cuda_root "${_d}")
+						break()
+					endif()
+				endif()
+			endforeach()
+		endif()
+	endif()
+	if(_gravity_cuda_root)
+		if(CMAKE_GENERATOR_TOOLSET)
+			set(_gravity_ts "${CMAKE_GENERATOR_TOOLSET},cuda=${_gravity_cuda_root}")
+		else()
+			set(_gravity_ts "cuda=${_gravity_cuda_root}")
+		endif()
+		set(CMAKE_GENERATOR_TOOLSET "${_gravity_ts}" CACHE STRING "Visual Studio toolset" FORCE)
+		message(STATUS "Gravity: VS generator will use CUDA toolkit at: ${_gravity_cuda_root}")
+	endif()
+endif()
+
 message("Begin generate. . . . . . . . . . . . . . . .")
 
 set(PROJECT_NAME Gravity)
@@ -56,8 +97,7 @@ set(IMGUI_INCLUDES "${IMGUI_DIR}")
 set(FREEIMAGE_NAME FreeImage)
 set(FREEIMAGE_DIR "${ENGINE_DIR}/ThirdParty/${FREEIMAGE_NAME}")
 
-# CUDA
-set(CUDA_NAME CUDA)
+set(CUDA_NAME CudaWrapper)
 set(CUDA_DIR "${ENGINE_DIR}/${CUDA_NAME}")
 set(CUDA_SOURCE "${CUDA_DIR}/Source")
 
@@ -76,6 +116,22 @@ include_directories(${PROJECT_PLATFORM_DIR})
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
+# CUDA (optional; GRAVITY_ENABLE_CUDA is declared at top of this file)
+set(GRAVITY_HAS_CUDA OFF)
+if(GRAVITY_ENABLE_CUDA)
+	include(CheckLanguage)
+    check_language(CUDA)
+    
+	if(CMAKE_CUDA_COMPILER)
+        enable_language(CUDA)
+        set(GRAVITY_HAS_CUDA ON)
+		add_definitions(-DENABLE_CUDA)
+		message("CUDA enabled")		
+    else()
+        message(WARNING "CUDA requested but no CUDA compiler found; building without CUDA.")
+    endif()
+endif()
+
 # FreeImage: choose arch after project() so CMAKE_SIZEOF_VOID_P is set
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(FREEIMAGE_DIST_ARCH "x64")
@@ -92,6 +148,7 @@ include_directories(${GLM_INCLUDES})
 
 # glfw
 include_directories(${GLFW_INCLUDES})
+set(USE_MSVC_RUNTIME_LIBRARY_DLL ON CACHE BOOL "Use MSVC runtime library DLL" FORCE)
 add_subdirectory(${GLFW_DIR})
 target_link_libraries(${PROJECT_NAME} ${GLFW_NAME})
 link_directories(${GLFW_LIB})
