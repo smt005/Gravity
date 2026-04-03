@@ -5,7 +5,7 @@
 
 namespace Cuda
 {
-	class CudaWrapper final {
+	class ExampleCuda final {
 	public:
 		static void Calculate(VectorWrapper<Body>& bodies, ValueWrapper<float>& ans);
 	};
