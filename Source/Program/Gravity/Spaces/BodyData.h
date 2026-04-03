@@ -3,6 +3,7 @@
 
 #include <numbers>
 #include <glm/vec3.hpp>
+#include <CudaWrapper.h>
 
 struct BodyData
 {
@@ -11,6 +12,12 @@ struct BodyData
 	glm::vec3 velocity;
 
 	BodyData() = default;
+
+	BodyData(const Cuda::Body& data)
+		: mass(data.mass)
+		, pos(data.pos.x, data.pos.y, data.pos.z)
+		, velocity(data.velocity.x, data.velocity.y, data.velocity.z)
+	{}
 
 	template <typename TVec3>
 	BodyData(float _mass, const TVec3& _pos, const TVec3& _velocity)
@@ -23,8 +30,7 @@ struct BodyData
 		: mass(_mass)
 		, pos(posX, posY, posZ)
 		, velocity(velX, velY, velZ)
-	{
-	}
+	{}
 
 	float Radius() const {
 		return std::cbrt((3.f * mass) / (4.f * std::numbers::pi));
@@ -33,4 +39,8 @@ struct BodyData
 	float Diameter() const {
 		return Radius() * 2.f;
 	}
+
+	static std::vector<BodyData> Copy(const std::vector<Cuda::Body>& bodies);
 };
+
+std::ostream& operator<<(std::ostream& os, const BodyData& body);

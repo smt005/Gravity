@@ -44,19 +44,11 @@ bool Gravity::Init(std::string_view params)
 
 		Cuda::CudaWrapper::Calculate(dataW, valueW);
 
-		LOG("BEFORE: valueW: '{}' dataW: {}", valueW, dataW);
+		std::vector<BodyData> bodies = BodyData::Copy(dataW.GetValue());
+
+		LOG("BEFORE: valueW: '{}' dataW: {} : bodies: {}", valueW, dataW, bodies);
 	}
 
-	{
-		Cuda::ValueWrapper<float> valueW(10000);
-		Cuda::VectorWrapper<Cuda::Body> dataW = std::vector<Cuda::Body>{ {777.f, {1.f, 2.f, 3.f}, {1.f, 2.f, 3.f}}, {2.f, {10.f, 20.f, 30.f}, {11.f, 22.f, 999.f}} };
-
-		LOG("ExampleCuda AFTER: valueW: '{}' dataW: {}", valueW, dataW);
-
-		Cuda::ExampleCuda::Calculate(dataW, valueW);
-
-		LOG("ExampleCuda BEFORE: valueW: '{}' dataW: {}", valueW, dataW);
-	}
 
 	return true;
 }
