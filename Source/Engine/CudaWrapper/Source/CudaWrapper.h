@@ -2,25 +2,53 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include "../../../Program/Gravity/Spaces/BodyData.h"
 
 namespace Cuda
 {
+	struct Vec3 {
+		float x, y, z;
+		Vec3() : x(0.f), y(0.f), z(0.f) {}
+		Vec3(float value) : x(value), y(value), z(value) {}
+		Vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	};
+
+	struct Body
+	{
+		float mass = 1.f;
+		Vec3 pos;
+		Vec3 velocity;
+	};
+
+	template <typename T>
+	struct ValueWrapper
+	{
+		ValueWrapper(T _value = {});
+		~ValueWrapper();
+
+		operator T () {
+			return value;
+		}
+		operator T* () {
+			return valuePtr;
+		}
+		T GetValue() {
+			return value;
+		}
+		void* Get() {
+			return valuePtr;
+		}
+
+		T RetrieveValue();
+
+	private:
+		T value;
+		T* valuePtr;
+	};
+
 	class CudaWrapper final {
 	public:
-		static bool Init(std::string& info);
-		static int Process();
-
-	public:
-		static bool processGPU;
-		static bool multithread;
-
-		static std::string nameGPU;
-		static int         deviceCount;
-		static int         warpSize;                    // Warp size in threads
-		static int         maxThreadsPerBlock;          // Maximum number of threads per block
-		static int         maxThreadsDim[3];                // Maximum size of each dimension of a block
-		static int         maxGridSize[3];                  // Maximum size of each dimension of a grid
-		static int         maxThreadsPerMultiProcessor; // Maximum resident threads per multiprocessor
-		static int         maxBlocksPerMultiProcessor;  // Maximum number of resident blocks per multiprocessor
+		static void Calculate(std::vector<Body>& bodies);
 	};
 }

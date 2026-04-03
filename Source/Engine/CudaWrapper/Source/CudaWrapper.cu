@@ -3,64 +3,42 @@
 #include "CudaWrapper.h"
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
+#include "../../ThirdParty/MyStl/Source/Log.h"
 
 namespace Cuda {
-	cudaDeviceProp deviceProp;
+	// ValueWrapper
+	template <typename T>
+	ValueWrapper<T>::ValueWrapper<T>(T _value)
+		: value(_value)
+	{
+		cudaMalloc(&valuePtr, sizeof(T));
+	}
 
-	int         deviceCount;
-	bool processGPU;
-	bool multithread;
-	std::string nameGPU;
-	int         warpSize;                    // Warp size in threads
-	int         maxThreadsPerBlock;          // Maximum number of threads per block
-	int         maxThreadsDim[3];                // Maximum size of each dimension of a block
-	int         maxGridSize[3];                  // Maximum size of each dimension of a grid
-	int         maxThreadsPerMultiProcessor; // Maximum resident threads per multiprocessor
-	int         maxBlocksPerMultiProcessor;  // Maximum number of resident blocks per multiprocessor
+	template <typename T>
+	ValueWrapper<T>::~ValueWrapper<T>() {
+		cudaFree(valuePtr);
+	}
 
-	bool GetProperty() {
-		if (deviceCount == -1) {
-			cudaGetDeviceCount(&deviceCount);
-
-			if (deviceCount == 0) {
-				return false;
-			}
-		}
-		cudaGetDeviceProperties(&deviceProp, 0);
-
-		nameGPU = deviceProp.name;
-		warpSize = deviceProp.warpSize;
-		maxThreadsPerBlock = deviceProp.maxThreadsPerBlock;
-		maxThreadsDim[0] = deviceProp.maxThreadsDim[0];
-		maxThreadsDim[1] = deviceProp.maxThreadsDim[1];
-		maxThreadsDim[2] = deviceProp.maxThreadsDim[2];
-		maxGridSize[0] = deviceProp.maxGridSize[0];
-		maxGridSize[1] = deviceProp.maxGridSize[1];
-		maxGridSize[2] = deviceProp.maxGridSize[2];
-		maxThreadsPerMultiProcessor = deviceProp.maxThreadsPerMultiProcessor;
-		maxBlocksPerMultiProcessor = deviceProp.maxBlocksPerMultiProcessor;
-
-		return true;
+	template <typename T>
+	T ValueWrapper<T>::RetrieveValue()
+	{
+		cudaMemcpy(&value, valuePtr, sizeof(T), cudaMemcpyDeviceToHost);
+		return value;
 	}
 }
 
 using namespace Cuda;
 
-__global__ void gravity_cuda_link_stub_kernel()
+__global__ void CudaFun(float a, float b, float* c)
 {
+	*c = a * b;
 }
 
-bool CudaWrapper::Init(std::string& info)
+void CudaWrapper::Calculate(std::vector<Body>& bodies)
 {
-	if (!GetProperty()) {
-		return false;
-	}
+	ValueWrapper<float> c;
 
-	return true;
-}
+	CudaFun << <1, 1 >> > (1000, 1.1f, c);
 
-int CudaWrapper::Process()
-{
-	gravity_cuda_link_stub_kernel <<<1,1>>>();
-	return true;
+	LOG("ans: a * b = {}", c.RetrieveValue());
 }

@@ -35,14 +35,9 @@ bool Gravity::Init(std::string_view params)
 	SpaceManager::Load();
 	GravityRender::Init();
 
-	std::string cudaInfo;
-	if (Cuda::CudaWrapper::Init(cudaInfo)) {
-		LOG("CUDA OK!");
-	}
-	else {
-		LOG("CUDA FAIL: {}", cudaInfo);
-	}
-	
+	std::vector<Cuda::Body> data;
+	Cuda::CudaWrapper::Calculate(data);
+
 	return true;
 }
 
