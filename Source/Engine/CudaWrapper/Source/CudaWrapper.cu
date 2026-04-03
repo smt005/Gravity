@@ -15,13 +15,13 @@ namespace Cuda {
 
 	// ValueWrapper
 	template <typename T>
-	ValueWrapper<T>::ValueWrapper<T>()
+	ValueWrapper<T>::ValueWrapper()
 	{
 		cudaMalloc(&valuePtr, sizeof(T));
 	}
 
 	template <typename T>
-	ValueWrapper<T>::ValueWrapper<T>(T _value)
+	ValueWrapper<T>::ValueWrapper(T _value)
 		: value(_value)
 	{
 		cudaMalloc(&valuePtr, sizeof(T));
@@ -29,7 +29,7 @@ namespace Cuda {
 	}
 
 	template <typename T>
-	ValueWrapper<T>::~ValueWrapper<T>() {
+	ValueWrapper<T>::~ValueWrapper() {
 		cudaFree(valuePtr);
 	}
 
@@ -42,41 +42,64 @@ namespace Cuda {
 
 	// VectorWrapper
 	template <typename T>
-	VectorWrapper<T>::VectorWrapper<T>(size_t _size)
+	VectorWrapper<T>::VectorWrapper(size_t _size)
 	{
 		data.resize(_size);
-		size = _size;
-		cudaMalloc(&valuePtr, size * sizeof(T));
-		cudaMemcpy(valuePtr, &data, size * sizeof(T), cudaMemcpyHostToDevice);
+		cudaMalloc(&valuePtr, data.size() * sizeof(T));
+		cudaMemcpy(valuePtr, data.data(), data.size() * sizeof(T), cudaMemcpyHostToDevice);
 	}
 
 	template <typename T>
-	VectorWrapper<T>::VectorWrapper<T>(const std::vector<T>& _data)
+	VectorWrapper<T>::VectorWrapper(const std::vector<T>& _data)
 		: data(_data)
-		, size(data.size())
 	{
-		cudaMalloc(&valuePtr, size * sizeof(T));
-		cudaMemcpy(valuePtr, &data, size * sizeof(T), cudaMemcpyHostToDevice);
+		cudaMalloc(&valuePtr, data.size() * sizeof(T));
+		cudaMemcpy(valuePtr, data.data(), data.size() * sizeof(T), cudaMemcpyHostToDevice);
 	}
 
 	template <typename T>
-	VectorWrapper<T>::VectorWrapper<T>(std::vector<T>&& _data) noexcept
-		: size(_data.size())
+	VectorWrapper<T>::VectorWrapper(std::vector<T>&& _data) noexcept
 	{
 		std::swap(data, _data);
-		cudaMalloc(&valuePtr, size * sizeof(T));
-		cudaMemcpy(valuePtr, &data, size * sizeof(T), cudaMemcpyHostToDevice);
+		cudaMalloc(&valuePtr, data.size() * sizeof(T));
+		cudaMemcpy(valuePtr, data.data(), data.size() * sizeof(T), cudaMemcpyHostToDevice);
 	}
 
 	template <typename T>
-	VectorWrapper<T>::~VectorWrapper<T>() {
+	const std::vector<T>& VectorWrapper<T>::operator = (const std::vector<T>& _data)
+	{
+		data = _data;
+		if (valuePtr) {
+			cudaFree(valuePtr);
+			valuePtr = nullptr;
+		}
+		cudaMalloc(&valuePtr, data.size() * sizeof(T));
+		cudaMemcpy(valuePtr, data.data(), data.size() * sizeof(T), cudaMemcpyHostToDevice);
+		return data;
+	}
+	
+	template <typename T>
+	const std::vector<T>& VectorWrapper<T>::operator = (std::vector<T>&& _data) noexcept
+	{
+		std::swap(data, _data);
+		if (valuePtr) {
+			cudaFree(valuePtr);
+			valuePtr = nullptr;
+		}
+		cudaMalloc(&valuePtr, data.size() * sizeof(T));
+		cudaMemcpy(valuePtr, data.data(), data.size() * sizeof(T), cudaMemcpyHostToDevice);
+		return data;
+	}
+
+	template <typename T>
+	VectorWrapper<T>::~VectorWrapper() {
 		cudaFree(valuePtr);
 	}
 
 	template <typename T>
 	const std::vector<T>& VectorWrapper<T>::RetrieveData() const
 	{
-		cudaMemcpy(&data, valuePtr, size * sizeof(T), cudaMemcpyDeviceToHost);
+		cudaMemcpy(data.data(), valuePtr, data.size() * sizeof(T), cudaMemcpyDeviceToHost);
 		return data;
 	}
 
@@ -91,12 +114,22 @@ namespace Cuda {
 
 using namespace Cuda;
 
-__global__ void CudaFun(float a, float b, float* c)
+__global__ void CudaFun(Body* bodies, size_t size, float* value)
 {
-	*c = *c * a * b;
+	float sumMass = 0;
+
+	for (int index = 0; index < size; ++index) {
+		Body* body = &bodies[index];
+		body->pos.x = body->pos.x * *value;
+	
+		sumMass = sumMass + body->mass;
+	}
+
+	*value = sumMass;
 }
 
-void CudaWrapper::Calculate(std::vector<Body>& bodies, ValueWrapper<float>& ans)
+void CudaWrapper::Calculate(VectorWrapper<Body>& bodies, ValueWrapper<float>& ans)
 {
-	CudaFun << <1, 1 >> > (100.f, 5.f, ans);
+	CudaFun<<<1, 1>>>(static_cast<Body*>(bodies.Get()), bodies.Size(), static_cast<float*>(ans.Get()));
+	cudaDeviceSynchronize();
 }

@@ -48,8 +48,8 @@ namespace Cuda
 		T RetrieveData() const;
 
 	private:
-		mutable T value;
-		T* valuePtr;
+		mutable T value{};
+		T* valuePtr = nullptr;
 	};
 	
 	template <typename T>
@@ -59,6 +59,9 @@ namespace Cuda
 		VectorWrapper(const std::vector<T>& data);
 		VectorWrapper(std::vector<T>&& data) noexcept;
 		~VectorWrapper();
+
+		const std::vector<T>& operator = (const std::vector<T>& data);
+		const std::vector<T>& operator = (std::vector<T>&& data) noexcept;
 
 		/*operator const std::vector<T>() const {
 			return data;
@@ -73,12 +76,15 @@ namespace Cuda
 			return valuePtr;
 		}
 
+		size_t Size() const {
+			return data.size();
+		};
+
 		const std::vector<T>& RetrieveData() const;
 
 	private:
 		mutable std::vector<T> data;
-		size_t size;
-		T* valuePtr;
+		T* valuePtr = nullptr;
 	};
 
 	static std::ostream& operator<<(std::ostream& os, const Vec3& vec)
@@ -119,6 +125,6 @@ namespace Cuda
 
 	class CudaWrapper final {
 	public:
-		static void Calculate(std::vector<Body>& bodies, ValueWrapper<float>& ans);
+		static void Calculate(VectorWrapper<Body>& bodies, ValueWrapper<float>& ans);
 	};
 }
