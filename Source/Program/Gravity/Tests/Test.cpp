@@ -11,7 +11,7 @@ namespace
 {
 	bool CheckVectors(const glm::vec3 glmVec3, const mystd::Vec3& myVec3)
 	{
-		if (glmVec3.x == myVec3.x() && glmVec3.y == myVec3.y() && glmVec3.z == myVec3.z()) {
+		if (glmVec3.x == myVec3.X() && glmVec3.y == myVec3.Y() && glmVec3.z == myVec3.Z()) {
 			return true;
 		}
 

@@ -19,13 +19,6 @@ struct BodyData
 		, velocity(data.velocity.x, data.velocity.y, data.velocity.z)
 	{}
 
-	template <typename TVec3>
-	BodyData(float _mass, const TVec3& _pos, const TVec3& _velocity)
-		: mass(_mass)
-		, pos(_pos.x, _pos.y, _pos.z)
-		, velocity(_velocity.x, _velocity.y, _velocity.z)
-	{}
-	
 	BodyData(float _mass, float posX, float posY, float posZ, float velX, float velY, float velZ)
 		: mass(_mass)
 		, pos(posX, posY, posZ)

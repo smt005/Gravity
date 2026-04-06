@@ -1,7 +1,9 @@
 ﻿// ◦ Xyz ◦
 
 #include "MainThreadSpace.h"
+#include <atomic>
 #include <glm/gtc/quaternion.hpp>
+#include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
@@ -24,7 +26,7 @@ void MainThread::AddBodies(const std::vector<BodyData>& bodies)
 
 	for (const auto& body : bodies) {
 		_bodies.emplace_back(body);
-		_velocities.emplace_back(body.velocity);
+		_velocities.emplace_back(body.velocity.x, body.velocity.y, body.velocity.z);
 	}
 }
 
@@ -34,7 +36,7 @@ void MainThread::Bodies(std::vector<GravityRender::Body>& bodies)
 	bodies.resize(_bodies.size());
 
 	std::transform(_bodies.begin(), _bodies.end(), bodies.begin(), [](const Body& body) {
-		return GravityRender::Body{ Diameter(body.mass), body.pos };
+		return GravityRender::Body{ Diameter(body.mass), glm::vec3(body.pos.X(), body.pos.Y(), body.pos.Z()) };
 	});
 }
 
@@ -45,7 +47,9 @@ std::vector<BodyData> MainThread::GetBodies()
 	bodies.reserve(size);
 	
 	for (size_t i = 0; i < size; ++i) {
-		bodies.emplace_back(_bodies[i].mass, _bodies[i].pos, _velocities[i]);
+		const auto& pos = _bodies[i].pos;
+		const auto& vel = _velocities[i];
+		bodies.emplace_back(_bodies[i].mass, pos.X(), pos.Y(), pos.Z(), vel.X(), vel.Y(), vel.Z());
 	}
 
 	return bodies;
@@ -53,27 +57,38 @@ std::vector<BodyData> MainThread::GetBodies()
 
 void MainThread::Update()
 {
+	auto& debugContext = DebugContext::Instance();
+	Engine::TimeHundler timer("Tag00");
+
+	debugContext.Clean();
 	const size_t size = _bodies.size();
-	std::vector<glm::vec3> forces(size, glm::vec3(0.f, 0.f, 0.f));
+	std::vector<mystd::Vec3> forces(size);
 	std::deque<Colapce> colapses;
 	std::vector<Colapce*> colapseOfBodies(size, nullptr);
+	debugContext.deltaTimes[0] = timer.GetDeltaTime();
 
 	UpdateForce(0, size, size, forces, colapses, colapseOfBodies);
 	ColapceBodies(forces, colapses, colapseOfBodies);
 	UpdatePositions(forces);
+	
+	debugContext.countObject = _bodies.size();
 }
 
-void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<glm::vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
 {
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[1], "Tag01");
+
+	//for (size_t i = iBegin; i < iEnd; ++i) {
+	//	for (size_t j = 0; j < size; ++j) {
 	for (size_t i = iBegin; i < iEnd; ++i) {
-		for (size_t j = 0; j < size; ++j) {
+		for (size_t j = i + 1; j < size; ++j) {
 			if (i == j) {
 				continue;
 			}
 
 			auto& force = forces[i];
-			const glm::vec3 direction = _bodies[j].pos - _bodies[i].pos;
-			const float distance = glm::length(direction);
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
 
 			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
 				Colapce* colapcePtr = colapseOfBodies[i];
@@ -100,15 +115,17 @@ void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vecto
 			}
 			else {
 				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
-				const auto forceDirection = glm::normalize(direction);
+				const auto forceDirection = direction.Normalized();
 				force += forceDirection * forceMagnitude;
 			}
 		}
 	}
 }
 
-void MainThread::ColapceBodies(std::vector<glm::vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+void MainThread::ColapceBodies(std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
 {
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[2], "Tag02");
+
 	for (Colapce& colapses : colapses) {
 		auto& body = _bodies[colapses.objectIndex];
 		body.mass = colapses.sumMass;
@@ -142,8 +159,10 @@ void MainThread::ColapceBodies(std::vector<glm::vec3>& forces, std::deque<Colapc
 	forces.resize(size);
 }
 
-void MainThread::UpdatePositions(const std::vector<glm::vec3>& forces)
+void MainThread::UpdatePositions(const std::vector<mystd::Vec3>& forces)
 {
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[3], "Tag03");
+
 	volatile static float velocityFactor = 1.f;
 	const float deltaTime = SpaceManager::offsetIteration.load() * velocityFactor;
 	const size_t size = _bodies.size();

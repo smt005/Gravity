@@ -25,7 +25,7 @@ AlgorithmWindow::AlgorithmWindow(std::string_view name)
 	: Engine::GuiWindow(std::string(name))
 {
 	SetFlags(ImGuiWindowFlags_AlwaysAutoResize);
-	SetTitle("Type algorithm");
+	SetTitle("Выбор алгоритма");
 	CloseButton(true);
 }
 

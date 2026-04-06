@@ -6,6 +6,8 @@
 #include <memory>
 #include <list>
 #include <mystd_memory.h>
+#include <Callback/Callback.h>
+#include <Logs.h>
 
 namespace Engine
 {
@@ -125,5 +127,49 @@ namespace Engine
 		}
 
 		std::list<Ptr> _refs;
+	};
+
+
+	struct TimeRefHundler
+	{
+		TimeRefHundler(double& _time, const std::string& _tag = {})
+			: tag(_tag)
+			, time(_time)
+			, beginTime(Callback::GetCurrentTime())
+		{
+			time = 0;
+		}
+		~TimeRefHundler() {
+			time = Callback::GetCurrentTime() - beginTime;
+			/*if (time == 0 && !tag.empty()) {
+				LOG("[TimeRefHundler] deltaTime: {} {}", time, tag);
+			}*/
+		}
+		std::string tag;
+		double& time;
+		const double beginTime;
+	};
+
+	struct TimeHundler
+	{
+		TimeHundler(const std::string& _tag = {})
+			: tag(_tag)
+			, beginTime(Callback::GetCurrentTime())
+		{
+		}
+		double GetDeltaTime() {
+			const double deltaTime = Callback::GetCurrentTime() - beginTime;
+			/*if (deltaTime == 0 && !tag.empty()) {
+				LOG("[TimeRefHundler] deltaTime: {} {}", deltaTime, tag);
+			}*/
+			return deltaTime;
+		}
+		double GetAndResetDeltaTime() {
+			const double deltaTime = GetDeltaTime();
+			beginTime = Callback::GetCurrentTime();
+			return deltaTime;
+		}
+		std::string tag;
+		double beginTime;
 	};
 }

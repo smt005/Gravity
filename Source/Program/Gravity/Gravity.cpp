@@ -15,6 +15,7 @@
 #include "Windows/AlgorithmWindow.h"
 #include "Windows/BottomPanel.h"
 #include "Windows/RenderWindow.h"
+#include "Windows/GuiStyle.h"
 #include "Render/GravityRender.h"
 #include "Tests/Test.h"
 #include <Logs.h>
@@ -134,6 +135,8 @@ void Gravity::InitCallback()
 
 void Gravity::InitWidows()
 {
+	Windows::LoadGuiStyle();
+
 	Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
 	Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
 	Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();

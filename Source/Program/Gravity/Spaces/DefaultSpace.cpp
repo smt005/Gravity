@@ -49,7 +49,9 @@ std::vector<BodyData> Default::GetBodies()
 	bodies.reserve(_bodies.size());
 	
 	for (const Body& body : _bodies) {
-		bodies.emplace_back(body.mass, body.pos, body.velocity);
+		const auto& pos = body.pos;
+		const auto& vel = body.velocity;
+		bodies.emplace_back(body.mass, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
 	}
 
 	return bodies;

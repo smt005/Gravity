@@ -2,6 +2,7 @@
 #pragma once
 
 #include <atomic>
+#include <array>
 #include <Singletone.h>
 
 class DebugContext : public mystd::Singletone<DebugContext>
@@ -23,6 +24,7 @@ public:
 	float constSpeed = 1.f;
 
 	std::atomic<double> updateDeltaTime = 0;
+	std::array<double, 4> deltaTimes;
 	float deltaTime = 0.f;
 	float subProgress = 0.f;
 	float progress = 0.f;

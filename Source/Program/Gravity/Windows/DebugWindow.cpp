@@ -17,7 +17,7 @@ DebugWindow::DebugWindow(std::string_view name)
 	: Engine::GuiWindow(std::string(name))
 {
 	SetFlags(ImGuiWindowFlags_AlwaysAutoResize);
-	SetTitle("Debud info");
+	SetTitle("Отладочная информация");
 }
 
 void DebugWindow::OnOpen()

@@ -65,7 +65,7 @@ GenerateWindow::GenerateWindow(std::string_view name)
 	: Engine::GuiWindow(std::string(name))
 {
 	SetFlags(ImGuiWindowFlags_AlwaysAutoResize);
-	SetTitle("Generate");
+	SetTitle("Генерирование объектов");
 	CloseButton(true);
 
 	_countInput = mystd::make_shared<InputValue<int>>("count", 300);

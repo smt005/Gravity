@@ -34,7 +34,7 @@ void InfoWindow::OnOpen()
 
 void InfoWindow::ShowMessageWindow(std::list<InfoWindow::Element>&& elementArgs)
 {
-	const std::string nameWindow = TO_STRING("InfoWindow:{}", std::rand() % 1000);
+	const std::string nameWindow = TO_STRING("Информация:{}", std::rand() % 1000);
 
 	auto content = [nameWindow, elements = std::forward<std::list<InfoWindow::Element>>(elementArgs)]() {
 		constexpr ImVec2 buttonSize(200.f, 28.f);
@@ -50,7 +50,7 @@ void InfoWindow::ShowMessageWindow(std::list<InfoWindow::Element>&& elementArgs)
 				}
 			} break;
 			case TypeElement::CLOSE_BUTTON: {
-				const std::string textButton = !text.empty() ? text : "Close";
+				const std::string textButton = !text.empty() ? text : "Закрыть";
 				if (ImGui::Button(textButton.data(), buttonSize)) {
 					if (fun) {
 						fun();

@@ -20,14 +20,14 @@ namespace mystd
 
         explicit Vec3(__m128 v) : m(v) {}
 
-        inline float x() const { return _mm_cvtss_f32(m); }
+        inline float X() const { return _mm_cvtss_f32(m); }
 
-        inline float y() const
+        inline float Y() const
         {
             return _mm_cvtss_f32(_mm_shuffle_ps(m, m, _MM_SHUFFLE(1, 1, 1, 1)));
         }
 
-        inline float z() const
+        inline float Z() const
         {
             return _mm_cvtss_f32(_mm_shuffle_ps(m, m, _MM_SHUFFLE(2, 2, 2, 2)));
         }

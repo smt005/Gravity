@@ -4,6 +4,7 @@
 #include <vector>
 #include <deque>
 #include <string>
+#include <MyMath.h>
 #include <glm/vec3.hpp>
 #include <mystd_memory.h>
 #include "BodyData.h"
@@ -16,14 +17,14 @@ namespace Spaces
 	private:
 		struct Body final {
 			float mass = 1.f;
-			glm::vec3 pos;
+			mystd::Vec3 pos;
 			float radius = 0.f;
 
 		public:
 			Body() = default;
 			Body(const BodyData& bodyData)
 				: mass(bodyData.mass)
-				, pos(bodyData.pos)
+				, pos(bodyData.pos.x, bodyData.pos.y, bodyData.pos.z)
 				, radius(Space::Radius(mass))
 			{}
 		};
@@ -32,8 +33,8 @@ namespace Spaces
 			Colapce(size_t _objectIndex) : objectIndex(_objectIndex) {}
 			size_t objectIndex;
 			float sumMass = 0.f;
-			glm::vec3 sumPos = glm::vec3(0.f, 0.f, 0.f);
-			glm::vec3 sumVelocity = glm::vec3(0.f, 0.f, 0.f);
+			mystd::Vec3 sumPos;
+			mystd::Vec3 sumVelocity;
 		};
 
 	public:
@@ -44,12 +45,12 @@ namespace Spaces
 		void Bodies(std::vector<GravityRender::Body>& bodies) override;
 		std::vector<BodyData> GetBodies() override;
 
-		void UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<glm::vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
-		void ColapceBodies(std::vector<glm::vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
-		void UpdatePositions(const std::vector<glm::vec3>& forces);
+		void UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
+		void ColapceBodies(std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
+		void UpdatePositions(const std::vector<mystd::Vec3>& forces);
 
 	protected:
 		std::vector<Body> _bodies;
-		std::vector<glm::vec3> _velocities;
+		std::vector<mystd::Vec3> _velocities;
 	};
 }

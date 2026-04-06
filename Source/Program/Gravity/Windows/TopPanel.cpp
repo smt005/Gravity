@@ -66,6 +66,15 @@ void TopPanel::Render() {
 		ImGui::SameLine();
 		ImGui::TextColored(GetCollor(_ups), text.c_str());
 	}
+
+	DebugContext& debugContext = DebugContext::Instance();
+	std::string text = "dT: ";
+	for (auto& dTime : debugContext.deltaTimes) {
+		text += std::to_string(dTime) + ", ";
+	}
+
+	ImGui::SameLine();
+	ImGui::Text(text.c_str());
 }
 
 void TopPanel::Update(double dTime) {
