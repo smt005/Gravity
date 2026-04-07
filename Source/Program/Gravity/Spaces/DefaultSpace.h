@@ -30,9 +30,6 @@ namespace Spaces
 	};
 
 	public:
-		Default() {
-			LOG("Space: {} Default", typeid(this).hash_code());
-		}
 		void Clear() override;
 		void Update() override;
 		void AddBody(const BodyData& body) override;

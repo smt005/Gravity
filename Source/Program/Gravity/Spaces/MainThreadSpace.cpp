@@ -65,6 +65,9 @@ std::vector<BodyData> MainThread::GetBodies()
 void MainThread::Update()
 {
 	auto& debugContext = DebugContext::Instance();
+	debugContext.Clean();
+	debugContext.deltaTimes.clear();
+
 	const size_t size = _bodies.size();
 	std::vector<mystd::Vec3> forces(size);
 	std::deque<Colapce> colapses;

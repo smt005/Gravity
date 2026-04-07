@@ -14,6 +14,8 @@
 #include "../Spaces/DefaultSpace.h"
 #include "../Spaces/MainThreadSpace.h"
 #include "../Spaces/MainThreadAllInBodySpace.h"
+#include "../Spaces/ParalelThreadSpace.h"
+//#include "../Spaces/XXX.h"
 //#include "../Spaces/XXX.h"
 
 using namespace Windows;
@@ -83,5 +85,7 @@ void AlgorithmWindow::Render() {
 	ButtonRender<Spaces::Default>();
 	ButtonRender<MainThread>();
 	ButtonRender<MainThreadAllInBody>();
+	ButtonRender<ParalelThread>();
+	//ButtonRender<XXX>();
 	//ButtonRender<XXX>();
 }

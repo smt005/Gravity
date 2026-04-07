@@ -90,9 +90,9 @@ void GravityRender::Render()
 		points.reserve(_renderBodies.size());
 
 		for (const auto& body : _renderBodies) {
-			_renderBodies.emplace_back(body.pos.x);
-			_renderBodies.emplace_back(body.pos.y);
-			_renderBodies.emplace_back(body.pos.z);
+			points.emplace_back(body.pos.x);
+			points.emplace_back(body.pos.y);
+			points.emplace_back(body.pos.z);
 		}
 
 		std::array<float, 4> color = { 10.f, 0.f, 0.f, 1.f };

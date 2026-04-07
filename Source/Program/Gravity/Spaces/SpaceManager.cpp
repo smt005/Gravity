@@ -14,6 +14,8 @@
 #include "DefaultSpace.h"
 #include "MainThreadSpace.h"
 #include "MainThreadAllInBodySpace.h"
+#include "ParalelThreadSpace.h"
+//#include "XXX.h"
 //#include "XXX.h"
 
 namespace {
@@ -36,7 +38,6 @@ const Space::Ptr& SpaceManager::CurrentPtr()
 
 void SpaceManager::Update(double deltaTime)
 {
-	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
 
 	for (size_t it = 1; it <= countOfIteration; ++it) {
@@ -64,6 +65,8 @@ void SpaceManager::Load()
 	if (MakeSpace<Spaces::Default>(className)) {}
 	else if (MakeSpace<MainThread>(className)) {}
 	else if (MakeSpace<MainThreadAllInBody>(className)) {}
+	else if (MakeSpace<ParalelThread>(className)) {}
+	//else if (MakeSpace<XXX>(className)) {}
 	//else if (MakeSpace<XXX>(className)) {}
 	else {
 		SetCurrentPtr<Spaces::Default>();

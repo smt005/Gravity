@@ -2,7 +2,7 @@
 
 #include "DefaultSpace.h"
 #include <glm/gtc/quaternion.hpp>
-//#include "../DebugContext.h"
+#include "../DebugContext.h"
 #include "SpaceManager.h"
 
 using namespace Spaces;
@@ -14,6 +14,12 @@ void Default::Clear()
 
 void Default::Update() {
 	static volatile float angleSpeedFactor = 0.001f;
+
+	auto& debugContext = DebugContext::Instance();
+	debugContext.Clean();
+	debugContext.deltaTimes.clear();
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes.emplace_back());
+
 	const float angleSpeed = SpaceManager::offsetIteration.load() * SpaceManager::countOfIteration.load() * angleSpeedFactor;
 	const glm::vec3 rotationAxis(0.f, 0.f, 1.f);
 	const glm::quat rotationQuat = glm::angleAxis(angleSpeed, rotationAxis);

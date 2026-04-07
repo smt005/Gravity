@@ -8,7 +8,10 @@
 class DebugContext : public mystd::Singletone<DebugContext>
 {
 public:
-	DebugContext() = default;
+	//DebugContext() = default;
+	DebugContext() {
+		LOG("DebugContext");
+	}
 
 	int countObject = 0;
 	float diameterSpace = 0.f;
@@ -41,6 +44,5 @@ public:
 
 		subProgress = 0.f;
 		progress = 0.f;
-		deltaTimes.clear();
 	}
 };

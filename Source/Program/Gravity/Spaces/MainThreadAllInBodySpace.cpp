@@ -9,11 +9,14 @@
 MainThreadAllInBody::MainThreadAllInBody()
 {
 	params.emplace_back(false, "for...");
-	LOG("Space: {} MainThreadAllInBody", typeid(this).hash_code());
 }
 
 void MainThreadAllInBody::Update()
 {
+	auto& debugContext = DebugContext::Instance();
+	debugContext.Clean();
+	debugContext.deltaTimes.clear();
+
 	for (auto& body : _bodies) {
 		body.force = { 0.f, 0.f, 0.f };
 	}

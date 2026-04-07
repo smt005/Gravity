@@ -132,18 +132,35 @@ namespace Engine
 
 	struct TimeRefHundler
 	{
-		TimeRefHundler(double& _time, const std::string& _tag = {})
+		TimeRefHundler(double& _deltaTime, const std::string& _tag = {})
 			: tag(_tag)
-			, time(_time)
+			, deltaTime(_deltaTime)
 			, beginTime(Callback::GetCurrentTime())
 		{
-			time = 0;
+			deltaTime = 987;
 		}
 		~TimeRefHundler() {
-			time = Callback::GetCurrentTime() - beginTime;
+			deltaTime = Callback::GetCurrentTime() - beginTime;
 		}
 		std::string tag;
-		double& time;
+		double& deltaTime;
+		const double beginTime;
+	};
+
+	struct TimePtrHundler
+	{
+		TimePtrHundler(double* _deltaTime, const std::string& _tag = {})
+			: tag(_tag)
+			, deltaTime(_deltaTime)
+			, beginTime(Callback::GetCurrentTime())
+		{
+			*deltaTime = 987;
+		}
+		~TimePtrHundler() {
+			*deltaTime = Callback::GetCurrentTime() - beginTime;
+		}
+		std::string tag;
+		double* deltaTime;
 		const double beginTime;
 	};
 

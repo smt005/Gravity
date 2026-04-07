@@ -28,20 +28,6 @@ void GuiWindows::Cleanup()
     if (!_windows.empty()) {
         CloseWindows();
         RenderWindows();
-        /*ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    
-        for (auto& window : _windows) {
-            const auto windowPtr = window.second;
-            auto& window = *windowPtr;
-
-            ImGui::Begin(window .GetId(), window._openPtr.get(), window._flags);
-            window.OnClose();
-            ImGui::End();
-        }
-
-        ImGui::Render();*/
     }
 
 	ImGui_ImplOpenGL3_Shutdown();
