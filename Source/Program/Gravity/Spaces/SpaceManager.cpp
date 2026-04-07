@@ -6,15 +6,15 @@
 #include <glm/glm.hpp>
 #include <Files/FileManager.h>
 #include <Common/Common.h>
-#include "Space.h"
-#include "DefaultSpace.h"
-#include "MainThreadSpace.h"
-#include "MainThreadSpaceOneBlock.h"
-//#include "XXX.h"
+#include <Logs.h>
 #include "Generators/Generetors.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
-#include <Logs.h>
+#include "Space.h"
+#include "DefaultSpace.h"
+#include "MainThreadSpace.h"
+#include "MainThreadAllInBodySpace.h"
+//#include "XXX.h"
 
 namespace {
 	std::string_view spaceDirectory = "Spaces";
@@ -63,7 +63,7 @@ void SpaceManager::Load()
 
 	if (MakeSpace<Spaces::Default>(className)) {}
 	else if (MakeSpace<MainThread>(className)) {}
-	else if (MakeSpace<MainThreadSpaceOneBlock>(className)) {}
+	else if (MakeSpace<MainThreadAllInBody>(className)) {}
 	//else if (MakeSpace<XXX>(className)) {}
 	else {
 		SetCurrentPtr<Spaces::Default>();

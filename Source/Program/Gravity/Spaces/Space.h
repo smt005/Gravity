@@ -22,7 +22,10 @@ namespace Spaces
 
 		using Ptr = mystd::shared_ptr<Space>;
 
-		Space() = default;
+		Space() {
+			LOG("Space: {}", typeid(this).hash_code());
+		}
+		//Space() = default;
 		virtual ~Space() = default;
 
 		Space(const Space&) = delete;
@@ -38,7 +41,6 @@ namespace Spaces
 		virtual std::vector<BodyData> GetBodies() = 0;
 
 		const std::string& GetName() const;
-		size_t GetId() const;
 
 		static float Radius(float mass);
 		static float Diameter(float mass);

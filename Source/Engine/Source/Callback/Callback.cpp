@@ -60,7 +60,8 @@ void Callback::Clear()
 
 void Callback::InitCallback()
 {
-	lastTime = GetCurrentTime();
+	beginTime = GetCurrentTime();
+	lastTime = beginTime;
 }
 
 void Callback::OnCursorPosCallback(double x, double y)
@@ -160,6 +161,16 @@ double Callback::GetCurrentTime()
 double Callback::GetDeltaTime()
 {
 	return deltaTime;
+}
+
+double Callback::GetBeginTime()
+{
+	return beginTime;
+}
+
+double Callback::TimePassed()
+{
+	return GetCurrentTime() - beginTime;
 }
 
 void Callback::Update()

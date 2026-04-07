@@ -1,76 +1,25 @@
 ﻿// ◦ Xyz ◦
 
-#include "MainThreadSpaceOneBlock.h"
+#include "MainThreadAllInBodySpace.h"
 #include <atomic>
-//#include <glm/gtc/quaternion.hpp>
-#include <Callback/Callback.h>
+// KOP_INC #include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
-using namespace Spaces;
-
-MainThreadSpaceOneBlock::MainThreadSpaceOneBlock()
+MainThreadAllInBody::MainThreadAllInBody()
 {
 	params.emplace_back(false, "for...");
+	LOG("Space: {} MainThreadAllInBody", typeid(this).hash_code());
 }
 
-void MainThreadSpaceOneBlock::Clear()
+void MainThreadAllInBody::Update()
 {
-	_bodies.clear();
-}
-
-void MainThreadSpaceOneBlock::AddBody(const BodyData& body)
-{
-	_bodies.emplace_back(body);
-}
-
-void MainThreadSpaceOneBlock::AddBodies(const std::vector<BodyData>& bodies)
-{
-	const size_t size = bodies.size();
-
-	for (const auto& body : bodies) {
-		_bodies.emplace_back(body);
-	}
-}
-
-void MainThreadSpaceOneBlock::Bodies(std::vector<GravityRender::Body>& bodies)
-{
-	bodies.clear();
-	bodies.resize(_bodies.size());
-
-	std::transform(_bodies.begin(), _bodies.end(), bodies.begin(), [](const Body& body) {
-		return GravityRender::Body{ Diameter(body.mass), glm::vec3(body.pos.X(), body.pos.Y(), body.pos.Z()) };
-	});
-}
-
-std::vector<BodyData> MainThreadSpaceOneBlock::GetBodies()
-{
-	std::vector<BodyData> bodies;
-	const size_t size = _bodies.size();
-	bodies.reserve(size);
-	 
-	for (size_t i = 0; i < size; ++i) {
-		const auto& pos = _bodies[i].pos;
-		const auto& vel = _bodies[i].velocity;
-		bodies.emplace_back(_bodies[i].mass, pos.X(), pos.Y(), pos.Z(), vel.X(), vel.Y(), vel.Z());
-	}
-
-	return bodies;
-}
-
-void MainThreadSpaceOneBlock::Update()
-{
-	auto& debugContext = DebugContext::Instance();
-	Engine::TimeHundler timer("Tag00");
-
 	for (auto& body : _bodies) {
 		body.force = { 0.f, 0.f, 0.f };
 	}
 	const size_t size = _bodies.size();
 	std::deque<Colapce> colapses;
 	std::vector<Colapce*> colapseOfBodies(size, nullptr);
-
-	debugContext.deltaTimes[0] = timer.GetDeltaTime();
 
 	if (!params[0].first) {
 		UpdateForce(0, size, size, colapses, colapseOfBodies);
@@ -81,13 +30,11 @@ void MainThreadSpaceOneBlock::Update()
 
 	ColapceBodies(colapses, colapseOfBodies);
 	UpdatePositions();
-	
-	debugContext.countObject = _bodies.size();
 }
 
-void MainThreadSpaceOneBlock::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+void MainThreadAllInBody::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
 {
-	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[1], "Tag01");
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes.emplace_back());
 
 	for (size_t i = iBegin; i < iEnd; ++i) {
 		for (size_t j = i + 1; j < size; ++j) {
@@ -128,9 +75,9 @@ void MainThreadSpaceOneBlock::UpdateForce(size_t iBegin, size_t iEnd, size_t siz
 	}
 }
 
-void MainThreadSpaceOneBlock::UpdateForceParamTrue(size_t iBegin, size_t iEnd, size_t size, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+void MainThreadAllInBody::UpdateForceParamTrue(size_t iBegin, size_t iEnd, size_t size, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
 {
-	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[1], "Tag01");
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes.emplace_back());
 
 	for (size_t i = iBegin; i < iEnd; ++i) {
 		for (size_t j = 0; j < size; ++j) {
@@ -174,10 +121,8 @@ void MainThreadSpaceOneBlock::UpdateForceParamTrue(size_t iBegin, size_t iEnd, s
 	}
 }
 
-void MainThreadSpaceOneBlock::ColapceBodies(std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+void MainThreadAllInBody::ColapceBodies(std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
 {
-	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[2], "Tag02");
-
 	for (Colapce& colapses : colapses) {
 		auto& body = _bodies[colapses.objectIndex];
 		body.mass = colapses.sumMass;
@@ -207,10 +152,8 @@ void MainThreadSpaceOneBlock::ColapceBodies(std::deque<Colapce>& colapses, std::
 	_bodies.resize(size);
 }
 
-void MainThreadSpaceOneBlock::UpdatePositions()
+void MainThreadAllInBody::UpdatePositions()
 {
-	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[3], "Tag03");
-
 	volatile static float velocityFactor = 1.f;
 	const float deltaTime = SpaceManager::offsetIteration.load() * velocityFactor;
 	const size_t size = _bodies.size();

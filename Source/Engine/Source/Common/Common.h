@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include <iomanip>
 #include <random>
 #include <memory>
 #include <list>
@@ -165,4 +166,12 @@ namespace Engine
 		std::string tag;
 		double beginTime;
 	};
+
+	template <typename T>
+	std::string ValueToString(T value, int precision = 1)
+	{
+		std::ostringstream oss;
+		oss << std::fixed << std::setprecision(precision) << value;
+		return oss.str();
+	}
 }

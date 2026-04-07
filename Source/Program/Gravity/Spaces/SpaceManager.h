@@ -99,14 +99,11 @@ public:
 		newSpace.AddBodies(bodies);
 	}
 
-//private: // TODO:
 public:
 	inline static std::atomic<float> offsetIteration = 1.f;
 	inline static std::atomic<float> countOfIteration = 1.f;
-	inline static std::atomic<bool> paramA = false;
-	inline static std::atomic<bool> paramB = false;
-	inline static std::atomic<bool> paramC = false;
 
+private:
 	inline static mystd::shared_ptr<Space> currentSpace;
 	inline static std::vector<mystd::shared_ptr<Space>> spaces;
 	inline static const std::string_view currentSpaceKey = "currentSpace";

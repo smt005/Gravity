@@ -2,18 +2,18 @@
 
 #include "AlgorithmWindow.h"
 #include <imgui.h>
-#include <imgui_internal.h>
-#include <GuiWindow/GuiWindows.h>
+// KOP_IMC #include <imgui_internal.h>
+// KOP_IMC #include <GuiWindow/GuiWindows.h>
 #include <Screen.h>
 #include <StringUtils.h>
-#include <Common/Common.h>
-#include <Files/Settings.h>
+// KOP_IMC #include <Common/Common.h>
+// KOP_IMC #include <Files/Settings.h>
 #include <GuiWindow/ImGuiHelp.h>
-#include <Logs.h>
+// KOP_IMC #include <Logs.h>
 #include "../Spaces/Space.h"
 #include "../Spaces/DefaultSpace.h"
 #include "../Spaces/MainThreadSpace.h"
-#include "../Spaces/MainThreadSpaceOneBlock.h"
+#include "../Spaces/MainThreadAllInBodySpace.h"
 //#include "../Spaces/XXX.h"
 
 using namespace Windows;
@@ -34,7 +34,7 @@ void AlgorithmWindow::OnResize()
 void AlgorithmWindow::OnOpen()
 {
 	OnResize();
-	_currentSpace = SpaceManager::Current().GetId();
+	_currentSpace = SpaceManager::Current().GetName();
 }
 
 // TODO: Вынести в родительский класс
@@ -82,6 +82,6 @@ void AlgorithmWindow::Render() {
 
 	ButtonRender<Spaces::Default>();
 	ButtonRender<MainThread>();
-	ButtonRender<MainThreadSpaceOneBlock>();
+	ButtonRender<MainThreadAllInBody>();
 	//ButtonRender<XXX>();
 }

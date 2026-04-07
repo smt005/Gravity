@@ -5,8 +5,9 @@
 #include <Screen.h>
 #include <StringUtils.h>
 #include <GuiWindow/GuiWindows.h>
-#include "../DebugContext.h"
 #include <Logs.h>
+#include "../DebugContext.h"
+#include "Common/Common.h"
 
 using namespace Windows;
 
@@ -51,35 +52,47 @@ void TopPanel::Render() {
 #ifdef _DEBUG
 		prefix = "DEBUG";
 #endif
-		std::string text = TO_STRING("{} fps: {} ", prefix, static_cast<int>(_fps));
-		ImGui::TextColored(GetCollor(_fps), text.c_str());
-	}
-	
-	{
-		std::string text;
-		if (_ups > 1) {
-			text = TO_STRING("\tups: {} ut: {}", static_cast<int>(_ups), static_cast<int>(_uTime));
-		}
-		else {
-			text = TO_STRING("\tups: {}/1000 ut: {}", static_cast<int>(_ups * 1000), static_cast<int>(_uTime));
-		}
+		std::string text = TO_STRING("{} Time: {} ", prefix, Engine::ValueToString(Engine::Callback::TimePassed() / 1000, 0));
+		ImGui::Text(text.c_str());
 		ImGui::SameLine();
-		ImGui::TextColored(GetCollor(_ups), text.c_str());
+	}
+
+	{
+		std::string text = TO_STRING("fps: {} ({})", _roundFps, Engine::ValueToString(_fps));
+		ImGui::TextColored(GetCollor(_fps), text.c_str());
+		ImGui::SameLine();
 	}
 
 	DebugContext& debugContext = DebugContext::Instance();
-	std::string text = "dT: ";
-	for (auto& dTime : debugContext.deltaTimes) {
-		text += std::to_string(dTime) + ", ";
-	}
+	const size_t size = debugContext.deltaTimes.size();
 
-	ImGui::SameLine();
-	ImGui::Text(text.c_str());
+	if (size > 0) {	
+		std::string times = " [";
+
+		for (size_t i = 0; i < size; ++i) {
+			if (debugContext.deltaTimes[i] < 10) {
+				times += TO_STRING("{}: 0 (∞), ", i);
+			}
+			else {
+				times += TO_STRING("{}: {} ({}), ", i, Engine::ValueToString(debugContext.deltaTimes[i]), Engine::ValueToString(1 / debugContext.deltaTimes[i] * 1000));
+			}
+		}
+		times += "] ";
+
+		ImGui::Text(times.c_str());
+		ImGui::SameLine();
+	}
 }
 
-void TopPanel::Update(double dTime) {
-	_fps = 1 / dTime;
+void TopPanel::Update(double deltaTime) {
+	_fps = 1 / deltaTime;
 
-	_uTime = DebugContext::Instance().updateDeltaTime.load();
-	_ups = 1 / _uTime * 1000;
+	_sumTimeFps += deltaTime;
+	++_countFrame;
+
+	if (_sumTimeFps >= 1) {
+		_roundFps = _countFrame;
+		_countFrame = 0;
+		_sumTimeFps = 0;
+	}
 }

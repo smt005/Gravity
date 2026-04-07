@@ -12,24 +12,27 @@ namespace Spaces
 {
 	class Default : public Space
 	{
-	private:
-		struct Body final {
-			float mass = 1.f;
-			glm::vec3 pos;
-			glm::vec3 velocity;
-			glm::vec3 force;
-			void* colapseData = nullptr;
-
-		public:
-			Body() = default;
-			Body(const BodyData& bodyData)
-				: mass(bodyData.mass)
-				, pos(bodyData.pos)
-				, velocity(bodyData.velocity)
-			{}
-		};
+	struct Body final {
+		float mass = 1.f;
+		mystd::Vec3 pos;
+		mystd::Vec3 velocity;
+		mystd::Vec3 force = { 0.f, 0.f, 0.f };
+		float radius = 0.f;
 
 	public:
+		Body() = default;
+		Body(const BodyData& bodyData)
+			: mass(bodyData.mass)
+			, pos(bodyData.pos.x, bodyData.pos.y, bodyData.pos.z)
+			, velocity(bodyData.velocity.x, bodyData.velocity.y, bodyData.velocity.z)
+			, radius(Space::Radius(mass))
+		{}
+	};
+
+	public:
+		Default() {
+			LOG("Space: {} Default", typeid(this).hash_code());
+		}
 		void Clear() override;
 		void Update() override;
 		void AddBody(const BodyData& body) override;

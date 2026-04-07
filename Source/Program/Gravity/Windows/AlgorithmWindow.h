@@ -30,18 +30,18 @@ namespace Windows
 			const static ImColor currentColor(0.9f, 0.6f, 0.3f, 1.f);
 			const static ImColor defaultColor(0.5f, 0.6f, 0.7f, 1.f);
 
-			ImGuiColorHandler color(ImGuiCol_Button, _currentSpace == typeid(T).hash_code() ? currentColor : defaultColor);
-			std::string nameBtn = Engine::ExtractClassName(typeid(T).name());
+			std::string nameSpace = Engine::ExtractClassName(typeid(T).name());
+			ImGuiColorHandler color(ImGuiCol_Button, _currentSpace == nameSpace ? currentColor : defaultColor);
 
-			if (ImGui::Button(nameBtn.data(), buttonSize)) {
+			if (ImGui::Button(nameSpace.c_str(), buttonSize)) {
 				SpaceManager::SwitchSpace<T>();
-				_currentSpace = typeid(T).hash_code();
+				_currentSpace = nameSpace;
 			}
 
 		}
 
 	private:
-		size_t _currentSpace = 0;
+		std::string _currentSpace;
 
 	public:
 		inline static const std::string_view windowName = "AlgorithmWindow";

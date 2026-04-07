@@ -23,8 +23,7 @@ public:
 	float constForce = 1.f;
 	float constSpeed = 1.f;
 
-	std::atomic<double> updateDeltaTime = 0;
-	std::array<double, 4> deltaTimes;
+	std::vector<double> deltaTimes;
 	float deltaTime = 0.f;
 	float subProgress = 0.f;
 	float progress = 0.f;
@@ -42,5 +41,6 @@ public:
 
 		subProgress = 0.f;
 		progress = 0.f;
+		deltaTimes.clear();
 	}
 };

@@ -68,6 +68,8 @@ namespace Engine
 		static const float* const GetDeltaMousePos();
 		static double GetCurrentTime();
 		static double GetDeltaTime();
+		static double GetBeginTime();
+		static double TimePassed();
 
 	private:
 		std::unordered_map<Type, std::list<Fun>> _callbackFuns;
@@ -80,6 +82,7 @@ namespace Engine
 		inline static float deltaMousePos[2];
 		inline static double lastTime = 0;
 		inline static double deltaTime = 0;
+		inline static double beginTime = 0;
 		inline static EventData currentEventData;
 	};
 }

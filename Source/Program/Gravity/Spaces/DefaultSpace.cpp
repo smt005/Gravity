@@ -2,7 +2,7 @@
 
 #include "DefaultSpace.h"
 #include <glm/gtc/quaternion.hpp>
-#include "../DebugContext.h"
+//#include "../DebugContext.h"
 #include "SpaceManager.h"
 
 using namespace Spaces;
@@ -19,7 +19,8 @@ void Default::Update() {
 	const glm::quat rotationQuat = glm::angleAxis(angleSpeed, rotationAxis);
 
 	for (auto& body : _bodies) {
-		body.pos = rotationQuat * body.pos;
+		const auto newPos = rotationQuat * glm::vec3(body.pos.X(), body.pos.Y(), body.pos.Z());
+		body.pos = { newPos.x, newPos.y, newPos.z };
 	}
 }
 
@@ -39,7 +40,7 @@ void Default::Bodies(std::vector<GravityRender::Body>& bodies)
 	bodies.resize(_bodies.size());
 
 	std::transform(_bodies.begin(), _bodies.end(), bodies.begin(), [](const Body& body) {
-		return GravityRender::Body{ Diameter(body.mass), body.pos };
+		return GravityRender::Body{ Diameter(body.mass), { body.pos.X(), body.pos.Y(), body.pos.Z()} };
 	});
 }
 
@@ -51,7 +52,7 @@ std::vector<BodyData> Default::GetBodies()
 	for (const Body& body : _bodies) {
 		const auto& pos = body.pos;
 		const auto& vel = body.velocity;
-		bodies.emplace_back(body.mass, pos.x, pos.y, pos.z, vel.x, vel.y, vel.z);
+		bodies.emplace_back(body.mass, pos.X(), pos.Y(), pos.Z(), vel.X(), vel.Y(), vel.Z());
 	}
 
 	return bodies;

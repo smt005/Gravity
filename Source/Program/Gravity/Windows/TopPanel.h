@@ -18,8 +18,9 @@ namespace Windows
 
 	private:
 		double _fps = 0;
-		double _ups = 0; // Update per second
-		double _uTime = 0;
+		int _roundFps = 0;
+		double _sumTimeFps = 0;
+		int _countFrame = 0;
 
 	public:
 		inline static const std::string_view windowName = "TopPanel";
