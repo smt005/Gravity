@@ -57,10 +57,10 @@ void DebugWindow::Render() {
 	ImGui::Text("   Const force: %f", debugContext.constForce);
 	ImGui::Text("   Const speed: %f", debugContext.constSpeed);
 
-	{
+	if (ImGui::CollapsingHeader("Progress", false)) {
 		ImGuiColorScopeHandler colorhandlers(ImGuiCol_FrameBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f),
-											ImGuiCol_PlotHistogram, ImVec4(0.2f, 0.2f, 0.2f, 1.0f),
-											ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+			ImGuiCol_PlotHistogram, ImVec4(0.2f, 0.2f, 0.2f, 1.0f),
+			ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 
 		if (debugContext.subProgress >= 0) {
 			char buf[32];
@@ -71,6 +71,13 @@ void DebugWindow::Render() {
 			char buf[32];
 			sprintf(buf, "%d/%d", (int)(debugContext.progress * 100), 100);
 			ImGui::ProgressBar(debugContext.progress, ImVec2(0.f, 0.f), buf);
+		}
+	}
+
+	if (ImGui::CollapsingHeader("Time", false)) {
+		const size_t size = debugContext.deltaTimes.size();
+		for (size_t i = 0; i < size; ++i) {
+			ImGui::Text("[%d]: %f", i, debugContext.deltaTimes[i]);
 		}
 	}
 }

@@ -69,25 +69,19 @@ void AlgorithmWindow::OnClose()
 }
 
 void AlgorithmWindow::Render() {
+	auto& space = SpaceManager::Current();
+
 	size_t spaceHash = typeid(*SpaceManager::CurrentPtr().get()).hash_code();
-	std::string text = TO_STRING("Current:\n{}", SpaceManager::Current().GetName());
+	std::string text = TO_STRING("Current:\n{}", space.GetName());
 	ImGui::Text(text.c_str());
 	ImGui::Separator();
 
-	static bool paramA = SpaceManager::paramA.load();
-	if (ImGui::Checkbox(": paramA", &paramA)) {
-		SpaceManager::paramA.store(paramA);
+	auto& params = space.params;
+	for (auto it = params.begin(); it != params.end(); ++it) {
+		ImGuiIdHandler id(&it);
+		ImGui::Checkbox(it->second.c_str(), &it->first);
 	}
 
-	static bool paramB = SpaceManager::paramB.load();
-	if (ImGui::Checkbox(": paramB", &paramB)) {
-		SpaceManager::paramB.store(paramB);
-	}
-
-	static bool paramC = SpaceManager::paramC.load();
-	if (ImGui::Checkbox(": paramC", &paramC)) {
-		SpaceManager::paramC.store(paramC);
-	}
 
 	ButtonRender<Spaces::Default>();
 	ButtonRender<MainThread>();

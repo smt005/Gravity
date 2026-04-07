@@ -129,7 +129,6 @@ namespace Engine
 		std::list<Ptr> _refs;
 	};
 
-
 	struct TimeRefHundler
 	{
 		TimeRefHundler(double& _time, const std::string& _tag = {})
@@ -141,9 +140,6 @@ namespace Engine
 		}
 		~TimeRefHundler() {
 			time = Callback::GetCurrentTime() - beginTime;
-			/*if (time == 0 && !tag.empty()) {
-				LOG("[TimeRefHundler] deltaTime: {} {}", time, tag);
-			}*/
 		}
 		std::string tag;
 		double& time;
@@ -159,9 +155,6 @@ namespace Engine
 		}
 		double GetDeltaTime() {
 			const double deltaTime = Callback::GetCurrentTime() - beginTime;
-			/*if (deltaTime == 0 && !tag.empty()) {
-				LOG("[TimeRefHundler] deltaTime: {} {}", deltaTime, tag);
-			}*/
 			return deltaTime;
 		}
 		double GetAndResetDeltaTime() {

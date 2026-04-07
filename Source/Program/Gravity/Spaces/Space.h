@@ -37,26 +37,15 @@ namespace Spaces
 		virtual void Bodies(std::vector<GravityRender::Body>& bodies) = 0;
 		virtual std::vector<BodyData> GetBodies() = 0;
 
-		const std::string& GetName() const {
-			if (_name.empty()) _name = Engine::ExtractClassName(typeid(*this).name());
-			return _name;
-		}
-		size_t GetId() const {
-			if (!_id) _id = typeid(*this).hash_code();
-			return _id;
-		}
+		const std::string& GetName() const;
+		size_t GetId() const;
 
-		static float Radius(float mass) {
-			return std::cbrt((3.f * mass) / (4.f * std::numbers::pi));
-		}
-
-		static float Diameter(float mass) {
-			const float radius = std::cbrt((3.f * mass) / (4.f * std::numbers::pi));
-			return radius * 2.f;
-		}
+		static float Radius(float mass);
+		static float Diameter(float mass);
 
 	public:
 		const ThreadType type = ThreadType::IN_MAIN;
+		std::vector<std::pair<bool, std::string>> params;
 
 	private:
 		mutable std::string _name;

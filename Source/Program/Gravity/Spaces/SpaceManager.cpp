@@ -41,7 +41,11 @@ void SpaceManager::Update(double deltaTime)
 {
 	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
-	Current().Update();
+
+	for (size_t it = 0; it < countOfIteration; ++it) {
+		Current().Update();
+	}
+	
 	CollectDebugData();
 }
 

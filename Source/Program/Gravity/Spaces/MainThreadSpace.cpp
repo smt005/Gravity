@@ -2,12 +2,17 @@
 
 #include "MainThreadSpace.h"
 #include <atomic>
-#include <glm/gtc/quaternion.hpp>
+//#include <glm/gtc/quaternion.hpp>
 #include <Callback/Callback.h>
 #include "../DebugContext.h"
 #include "SpaceManager.h"
 
 using namespace Spaces;
+
+MainThread::MainThread()
+{
+	params.emplace_back(false, "for...");
+}
 
 void MainThread::Clear()
 {
@@ -45,7 +50,7 @@ std::vector<BodyData> MainThread::GetBodies()
 	std::vector<BodyData> bodies;
 	const size_t size = _bodies.size();
 	bodies.reserve(size);
-	
+	 
 	for (size_t i = 0; i < size; ++i) {
 		const auto& pos = _bodies[i].pos;
 		const auto& vel = _velocities[i];
@@ -60,14 +65,19 @@ void MainThread::Update()
 	auto& debugContext = DebugContext::Instance();
 	Engine::TimeHundler timer("Tag00");
 
-	debugContext.Clean();
 	const size_t size = _bodies.size();
 	std::vector<mystd::Vec3> forces(size);
 	std::deque<Colapce> colapses;
 	std::vector<Colapce*> colapseOfBodies(size, nullptr);
 	debugContext.deltaTimes[0] = timer.GetDeltaTime();
 
-	UpdateForce(0, size, size, forces, colapses, colapseOfBodies);
+	if (!params[0].first) {
+		UpdateForce(0, size, size, forces, colapses, colapseOfBodies);
+	}
+	else {
+		UpdateForceParamTrue(0, size, size, forces, colapses, colapseOfBodies);
+	}
+
 	ColapceBodies(forces, colapses, colapseOfBodies);
 	UpdatePositions(forces);
 	
@@ -78,10 +88,51 @@ void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vecto
 {
 	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[1], "Tag01");
 
-	//for (size_t i = iBegin; i < iEnd; ++i) {
-	//	for (size_t j = 0; j < size; ++j) {
 	for (size_t i = iBegin; i < iEnd; ++i) {
 		for (size_t j = i + 1; j < size; ++j) {
+			auto& force = forces[i];
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
+
+			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				Colapce* colapcePtr = colapseOfBodies[i];
+				if (!colapcePtr) {
+					colapcePtr = colapseOfBodies[j];
+				}
+				if (!colapcePtr) {
+					colapcePtr = &colapses.emplace_back(i);
+				}
+				if (!colapseOfBodies[i]) {
+					colapseOfBodies[i] = colapcePtr;
+					const auto& body = _bodies[i];
+					colapcePtr->sumPos += body.pos * body.mass;
+					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += _velocities[i] * body.mass;
+				}
+				if (!colapseOfBodies[j]) {
+					colapseOfBodies[j] = colapcePtr;
+					const auto& body = _bodies[j];
+					colapcePtr->sumPos += body.pos * body.mass;
+					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += _velocities[j] * body.mass;
+				}
+			}
+			else {
+				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+				const auto forceDirection = direction.Normalized();
+				force += forceDirection * forceMagnitude;
+				forces[j] -= force;
+			}
+		}
+	}
+}
+
+void MainThread::UpdateForceParamTrue(size_t iBegin, size_t iEnd, size_t size, std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)
+{
+	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes[1], "Tag01");
+
+	for (size_t i = iBegin; i < iEnd; ++i) {
+		for (size_t j = 0; j < size; ++j) {
 			if (i == j) {
 				continue;
 			}

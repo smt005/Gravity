@@ -38,6 +38,7 @@ namespace Spaces
 		};
 
 	public:
+		MainThread();
 		void Clear() override;
 		void Update() override;
 		void AddBody(const BodyData& body) override;
@@ -46,6 +47,7 @@ namespace Spaces
 		std::vector<BodyData> GetBodies() override;
 
 		void UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
+		void UpdateForceParamTrue(size_t iBegin, size_t iEnd, size_t size, std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
 		void ColapceBodies(std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
 		void UpdatePositions(const std::vector<mystd::Vec3>& forces);
 
