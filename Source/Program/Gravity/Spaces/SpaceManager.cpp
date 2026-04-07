@@ -9,11 +9,8 @@
 #include "Space.h"
 #include "DefaultSpace.h"
 #include "MainThreadSpace.h"
-//#include "MainThreadProtSpace.h"
-//#include "ParallelThreadSpace.h"
-//#include "MultiThreadSpace.h"
-//#include "MultiAllThreadSpace.h"
-//#include "MultiAllThreadNoMutexSpace.h"
+#include "MainThreadSpaceOneBlock.h"
+//#include "XXX.h"
 #include "Generators/Generetors.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
@@ -42,7 +39,7 @@ void SpaceManager::Update(double deltaTime)
 	DebugContext::Instance().Clean();
 	CheckOverload(deltaTime);
 
-	for (size_t it = 0; it < countOfIteration; ++it) {
+	for (size_t it = 1; it <= countOfIteration; ++it) {
 		Current().Update();
 	}
 	
@@ -66,11 +63,8 @@ void SpaceManager::Load()
 
 	if (MakeSpace<Spaces::Default>(className)) {}
 	else if (MakeSpace<MainThread>(className)) {}
-	/*else if (MakeSpace<MainThreadSpace>(className)) {}
-	else if (MakeSpace<ParallelThreadSpace>(className)) {}
-	else if (MakeSpace<MultiThreadSpace>(className)) {}
-	else if (MakeSpace<MultiAllThreadSpace>(className)) {}
-	else if (MakeSpace<MultiAllThreadNoMutexSpace>(className)) {}*/
+	else if (MakeSpace<MainThreadSpaceOneBlock>(className)) {}
+	//else if (MakeSpace<XXX>(className)) {}
 	else {
 		SetCurrentPtr<Spaces::Default>();
 	}
