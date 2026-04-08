@@ -10,13 +10,7 @@
 #include "Generators/Generetors.h"
 #include "../DebugContext.h"
 #include "../Windows/InfoWindow.h"
-#include "Space.h"
-#include "DefaultSpace.h"
-#include "MainThreadSpace.h"
-#include "MainThreadAllInBodySpace.h"
-#include "ParalelThreadSpace.h"
-//#include "XXX.h"
-//#include "XXX.h"
+#include "SpaceIncludes.h"
 
 namespace {
 	std::string_view spaceDirectory = "Spaces";
@@ -66,6 +60,7 @@ void SpaceManager::Load()
 	else if (MakeSpace<MainThread>(className)) {}
 	else if (MakeSpace<MainThreadAllInBody>(className)) {}
 	else if (MakeSpace<ParalelThread>(className)) {}
+	else if (MakeSpace<MultiThread>(className)) {}
 	//else if (MakeSpace<XXX>(className)) {}
 	//else if (MakeSpace<XXX>(className)) {}
 	else {

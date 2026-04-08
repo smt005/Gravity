@@ -2,21 +2,10 @@
 
 #include "AlgorithmWindow.h"
 #include <imgui.h>
-// KOP_IMC #include <imgui_internal.h>
-// KOP_IMC #include <GuiWindow/GuiWindows.h>
 #include <Screen.h>
 #include <StringUtils.h>
-// KOP_IMC #include <Common/Common.h>
-// KOP_IMC #include <Files/Settings.h>
 #include <GuiWindow/ImGuiHelp.h>
-// KOP_IMC #include <Logs.h>
-#include "../Spaces/Space.h"
-#include "../Spaces/DefaultSpace.h"
-#include "../Spaces/MainThreadSpace.h"
-#include "../Spaces/MainThreadAllInBodySpace.h"
-#include "../Spaces/ParalelThreadSpace.h"
-//#include "../Spaces/XXX.h"
-//#include "../Spaces/XXX.h"
+#include "../Spaces/SpaceIncludes.h"
 
 using namespace Windows;
 
@@ -86,6 +75,7 @@ void AlgorithmWindow::Render() {
 	ButtonRender<MainThread>();
 	ButtonRender<MainThreadAllInBody>();
 	ButtonRender<ParalelThread>();
+	ButtonRender<MultiThread>();
 	//ButtonRender<XXX>();
 	//ButtonRender<XXX>();
 }

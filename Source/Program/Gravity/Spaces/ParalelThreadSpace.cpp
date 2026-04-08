@@ -97,8 +97,9 @@ void ParalelThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::de
 	Engine::TimeHundler timer;
 
 	for (size_t i = iBegin; i < iEnd; ++i) {
+		auto& bodyForce = _bodies[i].force;
+
 		for (size_t j = i + 1; j < size; ++j) {
-			auto& force = _bodies[i].force;
 			const auto direction = _bodies[j].pos - _bodies[i].pos;
 			const float distance = direction.Length();
 
@@ -128,7 +129,8 @@ void ParalelThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::de
 			else {
 				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
 				const auto forceDirection = direction.Normalized();
-				force += forceDirection * forceMagnitude;
+				const auto force = forceDirection * forceMagnitude;
+				bodyForce += force;
 				_bodies[j].force -= force;
 			}
 		}
@@ -174,10 +176,10 @@ void ParalelThread::UpdatePositions()
 	const float deltaTime = SpaceManager::offsetIteration.load() * velocityFactor;
 	const size_t size = _bodies.size();
 
-	for (size_t i = 0; i < size; ++i) {
-		const auto acceleration = _bodies[i].force / _bodies[i].mass;
-		_bodies[i].force += acceleration * deltaTime;
-		_bodies[i].pos += _bodies[i].velocity * deltaTime;
+	for (auto& body : _bodies) {
+		const auto acceleration = body.force / body.mass;
+		body.velocity += acceleration * deltaTime;
+		body.pos += body.velocity * deltaTime;
 	}
 }
 

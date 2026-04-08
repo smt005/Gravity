@@ -6,11 +6,11 @@
 #include <mutex>
 #include <atomic>
 #include <MyMath.h>
-#include "DefaultSpace.h"
+#include "Space.h"
 
 namespace Spaces
 {
-	class ParalelThread : public Space
+	class MultiThread : public Space
 	{
 	protected:
 		struct Body final {
@@ -27,7 +27,8 @@ namespace Spaces
 				, pos(bodyData.pos.x, bodyData.pos.y, bodyData.pos.z)
 				, velocity(bodyData.velocity.x, bodyData.velocity.y, bodyData.velocity.z)
 				, radius(Space::Radius(mass))
-			{}
+			{
+			}
 		};
 
 		struct Colapce {
@@ -39,7 +40,7 @@ namespace Spaces
 		};
 
 	public:
-		ParalelThread();
+		MultiThread();
 		void Clear() override;
 		void Update() override;
 		void AddBody(const BodyData& body) override;
@@ -47,16 +48,23 @@ namespace Spaces
 		void Bodies(std::vector<GravityRender::Body>& bodies) override;
 		std::vector<BodyData> GetBodies() override;
 
-		void UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
-		void ColapceBodies(std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies);
+	private:
+		void UpdateForce(size_t iBegin, size_t iEnd, size_t size);
+		void ColapceBodies();
 		void UpdatePositions();
 		void CopyBodies();
+		void ApplyForce();
 
 	protected:
+		double _beginTime;
 		std::vector<Body> _bodies;
 		std::vector<GravityRender::Body> _renderBodies;
-		mutable std::atomic<bool> _processing;
+		std::deque<Colapce> _colapses;
+		std::vector<Colapce*> _colapseOfBodies;
+
+		mutable std::atomic<int> _countProcessing;
 		mutable std::mutex _mutex;
 		mutable std::mutex _copyMutex;
+		mutable std::condition_variable _conditionMutex;
 	};
 }

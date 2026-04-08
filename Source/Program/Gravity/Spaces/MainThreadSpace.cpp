@@ -91,8 +91,9 @@ void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vecto
 	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes.emplace_back(), "Update force");
 
 	for (size_t i = iBegin; i < iEnd; ++i) {
-		for (size_t j = i + 1; j < size; ++j) {
-			auto& force = forces[i];
+		auto& bodyForce = forces[i];
+
+		for (size_t j = i + 1; j < size; ++j) {	
 			const auto direction = _bodies[j].pos - _bodies[i].pos;
 			const float distance = direction.Length();
 
@@ -122,7 +123,8 @@ void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vecto
 			else {
 				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
 				const auto forceDirection = direction.Normalized();
-				force += forceDirection * forceMagnitude;
+				const auto force = forceDirection * forceMagnitude;
+				bodyForce += force;
 				forces[j] -= force;
 			}
 		}
@@ -134,12 +136,13 @@ void MainThread::UpdateForceParamTrue(size_t iBegin, size_t iEnd, size_t size, s
 	Engine::TimeRefHundler timer(DebugContext::Instance().deltaTimes.emplace_back(), "Update force");
 
 	for (size_t i = iBegin; i < iEnd; ++i) {
+		auto& bodyForce = forces[i];
+
 		for (size_t j = 0; j < size; ++j) {
 			if (i == j) {
 				continue;
 			}
 
-			auto& force = forces[i];
 			const auto direction = _bodies[j].pos - _bodies[i].pos;
 			const float distance = direction.Length();
 
@@ -169,7 +172,7 @@ void MainThread::UpdateForceParamTrue(size_t iBegin, size_t iEnd, size_t size, s
 			else {
 				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
 				const auto forceDirection = direction.Normalized();
-				force += forceDirection * forceMagnitude;
+				bodyForce += forceDirection * forceMagnitude;
 			}
 		}
 	}

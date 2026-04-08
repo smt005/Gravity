@@ -8,10 +8,7 @@
 class DebugContext : public mystd::Singletone<DebugContext>
 {
 public:
-	//DebugContext() = default;
-	DebugContext() {
-		LOG("DebugContext");
-	}
+	DebugContext() = default;
 
 	int countObject = 0;
 	float diameterSpace = 0.f;
