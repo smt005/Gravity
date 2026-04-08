@@ -50,6 +50,8 @@ namespace Spaces
 
 	private:
 		void UpdateForce(size_t iBegin, size_t iEnd, size_t size);
+		void UpdateForceHalf(size_t iBegin, size_t iEnd, size_t size);
+		void UpdateForceHalfNoMutex(size_t iBegin, size_t iEnd, size_t size);
 		void ColapceBodies();
 		void UpdatePositions();
 		void CopyBodies();

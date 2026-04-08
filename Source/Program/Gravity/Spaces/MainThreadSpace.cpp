@@ -12,7 +12,6 @@ using namespace Spaces;
 MainThread::MainThread()
 {
 	params.emplace_back(false, "for...");
-	LOG("Space: {} MainThread", typeid(this).hash_code());
 }
 
 

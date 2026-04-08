@@ -8,6 +8,8 @@
 MultiThread::MultiThread()
 {
 	DebugContext::Instance().deltaTimes.resize(1);
+	params.emplace_back(false, "double set force");
+	params.emplace_back(false, "disable mutex");
 }
 
 void MultiThread::Clear()
@@ -100,13 +102,25 @@ void MultiThread::Update()
 		ranges.back().second = size;
 	}
 
+	const bool typeProcecc = params[0].first;
+	const bool disableMutex = params[1].first;
 	_beginTime = Engine::Callback::GetCurrentTime();
 
 	for (const auto& rengePair : ranges) {
 		_countProcessing.fetch_add(1);
 
-		std::thread th([this, iBegin = rengePair.first, iEnd = rengePair.second, size]() {
-			UpdateForce(iBegin, iEnd, size);
+		std::thread th([this, iBegin = rengePair.first, iEnd = rengePair.second, size, typeProcecc, disableMutex]() {
+			if (typeProcecc) {
+				if (disableMutex) {
+					UpdateForceHalfNoMutex(iBegin, iEnd, size);
+				}
+				else {
+					UpdateForceHalf(iBegin, iEnd, size);
+				}
+			}
+			else {
+				UpdateForce(iBegin, iEnd, size);
+			}
 
 			_countProcessing.fetch_sub(1);
 			if (_countProcessing.load() == 1) {
@@ -133,6 +147,8 @@ void MultiThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size)
 			const float distance = direction.Length();
 
 			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				std::lock_guard lockMutex(_copyMutex);
+
 				Colapce* colapcePtr = _colapseOfBodies[i];
 				if (!colapcePtr) {
 					colapcePtr = _colapseOfBodies[j];
@@ -159,6 +175,98 @@ void MultiThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size)
 				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
 				const auto forceDirection = direction.Normalized();
 				bodyForce += forceDirection * forceMagnitude;
+			}
+		}
+	}
+}
+
+void MultiThread::UpdateForceHalf(size_t iBegin, size_t iEnd, size_t size)
+{
+	for (size_t i = iBegin; i < iEnd; ++i) {
+		auto& bodyForce = _bodies[i].force;
+
+		for (size_t j = i + 1; j < size; ++j) {
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
+
+			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				std::lock_guard lockMutex(_copyMutex);
+
+				Colapce* colapcePtr = _colapseOfBodies[i];
+				if (!colapcePtr) {
+					colapcePtr = _colapseOfBodies[j];
+				}
+				if (!colapcePtr) {
+					colapcePtr = &_colapses.emplace_back(i);
+				}
+				if (!_colapseOfBodies[i]) {
+					_colapseOfBodies[i] = colapcePtr;
+					const auto& body = _bodies[i];
+					colapcePtr->sumPos += body.pos * body.mass;
+					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+				if (!_colapseOfBodies[j]) {
+					_colapseOfBodies[j] = colapcePtr;
+					const auto& body = _bodies[j];
+					colapcePtr->sumPos += body.pos * body.mass;
+					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+			}
+			else {
+				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+				const auto forceDirection = direction.Normalized();
+				const auto force = forceDirection * forceMagnitude;
+
+				std::lock_guard lockMutex(_copyMutex);
+				bodyForce += force;
+				_bodies[j].force -= force;
+			}
+		}
+	}
+}
+
+void MultiThread::UpdateForceHalfNoMutex(size_t iBegin, size_t iEnd, size_t size)
+{
+	for (size_t i = iBegin; i < iEnd; ++i) {
+		auto& bodyForce = _bodies[i].force;
+
+		for (size_t j = i + 1; j < size; ++j) {
+			const auto direction = _bodies[j].pos - _bodies[i].pos;
+			const float distance = direction.Length();
+
+			if (distance <= (_bodies[i].radius + _bodies[j].radius)) {
+				std::lock_guard lockMutex(_copyMutex);
+
+				Colapce* colapcePtr = _colapseOfBodies[i];
+				if (!colapcePtr) {
+					colapcePtr = _colapseOfBodies[j];
+				}
+				if (!colapcePtr) {
+					colapcePtr = &_colapses.emplace_back(i);
+				}
+				if (!_colapseOfBodies[i]) {
+					_colapseOfBodies[i] = colapcePtr;
+					const auto& body = _bodies[i];
+					colapcePtr->sumPos += body.pos * body.mass;
+					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+				if (!_colapseOfBodies[j]) {
+					_colapseOfBodies[j] = colapcePtr;
+					const auto& body = _bodies[j];
+					colapcePtr->sumPos += body.pos * body.mass;
+					colapcePtr->sumMass += body.mass;
+					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+			}
+			else {
+				const float forceMagnitude = Space::constantGravity * _bodies[i].mass * _bodies[j].mass / std::pow(distance, 2);
+				const auto forceDirection = direction.Normalized();
+				const auto force = forceDirection * forceMagnitude;
+				bodyForce += force;
+				_bodies[j].force -= force;
 			}
 		}
 	}
