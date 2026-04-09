@@ -17,6 +17,7 @@
 #include "Windows/RenderWindow.h"
 #include "Windows/GuiStyle.h"
 #include "Render/GravityRender.h"
+#include <Common/JsonHelper.h>
 #include "Tests/Test.h"
 #include <Logs.h>
 
@@ -54,12 +55,24 @@ bool Gravity::Init(std::string_view params)
 	return true;
 }
 
-void Gravity::OnClose() {
+void Gravity::OnClose()
+{
+	if (auto* data = Engine::Settings::Instance().JsonData("openWindows", true)) {
+		data->clear();
+		(*data) = Json::array();
+		
+		for (const auto& [name, _] : Engine::GuiWindows::GetWindows())  {
+			data->emplace_back(name);
+		}
+	}
+
 	SpaceManager::Save();
-	Engine::Camera::GetLink().Save();
+	//Engine::Camera::GetLink().Save();
+	Engine::Camera::Get()->Save();
 }
 
-void Gravity::Update(double deltaTime) {
+void Gravity::Update(double deltaTime)
+{
 	SpaceManager::Update(deltaTime);
 }
 
@@ -69,7 +82,8 @@ void Gravity::OnResize()
 	Engine::Camera::GetLink().Resize();
 }
 
-void Gravity::Draw() {
+void Gravity::Draw()
+{
 	GravityRender::Render();
 }
 
@@ -82,6 +96,14 @@ void Gravity::InitCallback()
 			Core::Close();
 		}
 
+		if (data.key == VirtualKey::F1) {
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::AlgorithmWindow>();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::BottomPanel>();
+			Engine::GuiWindows::SwitchVisibleWindow<Windows::RenderWindow>();
+		}
 		if (data.key == VirtualKey::F5) {
 			Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
 		}
@@ -133,13 +155,32 @@ void Gravity::InitCallback()
 	});
 }
 
+template <typename Twindow>
+void OpenWindow(const std::string& nameWindow)
+{
+	if (nameWindow == Engine::ExtractClassName(typeid(Twindow).name())) {
+		Engine::GuiWindows::SwitchVisibleWindow<Twindow>();
+	}
+}
+
 void Gravity::InitWidows()
 {
 	Windows::LoadGuiStyle();
 
-	Engine::GuiWindows::SwitchVisibleWindow<Windows::TopPanel>();
-	Engine::GuiWindows::SwitchVisibleWindow<Windows::DebugWindow>();
-	Engine::GuiWindows::SwitchVisibleWindow<Windows::GenerateWindow>();
-	Engine::GuiWindows::SwitchVisibleWindow<Windows::AlgorithmWindow>();
-	Engine::GuiWindows::SwitchVisibleWindow<Windows::BottomPanel>();
+	if (const auto* data = Engine::Settings::Instance().JsonData("openWindows")) {
+		if (data->is_array()) {
+			for (const auto& element : *data) {
+				if (element.is_string()) {
+					const std::string windowName = element.get<std::string>();
+
+					OpenWindow<Windows::TopPanel>(windowName);
+					OpenWindow<Windows::DebugWindow>(windowName);
+					OpenWindow<Windows::GenerateWindow>(windowName);
+					OpenWindow<Windows::AlgorithmWindow>(windowName);
+					OpenWindow<Windows::BottomPanel>(windowName);
+					OpenWindow<Windows::RenderWindow>(windowName);
+				}
+			}
+		}
+	}
 }

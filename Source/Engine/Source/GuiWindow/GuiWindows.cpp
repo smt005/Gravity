@@ -146,3 +146,8 @@ const GuiWindow::Ptr& GuiWindows::Get(const std::string name)
     }
     return it->second;
 }
+
+const std::unordered_map<std::string, GuiWindow::Ptr>& GuiWindows::GetWindows()
+{
+    return _windows;
+}

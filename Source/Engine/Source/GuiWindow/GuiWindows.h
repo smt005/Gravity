@@ -46,6 +46,7 @@ namespace Engine
 		static void ResizeWindows(std::string_view name = {});
 		static void UpdateWindows(double dTime);
 		static const GuiWindow::Ptr& Get(const std::string name);
+		static const std::unordered_map<std::string, GuiWindow::Ptr>& GetWindows();
 		static bool ExistWindow(std::string_view name);
 		static bool ExistWindow(const std::string& name);
 
