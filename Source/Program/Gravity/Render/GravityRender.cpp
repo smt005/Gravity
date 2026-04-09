@@ -15,9 +15,16 @@ void GravityRender::Init()
 	Engine::Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
+	framebuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
 }
 
 void GravityRender::Render()
+{
+	RenderToBuffer();
+	RenderToScreen();
+}
+
+void GravityRender::RenderToBuffer()
 {
 	using namespace Engine;
 
@@ -37,7 +44,8 @@ void GravityRender::Render()
 		});
 
 	if (typeDraw.sprite) {
-		
+		framebuffer.PushRender();
+
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
 
@@ -79,6 +87,8 @@ void GravityRender::Render()
 
 			Draw::Render(SHAPES["Sprite", true, true].mesh);
 		}
+
+		framebuffer.PopRender();
 	}
 
 	if (typeDraw.point) {
@@ -131,7 +141,15 @@ void GravityRender::Render()
 	}
 }
 
-void GravityRender::GetBodyPositions()
+void GravityRender::RenderToScreen()
 {
-	std::vector<Body> renderBodies;
+	using namespace Engine;
+
+	auto& shader = shaders::SimpleShaderSingle::Instance();
+	shader.UseProgram();
+
+	//Draw::BindTexture(Texture::GetRef("Greed.png").Id());
+	Draw::BindTexture(framebuffer.TextureId());
+
+	Draw::DrawToScreen();
 }

@@ -11,6 +11,25 @@
 
 using namespace shaders;
 
+// SimpleShader
+
+bool SimpleShader::UseProgram() const
+{
+	if (!_program) {
+		return false;
+	}
+
+	glUseProgram(_program);
+	glDisable(GL_DEPTH_TEST);
+
+	return true;
+}
+
+bool SimpleShader::GetLocation()
+{
+	return _program;
+}
+
 // BaseShader
 
 bool BaseShader::UseProgram() const
@@ -156,6 +175,10 @@ void LineShader::SetColor(const float* const color) const
 // InitShaders
 void shaders::InitShaders()
 {
+	{
+		shaders::SimpleShaderSingle::Instance().LoadByName("Simple");
+	}
+
 	{
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.LoadByName("Texture");

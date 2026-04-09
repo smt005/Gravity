@@ -3,7 +3,7 @@
 #include <Draw/Camera.h>
 #include <Callback/Callback.h>
 
-class CameraControl final : public Engine::Camera, public Engine::Callback {
+class CameraControl final : public Engine::Camera {
 public:
 	using Ptr = std::shared_ptr<CameraControl>;
 

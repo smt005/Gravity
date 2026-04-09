@@ -130,6 +130,10 @@ namespace Engine
 			return cameraPtr;
 		}
 
+		static void SetCamera(Camera::Ptr cameraPtr) {
+			_currentCameraPtr = cameraPtr;
+		}
+
 		static Camera::Ptr Get() {
 			return _currentCameraPtr;
 		}
@@ -169,6 +173,7 @@ namespace Engine
 		glm::vec3 _up;
 
 		Type _type;
+		std::string _nameCamera;
 
 	private:
 	public:

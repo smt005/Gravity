@@ -25,7 +25,9 @@ void CameraControl::Enable(const bool state) {
 }
 
 void CameraControl::MakeCallback() {
-	Callback::Add(Callback::Type::PINCH_KEY, [this](const Engine::Callback::EventData& data) {
+	_callbackPtr = new Engine::Callback();
+
+	_callbackPtr->Add(Callback::Type::PINCH_KEY, [this](const Engine::Callback::EventData& data) {
 			float kForce = 1.0;
 
 			if (Engine::Callback::KeyPressed(Engine::VirtualKey::CONTROL)) {
@@ -55,7 +57,7 @@ void CameraControl::MakeCallback() {
 		}
 	);
 
-	Add(Callback::Type::PINCH_TAP, [this](const Engine::Callback::EventData& data) {
+	_callbackPtr->Add(Callback::Type::PINCH_TAP, [this](const Engine::Callback::EventData& data) {
 		if (Callback::MouseButtonPressed(VirtualTap::RIGHT)) {
 				glm::vec2 delta(-Callback::GetDeltaMousePos()[0], -Callback::GetDeltaMousePos()[1]);
 				Rotate(delta);

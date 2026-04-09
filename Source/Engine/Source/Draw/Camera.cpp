@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include <glm/ext/matrix_clip_space.hpp>
 #include <Files/Settings.h>
+#include <Common/Common.h>
 #include "Callback/Callback.h"
 
 using namespace Engine;
@@ -54,7 +55,9 @@ void Camera::SetOrtho(const float size, float zNear, float zFar) {
 // TODO: Объединить Load, Save
 bool Camera::Load()
 {
-	if (auto* jsonData = Settings::Instance().JsonData("Cameras")) {
+	// TODO:
+	_nameCamera = Engine::ExtractClassName(typeid(*this).name());
+	if (auto* jsonData = Settings::Instance().JsonData(TO_STRING("Cameras/{}", _nameCamera))) {
 		return Load(*jsonData);
 	}
 
@@ -63,7 +66,12 @@ bool Camera::Load()
 
 void Camera::Save()
 {
-	if (auto* jsonData = Settings::Instance().JsonData("Cameras", true)) {
+	// TODO:
+	if (_nameCamera.empty()) {
+		return;
+	}
+
+	if (auto* jsonData = Settings::Instance().JsonData(TO_STRING("Cameras/{}", _nameCamera), true)) {
 		Save(*jsonData);
 	}
 }

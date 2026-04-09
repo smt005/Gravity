@@ -8,7 +8,12 @@
 
 namespace shaders
 {
-	//using Arr3 = float[3];
+	class SimpleShader : public Engine::Shader
+	{
+	public:
+		bool UseProgram() const override;
+		bool GetLocation() override;
+	};
 
 	class BaseShader : public Engine::Shader
 	{
@@ -62,6 +67,7 @@ namespace shaders
 		unsigned int uColor = 0;
 	};
 
+	class SimpleShaderSingle : public SimpleShader, public mystd::Singletone<SimpleShaderSingle> {};
 	class BaseShaderSingle : public BaseShader, public mystd::Singletone<BaseShaderSingle> {};
 	class ForwardShaderSingle : public ForwardShader, public mystd::Singletone<ForwardShaderSingle> {};
 	class LineShaderSingle : public LineShader, public mystd::Singletone<LineShaderSingle> {};

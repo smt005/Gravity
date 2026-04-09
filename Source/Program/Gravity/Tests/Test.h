@@ -4,4 +4,5 @@
 namespace Tests
 {
 	void FunVec3();
+	void SharedPtr();
 }

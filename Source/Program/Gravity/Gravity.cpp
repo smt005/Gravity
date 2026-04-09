@@ -32,6 +32,8 @@ bool Gravity::InitFileManagers(std::string_view params)
 
 bool Gravity::Init(std::string_view params)
 {
+	//Tests::SharedPtr();
+
 	InitCallback();
 	InitWidows();
 

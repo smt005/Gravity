@@ -35,6 +35,9 @@ namespace Engine
 			Render(mesh.Vao(), mesh.Count());
 		}
 
+		// TODO:
+		static void DrawToScreen();
+
 	private:
 		inline static float clearColor;
 	};
