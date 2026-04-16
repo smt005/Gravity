@@ -166,3 +166,7 @@ void Draw::DrawToScreen()
 		glBindVertexArray(0);
 	}
 }
+
+void Draw::PostDraw()
+{
+}

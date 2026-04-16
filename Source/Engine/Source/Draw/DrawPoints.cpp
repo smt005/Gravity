@@ -2,6 +2,7 @@
 #include "Draw.h"
 #include <glad/gl.h>
 #include <Screen.h>
+#include <Draw/Shader.h>
 
 namespace Engine
 {
@@ -29,7 +30,7 @@ namespace Engine
     }
 
     // ---------- shader utils ----------
-    GLuint compileShader(const char* vs, const char* fs) {
+    /*GLuint compileShader(const char* vs, const char* fs) {
         GLuint v = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(v, 1, &vs, NULL);
         glCompileShader(v);
@@ -46,10 +47,10 @@ namespace Engine
         glDeleteShader(v);
         glDeleteShader(f);
         return p;
-    }
+    }*/
 
     // ---------- shaders ----------
-    const char* vsQuad = R"(
+    /*const char* vsQuad = R"(
 #version 330 core
 layout (location = 0) in vec2 aPos;
 out vec2 vUV;
@@ -84,10 +85,65 @@ uniform sampler2D uTex;
 void main(){
     FragColor = texture(uTex, vUV);
 }
-)";
+)";*/
+
+    class FrameBufferTest
+    {
+    public:
+        GLuint fbo;
+        GLuint tex;
+        void Create()
+        {
+            glGenFramebuffers(1, &fbo);
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+            glGenTextures(1, &tex);
+            glBindTexture(GL_TEXTURE_2D, tex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Engine::ScreenParams::Width(), Engine::ScreenParams::Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+        }
+        void Bind()
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            glClearColor(0, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+    };
+
+    class AccumShader : public Engine::Shader
+    {
+    public:
+        bool GetLocation() override
+        {
+            uPrev = glGetUniformLocation(_program, "uPrev");
+            uCurrent = glGetUniformLocation(_program, "uCurrent");
+            uDecay = glGetUniformLocation(_program, "uDecay");
+            uOffset = glGetUniformLocation(_program, "uOffset");
+            return true;
+        }
+        bool UseProgram() const {
+            if (Shader::UseProgram()) {
+                glUniform1i(uPrev, 0);
+                glUniform1i(uCurrent, 1);
+                glUniform1f(uDecay, 1.f);
+                glUniform1f(uOffset, 0.002f);
+                return true;
+            }
+            return false;
+        }
+
+        unsigned int uPrev = 0;
+        unsigned int uCurrent = 0;
+        unsigned int uDecay = 0;
+        unsigned int uOffset = 0;
+    };
 
     // ---------- FBO ----------
-    void createFBO(GLuint& fbo, GLuint& tex)
+    /*void createFBO(GLuint& fbo, GLuint& tex)
     {
         glGenFramebuffers(1, &fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -100,22 +156,18 @@ void main(){
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-    }
+    }*/
 
     // ---------- простые точки ----------
-    GLuint pointFBO, pointTex;
-
-    void createPointBuffer()
-    {
-        createFBO(pointFBO, pointTex);
-    }
-
+    //GLuint pointFBO, pointTex;
+    FrameBufferTest pointFBO;
     // рисуем движущуюся точку
     void renderPoints(float t)
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, pointFBO);
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+        //glBindFramebuffer(GL_FRAMEBUFFER, pointFBO);
+        //glClearColor(0, 0, 0, 1);
+        //glClear(GL_COLOR_BUFFER_BIT);
+        pointFBO.Bind();
 
        /* float factor = cos(t/25) - 0.5f;
         float x = 0.5f + 0.4f * cos(t + factor);
@@ -133,22 +185,32 @@ void main(){
         glDisable(GL_SCISSOR_TEST);*/
     }
 
-    GLuint accumShader;
-    GLuint displayShader;
-    GLuint fboA, texA, fboB, texB;
+    //GLuint accumShader;
+    //GLuint displayShader;
+
+    AccumShader accumShader;
+    Engine::Shader displayShader;
+    
+    //GLuint fboA, texA, fboB, texB;
+    FrameBufferTest fboA, fboB;
     float time = 0.0f;
 
     void Draw::InitTraceBuffers()
     {
         createQuad();
 
-        accumShader = compileShader(vsQuad, fsAccum);
-        displayShader = compileShader(vsQuad, fsDisplay);
+        //accumShader = compileShader(vsQuad, fsAccum);
+        //displayShader = compileShader(vsQuad, fsDisplay);
 
-        createFBO(fboA, texA);
-        createFBO(fboB, texB);
+        accumShader.LoadByName("Post/Accumulate");
+        displayShader.LoadByName("Post/Display");
 
-        createPointBuffer();
+        //createFBO(fboA, texA);
+        //createFBO(fboB, texB);
+        //createFBO(pointFBO, pointTex);
+        fboA.Create();
+        fboB.Create();
+        pointFBO.Create();
     }
 
     void Draw::RenderTrace(std::function<void()> fun)
@@ -160,50 +222,58 @@ void main(){
         fun();
 
         // 2. accumulation
-        glBindFramebuffer(GL_FRAMEBUFFER, fboB);
+        //glBindFramebuffer(GL_FRAMEBUFFER, fboB);
+        fboB.Bind();
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(accumShader);
+        //glUseProgram(accumShader);
+        accumShader.UseProgram();
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texA);
+        //glBindTexture(GL_TEXTURE_2D, texA);
+        glBindTexture(GL_TEXTURE_2D, fboA.tex);
 
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, pointTex);
+        //glBindTexture(GL_TEXTURE_2D, pointTex);
+        glBindTexture(GL_TEXTURE_2D, pointFBO.tex);
 
-        glUniform1i(glGetUniformLocation(accumShader, "uPrev"), 0);
-        glUniform1i(glGetUniformLocation(accumShader, "uCurrent"), 1);
-        glUniform1f(glGetUniformLocation(accumShader, "uDecay"), 1.f);
+        //glUniform1i(glGetUniformLocation(accumShader, "uPrev"), 0);
+        //glUniform1i(glGetUniformLocation(accumShader, "uCurrent"), 1);
+        //glUniform1f(glGetUniformLocation(accumShader, "uDecay"), 1.f);
 
 
-        static float uOffset = 0.f;
-        static float timerOffset = 0.f;
+        static float uOffset = 0.002f;
+        /*static float timerOffset = 0.f;
         if (timerOffset > 1.f) {
             timerOffset = 0.f;
             uOffset = 0.002f;
         }
         else {
-            timerOffset += 0.5f;
+            timerOffset += 0.995f;
             uOffset = 0.f;
-        }
+        }*/
 
-        glUniform1f(glGetUniformLocation(accumShader, "uOffset"), uOffset);
+        //glUniform1f(glGetUniformLocation(accumShader, "uOffset"), uOffset);
+        accumShader.GetLocation();
 
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        std::swap(texA, texB);
+        //std::swap(texA, texB);
+        //std::swap(fboA, fboB);
         std::swap(fboA, fboB);
 
         // 3. вывод
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(displayShader);
+        //glUseProgram(displayShader);
+        displayShader.UseProgram();
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texA);
-        glUniform1i(glGetUniformLocation(displayShader, "uTex"), 0);
+        //glBindTexture(GL_TEXTURE_2D, texA);
+        glBindTexture(GL_TEXTURE_2D, fboA.tex);
+//glUniform1i(glGetUniformLocation(displayShader, "uTex"), 0);
 
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }

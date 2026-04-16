@@ -10,8 +10,8 @@ namespace Engine
 	public:
 		Shader() = default;
 		virtual ~Shader();
-		virtual bool GetLocation() = 0;
-		virtual bool UseProgram() const = 0;
+		virtual bool GetLocation();
+		virtual bool UseProgram() const;
 
 		void Load(const std::string& vertexFilePath, const std::string& fragmentFilePath);
 		void LoadByName(const std::string& name);

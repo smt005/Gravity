@@ -43,6 +43,8 @@ namespace Engine
 		static void InitTraceBuffers();
 		static void RenderTrace(std::function<void()> fun);
 
+		static void PostDraw();
+
 	private:
 		inline static float clearColor;
 	};
