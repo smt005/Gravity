@@ -42,4 +42,8 @@ void RenderWindow::Render()
 	if (ImGui::Button("Шрифты##fonts_button")) {
 		Engine::GuiWindows::SwitchVisibleWindow<Windows::DrawFontWindow>();
 	}
+	ImGui::Dummy(ImVec2(0.f, 10.f));
+
+	ImGui::SliderFloat("Alpha", &GravityRender::alpha, 0.f, 1.f);
+	ImGui::Dummy(ImVec2(0.f, 10.f));
 }

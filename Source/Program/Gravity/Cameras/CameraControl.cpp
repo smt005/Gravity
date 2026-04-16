@@ -3,6 +3,7 @@
 #include <Core.h>
 #include <Callback/VirtualKey.h>
 #include <Logs.h>
+#include "../Render/GravityRender.h"
 
 using namespace Engine;
 
@@ -116,6 +117,7 @@ void CameraControl::Move(const MoveDirect direct, const float kForce) {
 	}
 
 	SetPos(pos);
+	GravityRender::ClearPointBuffer();
 }
 
 template <typename T>
@@ -123,6 +125,7 @@ void CameraControl::Move(const T& directVector, const float kForce) {
 	glm::vec3 pos = Pos();
 	pos += directVector.x * _speed * kForce;
 	SetPos(pos);
+	GravityRender::ClearPointBuffer();
 }
 
 void CameraControl::Rotate(const glm::vec2& angles) {
@@ -156,4 +159,5 @@ void CameraControl::Rotate(const glm::vec2& angles) {
 
 
 	SetDirect(directVector);
+	GravityRender::ClearPointBuffer();
 }

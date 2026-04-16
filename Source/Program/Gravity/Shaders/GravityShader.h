@@ -13,6 +13,19 @@ namespace shaders
 	public:
 		bool UseProgram() const override;
 		bool GetLocation() override;
+
+	protected:
+		unsigned int uAlpha = 0;
+	};
+
+	class SimpleAlphaShader : public SimpleShader
+	{
+	public:
+		bool GetLocation() override;
+		void SetAlpha(float value) const;
+
+	protected:
+		unsigned int uAlpha = 0;
 	};
 
 	class BaseShader : public Engine::Shader
@@ -68,6 +81,7 @@ namespace shaders
 	};
 
 	class SimpleShaderSingle : public SimpleShader, public mystd::Singletone<SimpleShaderSingle> {};
+	class SimpleAlphaShaderSingle : public SimpleAlphaShader, public mystd::Singletone<SimpleAlphaShaderSingle> {};
 	class BaseShaderSingle : public BaseShader, public mystd::Singletone<BaseShaderSingle> {};
 	class ForwardShaderSingle : public ForwardShader, public mystd::Singletone<ForwardShaderSingle> {};
 	class LineShaderSingle : public LineShader, public mystd::Singletone<LineShaderSingle> {};

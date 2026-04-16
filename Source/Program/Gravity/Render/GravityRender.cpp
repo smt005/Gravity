@@ -10,48 +10,169 @@
 #include "../Cameras/GravityCameras.h"
 #include "../Spaces/SpaceManager.h"
 
+
 void GravityRender::Init()
 {
 	Engine::Draw::SetClearColor(0.1f, 0.2f, 0.3f);
+	//Engine::Draw::SetClearColor(0.03f, 0.06f, 0.09f, 1.f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
-	framebuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+	prevPointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+	pointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+	frameBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+}
+
+void GravityRender::Update(double deltaTime)
+{
+	static float timerOffset = 0.f;
+
+	if (deltaAlphaTime > 1.f) {
+		deltaAlphaTime = 0.f;
+		alpha = 0.002f;
+	}
+	else {
+		deltaAlphaTime += timerOffset;
+		alpha = 0.f;
+	}
 }
 
 void GravityRender::Render()
 {
-	RenderToBuffer();
-	RenderToScreen();
+	using namespace Engine;
+
+	PrepareRender();
+	RenderPoints();
+	RenderSprite();
 }
 
-void GravityRender::RenderToBuffer()
+void GravityRender::PrepareRender()
 {
 	using namespace Engine;
 
 	Draw::ClearColor();
 	const glm::vec3 camPos = Camera::GetLink().Pos();
-
 	SpaceManager::Current().Bodies(_renderBodies);
-
-	if (_renderBodies.empty()) {
-		return;
-	}
 
 	std::sort(_renderBodies.begin(), _renderBodies.end(), [&camPos](const auto& leftBody, const auto& rightBody) {
 		const float leftDist = glm::distance(camPos, leftBody.pos);
 		const float rightDist = glm::distance(camPos, rightBody.pos);
 		return leftDist > rightDist;
 		});
+}
+
+void GravityRender::RenderPoints()
+{
+	using namespace Engine;
+
+	if (_renderBodies.empty()) {
+		return;
+	}
+
+	/*{
+		std::vector<float> points;
+		points.reserve(_renderBodies.size());
+
+		for (const auto& body : _renderBodies) {
+			points.emplace_back(body.pos.x);
+			points.emplace_back(body.pos.y);
+			points.emplace_back(body.pos.z);
+		}
+
+		std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.0f };
+		const auto& shader = shaders::LineShaderSingle::Instance();
+		shader.UseProgram();
+		shader.SetColor(color.data());
+
+		pointBuffer.PushRender(true);
+		Draw::ClearColor(0.f, 0.f, 0.f, 0.f);
+		Draw::SetPointSize(2.f);
+		Draw::RenderPoints(points.data(), points.size() / 3);
+		pointBuffer.PopRender();
+	}
+
+	frameBuffer.PushRender();
+	{
+		const auto& shader = shaders::SimpleAlphaShaderSingle::Instance();
+		shader.UseProgram();
+		shader.SetAlpha(alpha);
+
+		Draw::ClearColor(0.f, 0.f, 0.f, 1.f);
+		Draw::BindTexture(prevPointBuffer.TextureId());
+		Draw::DrawToScreen();
+	}
+
+	{
+		const auto& shader = shaders::SimpleShaderSingle::Instance();
+		shader.UseProgram();
+
+		Draw::BindTexture(pointBuffer.TextureId());
+		Draw::DrawToScreen();
+	}
+	frameBuffer.PopRender();
+
+	{
+		const auto& shader = shaders::SimpleShaderSingle::Instance();
+		shader.UseProgram();
+
+		Draw::ClearColor(0.1f, 0.2f, 0.3f, 1.f);
+		Draw::BindTexture(frameBuffer.TextureId());
+		Draw::DrawToScreen();
+	}
+
+	prevPointBuffer.Swap(frameBuffer);*/
+
+	static bool _bbb_ = false;
+	if (!_bbb_) {
+		Draw::InitTraceBuffers();
+		_bbb_ = true;
+	}
+	else {
+		auto fun = []() {
+			std::vector<float> points;
+			points.reserve(_renderBodies.size());
+
+			for (const auto& body : _renderBodies) {
+				points.emplace_back(body.pos.x);
+				points.emplace_back(body.pos.y);
+				points.emplace_back(body.pos.z);
+			}
+
+			std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.0f };
+			const auto& shader = shaders::LineShaderSingle::Instance();
+			shader.UseProgram();
+			shader.SetColor(color.data());
+
+			Draw::SetPointSize(2.f);
+			Draw::RenderPoints(points.data(), points.size() / 3);
+		};
+		
+		Draw::RenderTrace(fun);
+	}
+}
+
+void GravityRender::ClearPointBuffer()
+{
+	pointBuffer.Clear();
+}
+
+void GravityRender::RenderSprite()
+{
+	using namespace Engine;
+
+	if (_renderBodies.empty()) {
+		return;
+	}
+
+	//Engine::Draw::SetClearColor(0.1f, 0.2f, 0.3f);
 
 	if (typeDraw.sprite) {
-		framebuffer.PushRender();
-
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.UseProgram();
 
 		Draw::DepthTest(true);
 		Draw::BindTexture(Texture::GetRef("Star.png").Id());
 
+		const glm::vec3 camPos = Camera::GetLink().Pos();
 		float farDist= glm::distance(camPos, _renderBodies.front().pos);
 		float nearDist = glm::distance(camPos, _renderBodies.back().pos);
 		float spaceDist = farDist - nearDist;
@@ -87,28 +208,6 @@ void GravityRender::RenderToBuffer()
 
 			Draw::Render(SHAPES["Sprite", true, true].mesh);
 		}
-
-		framebuffer.PopRender();
-	}
-
-	if (typeDraw.point) {
-		Draw::SetPointSize(1.f);
-		const auto& shader = shaders::LineShaderSingle::Instance();
-		shader.UseProgram();
-
-		std::vector<float> points;
-		points.reserve(_renderBodies.size());
-
-		for (const auto& body : _renderBodies) {
-			points.emplace_back(body.pos.x);
-			points.emplace_back(body.pos.y);
-			points.emplace_back(body.pos.z);
-		}
-
-		std::array<float, 4> color = { 10.f, 0.f, 0.f, 1.f };
-		shader.SetColor(color.data());
-
-		Draw::RenderPoints(points.data(), points.size() / 3);
 	}
 
 	if (typeDraw.spriteShader) {
@@ -139,17 +238,4 @@ void GravityRender::RenderToBuffer()
 			Draw::Render(SHAPES["Sphere", true, true].mesh);
 		}
 	}
-}
-
-void GravityRender::RenderToScreen()
-{
-	using namespace Engine;
-
-	auto& shader = shaders::SimpleShaderSingle::Instance();
-	shader.UseProgram();
-
-	//Draw::BindTexture(Texture::GetRef("Greed.png").Id());
-	Draw::BindTexture(framebuffer.TextureId());
-
-	Draw::DrawToScreen();
 }

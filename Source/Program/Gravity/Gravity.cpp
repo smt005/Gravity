@@ -76,6 +76,7 @@ void Gravity::OnClose()
 void Gravity::Update(double deltaTime)
 {
 	SpaceManager::Update(deltaTime);
+	GravityRender::Update(deltaTime);
 }
 
 void Gravity::OnResize()

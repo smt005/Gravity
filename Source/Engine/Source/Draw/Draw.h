@@ -4,6 +4,7 @@
 #include <string>
 #include "Shader.h"
 #include "Object/Mesh.h"
+#include <functional>
 
 namespace Engine
 {
@@ -20,6 +21,7 @@ namespace Engine
 	public:
 		static void SetClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearColor();
+		static void ClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearDepth();
 		static void DepthTest(bool enable);
 		static void CullFace(CullFaceType type);
@@ -37,6 +39,9 @@ namespace Engine
 
 		// TODO:
 		static void DrawToScreen();
+
+		static void InitTraceBuffers();
+		static void RenderTrace(std::function<void()> fun);
 
 	private:
 		inline static float clearColor;

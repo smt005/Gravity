@@ -4,8 +4,8 @@
 class Framebuffer final
 {
 public:
-	Framebuffer();
-	Framebuffer(unsigned int width, unsigned int height);
+	Framebuffer(bool init = false);
+	Framebuffer(unsigned int width, unsigned int height, bool init = false);
 	~Framebuffer();
 
 	Framebuffer(const Framebuffer&) = delete;
@@ -14,11 +14,13 @@ public:
 	Framebuffer& operator = (Framebuffer&&) = delete;
 
 	unsigned int TextureId() const;
-	void PushRender() const;
+	void PushRender(bool clean = false) const;
 	void PopRender() const;
 
 	void Init(unsigned int _width, unsigned int _height);
 	void Init();
+	void Swap(Framebuffer& buffer);
+	void Clear();
 
 private:
 	unsigned int _fbo;

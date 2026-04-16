@@ -11,7 +11,7 @@ class GravityRender final
 public:
 	struct TypeDraw
 	{
-		bool sprite = true;
+		bool sprite = false;
 		bool point = true;
 		bool model = false;
 		bool spriteShader = false;
@@ -25,9 +25,12 @@ public:
 
 public:
 	static void Init();
+	static void Update(double deltaTime);
 	static void Render();
-	static void RenderToBuffer();
-	static void RenderToScreen();
+	static void PrepareRender();
+	static void RenderPoints();
+	static void RenderSprite();
+	static void ClearPointBuffer();
 
 public:
 	inline static TypeDraw typeDraw;
@@ -35,5 +38,11 @@ public:
 
 private:
 	inline static std::vector<Body> _renderBodies;
-	inline static Framebuffer framebuffer;
+	inline static Framebuffer prevPointBuffer;
+	inline static Framebuffer pointBuffer;
+	inline static Framebuffer frameBuffer;
+
+public:
+	inline static float alpha = 0.f;
+	inline static float deltaAlphaTime = 0.f;
 };

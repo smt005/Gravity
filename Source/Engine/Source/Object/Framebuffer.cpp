@@ -5,15 +5,23 @@
 #include "glad/gl.h"
 #include <Screen.h>
 
-Framebuffer::Framebuffer()
+Framebuffer::Framebuffer(bool init)
 	: width(Engine::ScreenParams::Width())
 	, height(Engine::ScreenParams::Height())
-{}
+{
+	if (init) {
+		Init();
+	}
+}
 
-Framebuffer::Framebuffer(unsigned int _width, unsigned int _height)
+Framebuffer::Framebuffer(unsigned int _width, unsigned int _height, bool init)
 	: width(_width)
 	, height(_height)
-{}
+{
+	if (init) {
+		Init();
+	}
+}
 
 void Framebuffer::Init(unsigned int _width, unsigned int _height)
 {
@@ -24,9 +32,11 @@ void Framebuffer::Init(unsigned int _width, unsigned int _height)
 
 void Framebuffer::Init()
 {
+	this->~Framebuffer();
+
 	// Создание фреймбуфера (FBO)
 	glGenFramebuffers(1, &_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+	//glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
 	// Создание текстуры для хранения изображения
 	glGenTextures(1, &_textureId);
@@ -56,14 +66,32 @@ void Framebuffer::Init()
 	}
 }
 
+void Framebuffer::Swap(Framebuffer& buffer)
+{
+	std::swap(_fbo, buffer._fbo);
+	std::swap(_textureId, buffer._textureId);
+	std::swap(width, buffer.width);
+	std::swap(height, buffer.height);
+}
+
+void Framebuffer::Clear()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+	glClearColor(0.f, 0.f, 0.f, 0.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 Framebuffer::~Framebuffer()
 {
 	if (_fbo != 0) {
 		glDeleteFramebuffers(1, &_fbo);
+		_fbo = 0;
 	}
 
 	if (_textureId != 0) {
 		glDeleteTextures(1, &_textureId);
+		_textureId = 0;
 	}
 }
 
@@ -72,11 +100,15 @@ unsigned int Framebuffer::TextureId() const
 	return _textureId;
 }
 
-void Framebuffer::PushRender() const
+void Framebuffer::PushRender(bool clean) const
 {
 	// Привязываем фреймбуфер для рендеринга
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	if (clean) {
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 }
 
 void Framebuffer::PopRender() const

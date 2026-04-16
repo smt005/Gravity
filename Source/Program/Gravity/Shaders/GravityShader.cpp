@@ -22,12 +22,29 @@ bool SimpleShader::UseProgram() const
 	glUseProgram(_program);
 	glDisable(GL_DEPTH_TEST);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_TEXTURE_2D);
+
 	return true;
 }
 
 bool SimpleShader::GetLocation()
 {
 	return _program;
+}
+
+// SimpleAlphaShader
+
+bool SimpleAlphaShader::GetLocation()
+{
+	uAlpha = glGetUniformLocation(_program, "uAlpha");
+	return true;
+}
+
+void SimpleAlphaShader::SetAlpha(float value) const
+{
+	glUniform1f(uAlpha, value);
 }
 
 // BaseShader
@@ -176,7 +193,14 @@ void LineShader::SetColor(const float* const color) const
 void shaders::InitShaders()
 {
 	{
-		shaders::SimpleShaderSingle::Instance().LoadByName("Simple");
+		auto& shader = shaders::SimpleShaderSingle::Instance();
+		shader.LoadByName("Simple");
+	}
+
+	{
+		auto& shader = shaders::SimpleAlphaShaderSingle::Instance();
+		shader.LoadByName("post/Alpha");
+		shader.SetAlpha(0.99f);
 	}
 
 	{
