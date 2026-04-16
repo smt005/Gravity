@@ -15,14 +15,9 @@
 void GravityRender::Init()
 {
 	Engine::Draw::SetClearColor(0.1f, 0.2f, 0.3f);
-	//Engine::Draw::SetClearColor(0.03f, 0.06f, 0.09f, 1.f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
-	//prevPointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
-	//pointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
-	//frameBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
 
-	Engine::DrawBuffer::InitPostDraw();
 	pointBuffer.Create();
 	bufferA.Create();
 	bufferB.Create();
@@ -70,11 +65,13 @@ void GravityRender::RenderPoints()
 {
 	using namespace Engine;
 
-	if (_renderBodies.empty()) {
+	if (!typeDraw.point || _renderBodies.empty()) {
 		return;
 	}
 
-	/*{
+	{
+		pointBuffer.Bind();
+
 		std::vector<float> points;
 		points.reserve(_renderBodies.size());
 
@@ -89,182 +86,89 @@ void GravityRender::RenderPoints()
 		shader.UseProgram();
 		shader.SetColor(color.data());
 
-		pointBuffer.PushRender(true);
-		Draw::ClearColor(0.f, 0.f, 0.f, 0.f);
 		Draw::SetPointSize(2.f);
 		Draw::RenderPoints(points.data(), points.size() / 3);
-		pointBuffer.PopRender();
-	}
-
-	frameBuffer.PushRender();
-	{
-		const auto& shader = shaders::SimpleAlphaShaderSingle::Instance();
-		shader.UseProgram();
-		shader.SetAlpha(alpha);
-
-		Draw::ClearColor(0.f, 0.f, 0.f, 1.f);
-		Draw::BindTexture(prevPointBuffer.TextureId());
-		Draw::DrawToScreen();
 	}
 
 	{
-		const auto& shader = shaders::SimpleShaderSingle::Instance();
-		shader.UseProgram();
+		bufferB.Bind();
+		Draw::ClearColor();
 
-		Draw::BindTexture(pointBuffer.TextureId());
-		Draw::DrawToScreen();
+		shaders::AccumShaderSingle::Instance().UseProgram();
+
+		Draw::ActiveTexture(0);
+		Draw::BindTexture(bufferA.GetTexture());
+
+		Draw::ActiveTexture(1);
+		Draw::BindTexture(pointBuffer.GetTexture());
+
+		shaders::AccumShaderSingle::Instance().GetLocation();
+
+		Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
+
+		std::swap(bufferA, bufferB);
 	}
-	frameBuffer.PopRender();
 
-	{
-		const auto& shader = shaders::SimpleShaderSingle::Instance();
-		shader.UseProgram();
-
-		Draw::ClearColor(0.1f, 0.2f, 0.3f, 1.f);
-		Draw::BindTexture(frameBuffer.TextureId());
-		Draw::DrawToScreen();
-	}
-
-	prevPointBuffer.Swap(frameBuffer);*/
-
-	/*static bool _bbb_ = false;
-	if (!_bbb_) {
-		DrawBuffer::InitPostDraw();
-		_bbb_ = true;
-	}
-	else */{
-		/*auto fun = []() {
-			std::vector<float> points;
-			points.reserve(_renderBodies.size());
-
-			for (const auto& body : _renderBodies) {
-				points.emplace_back(body.pos.x);
-				points.emplace_back(body.pos.y);
-				points.emplace_back(body.pos.z);
-			}
-
-			std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.0f };
-			const auto& shader = shaders::LineShaderSingle::Instance();
-			shader.UseProgram();
-			shader.SetColor(color.data());
-
-			Draw::SetPointSize(2.f);
-			Draw::RenderPoints(points.data(), points.size() / 3);
-		};
-		
-		DrawBuffer::PostDraw(fun);
-		*/
-
-		{
-			pointBuffer.Bind();
-
-			std::vector<float> points;
-			points.reserve(_renderBodies.size());
-
-			for (const auto& body : _renderBodies) {
-				points.emplace_back(body.pos.x);
-				points.emplace_back(body.pos.y);
-				points.emplace_back(body.pos.z);
-			}
-
-			std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.0f };
-			const auto& shader = shaders::LineShaderSingle::Instance();
-			shader.UseProgram();
-			shader.SetColor(color.data());
-
-			Draw::SetPointSize(2.f);
-			Draw::RenderPoints(points.data(), points.size() / 3);
-
-			//DrawBuffer::PostDraw(pointBuffer.GetTexture(), bufferA, bufferB);
-		}
-
-		{
-			bufferB.Bind();
-			//glClear(GL_COLOR_BUFFER_BIT);
-			Draw::ClearColor();
-
-			//accumShader.UseProgram();
-			shaders::AccumShaderSingle::Instance().UseProgram();
-
-			Draw::ActiveTexture(0);
-			Draw::BindTexture(bufferA.GetTexture());
-
-			Draw::ActiveTexture(1);
-			Draw::BindTexture(pointBuffer.GetTexture());
-
-			//accumShader.GetLocation();
-			shaders::AccumShaderSingle::Instance().GetLocation();
-
-			Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
-
-			std::swap(bufferA, bufferB);
-		}
-
-		DrawBuffer::Draw(bufferA);
-	}
+	DrawBuffer::Draw(bufferA);
 }
 
 void GravityRender::ClearPointBuffer()
 {
-	//pointBuffer.Clear();
+	bufferA.Create();
 }
 
 void GravityRender::RenderSprite()
 {
 	using namespace Engine;
 
-	if (_renderBodies.empty()) {
+	if (!typeDraw.sprite || _renderBodies.empty()) {
 		return;
 	}
 
-	//Engine::Draw::SetClearColor(0.1f, 0.2f, 0.3f);
+	auto& shader = shaders::BaseShaderSingle::Instance();
+	shader.UseProgram();
 
-	if (typeDraw.sprite) {
-		auto& shader = shaders::BaseShaderSingle::Instance();
-		shader.UseProgram();
+	Draw::DepthTest(true);
+	Draw::BindTexture(Texture::GetRef("Star.png").Id());
 
-		Draw::DepthTest(true);
-		Draw::BindTexture(Texture::GetRef("Star.png").Id());
+	const glm::vec3 camPos = Camera::GetLink().Pos();
+	float farDist= glm::distance(camPos, _renderBodies.front().pos);
+	float nearDist = glm::distance(camPos, _renderBodies.back().pos);
+	float spaceDist = farDist - nearDist;
+	std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.f };
 
-		const glm::vec3 camPos = Camera::GetLink().Pos();
-		float farDist= glm::distance(camPos, _renderBodies.front().pos);
-		float nearDist = glm::distance(camPos, _renderBodies.back().pos);
-		float spaceDist = farDist - nearDist;
-		std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.f };
+	for (const auto& body : _renderBodies) {
+		glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - body.pos);
+		glm::vec3 from(0.f, 0.f, 1.f);
+		glm::vec3 axis = glm::normalize(glm::cross(from, to));
 
-		for (const auto& body : _renderBodies) {
-			glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - body.pos);
-			glm::vec3 from(0.f, 0.f, 1.f);
-			glm::vec3 axis = glm::normalize(glm::cross(from, to));
+		float dot = glm::dot(from, to);
+		float angle = acos(dot);
 
-			float dot = glm::dot(from, to);
-			float angle = acos(dot);
+		glm::mat4 mat(1.f);
+		const float scale = body.diameter * scaleBody;
 
-			glm::mat4 mat(1.f);
-			const float scale = body.diameter * scaleBody;
+		mat = glm::translate(mat, body.pos);
 
-			mat = glm::translate(mat, body.pos);
-
-			if (glm::length(axis)) {
-				mat = glm::rotate(mat, angle, axis);
-			}
-			mat = glm::scale(mat, glm::vec3(scale));
-			shader.SetModelMatrix(mat);
-
-			float distFactor = glm::distance(camPos, body.pos);
-			distFactor -= nearDist;
-			distFactor /= spaceDist;
-
-			color[1] = 1.f - distFactor;
-			color[2] = 1.f - distFactor;
-
-			shader.SetColor(color.data());
-
-			Draw::Render(SHAPES["Sprite", true, true].mesh);
+		if (glm::length(axis)) {
+			mat = glm::rotate(mat, angle, axis);
 		}
+		mat = glm::scale(mat, glm::vec3(scale));
+		shader.SetModelMatrix(mat);
+
+		float distFactor = glm::distance(camPos, body.pos);
+		distFactor -= nearDist;
+		distFactor /= spaceDist;
+
+		color[1] = 1.f - distFactor;
+		color[2] = 1.f - distFactor;
+
+		shader.SetColor(color.data());
+
+		Draw::Render(SHAPES["Sprite", true, true].mesh);
 	}
 
-	if (typeDraw.spriteShader) {
+	/*if (typeDraw.spriteShader) {
 		auto& shader = shaders::ForwardShaderSingle::Instance();
 		shader.UseProgram();
 
@@ -291,5 +195,5 @@ void GravityRender::RenderSprite()
 			shader.SetModelMatrix(mat);
 			Draw::Render(SHAPES["Sphere", true, true].mesh);
 		}
-	}
+	}*/
 }
