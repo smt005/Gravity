@@ -80,6 +80,11 @@ void Draw::SetPointSize(const float sizePoint)
 	}
 }
 
+void Draw::BindTexture(Texture& texture)
+{
+	BindTexture(texture.Id());
+}
+
 void Draw::BindTexture(unsigned int textureId) {
 	glBindTexture(GL_TEXTURE_2D, textureId);
 }
@@ -88,6 +93,12 @@ void Draw::Render(unsigned int vao, int count)
 {
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, count);
+}
+
+void Draw::RenderTriangleFun(unsigned int vao, int count)
+{
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, count);
 }
 
 void Draw::RenderLines(const float* vertexes, unsigned int count)
@@ -102,4 +113,16 @@ void Draw::RenderPoints(const float* vertexes, unsigned int count)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertexes);
 	glEnableVertexAttribArray(0);
 	glDrawArrays(GL_POINTS, 0, count);
+}
+
+void Draw::ActiveTexture(unsigned int texture)
+{
+	switch (texture) {
+		case 0: glActiveTexture(GL_TEXTURE0); break;
+		case 1: glActiveTexture(GL_TEXTURE1); break;
+		case 2: glActiveTexture(GL_TEXTURE2); break;
+		default: {
+			throw "ERROR";
+		};
+	};
 }

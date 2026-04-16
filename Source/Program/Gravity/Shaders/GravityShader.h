@@ -80,11 +80,25 @@ namespace shaders
 		unsigned int uColor = 0;
 	};
 
+	class AccumShader : public Engine::Shader
+	{
+	public:
+		bool GetLocation() override;
+		bool UseProgram() const;
+
+		unsigned int uPrev = 0;
+		unsigned int uCurrent = 0;
+		unsigned int uDecay = 0;
+		unsigned int uOffset = 0;
+	};
+
 	class SimpleShaderSingle : public SimpleShader, public mystd::Singletone<SimpleShaderSingle> {};
 	class SimpleAlphaShaderSingle : public SimpleAlphaShader, public mystd::Singletone<SimpleAlphaShaderSingle> {};
 	class BaseShaderSingle : public BaseShader, public mystd::Singletone<BaseShaderSingle> {};
 	class ForwardShaderSingle : public ForwardShader, public mystd::Singletone<ForwardShaderSingle> {};
 	class LineShaderSingle : public LineShader, public mystd::Singletone<LineShaderSingle> {};
+	class AccumShaderSingle : public AccumShader, public mystd::Singletone<AccumShaderSingle> {};
+	class DisplayShaderSingle : public Engine::Shader, public mystd::Singletone<DisplayShaderSingle> {};
 
 	void InitShaders();
 }

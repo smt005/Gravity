@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/vec3.hpp>
 #include <Object/Framebuffer.h>
+#include <Object/Framebuffer2.h>
 #include "../Spaces/BodyData.h"
 
 class GravityRender final
@@ -38,9 +39,13 @@ public:
 
 private:
 	inline static std::vector<Body> _renderBodies;
-	inline static Framebuffer prevPointBuffer;
-	inline static Framebuffer pointBuffer;
-	inline static Framebuffer frameBuffer;
+	//inline static Framebuffer prevPointBuffer;
+	//inline static Framebuffer pointBuffer;
+	//inline static Framebuffer frameBuffer;
+
+	inline static Engine::FrameBuffer2 pointBuffer;
+	inline static Engine::FrameBuffer2 bufferA;
+	inline static Engine::FrameBuffer2 bufferB;
 
 public:
 	inline static float alpha = 0.f;

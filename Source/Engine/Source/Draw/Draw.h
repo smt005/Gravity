@@ -2,9 +2,10 @@
 #pragma once
 
 #include <string>
-#include "Shader.h"
-#include "Object/Mesh.h"
 #include <functional>
+#include <Draw/Shader.h>
+#include <Object/Mesh.h>
+#include <Object/Texture.h>
 
 namespace Engine
 {
@@ -27,11 +28,15 @@ namespace Engine
 		static void CullFace(CullFaceType type);
 		static void Viewport();
 		static void SetPointSize(const float sizePoint);
+		static void BindTexture(Texture& texture);
 		static void BindTexture(unsigned int textureId);
 		static void Render(unsigned int vao, int count);
+		static void RenderTriangleFun(unsigned int vao, int count);
 		static void RenderLines(const float* vertexes, unsigned int count);
 		static void RenderPoints(const float* vertexes, unsigned int count);
 
+		static void ActiveTexture(unsigned int texture);
+		
 		template <typename T>
 		static void Render(const T& mesh) {
 			Render(mesh.Vao(), mesh.Count());

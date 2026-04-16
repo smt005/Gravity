@@ -189,6 +189,27 @@ void LineShader::SetColor(const float* const color) const
 	}
 }
 
+// AccumShader
+bool AccumShader::GetLocation()
+{
+	uPrev = glGetUniformLocation(_program, "uPrev");
+	uCurrent = glGetUniformLocation(_program, "uCurrent");
+	uDecay = glGetUniformLocation(_program, "uDecay");
+	uOffset = glGetUniformLocation(_program, "uOffset");
+	return true;
+}
+
+bool AccumShader::UseProgram() const {
+	if (Shader::UseProgram()) {
+		glUniform1i(uPrev, 0);
+		glUniform1i(uCurrent, 1);
+		glUniform1f(uDecay, 1.f);
+		glUniform1f(uOffset, 0.002f);
+		return true;
+	}
+	return false;
+}
+
 // InitShaders
 void shaders::InitShaders()
 {
@@ -234,5 +255,10 @@ void shaders::InitShaders()
 
 		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
 		shader.SetColor(glm::value_ptr(color));
+	}
+
+	{
+		AccumShaderSingle::Instance().LoadByName("Post/Accumulate");
+		DisplayShaderSingle::Instance().LoadByName("Post/Display");
 	}
 }

@@ -18,9 +18,14 @@ void GravityRender::Init()
 	//Engine::Draw::SetClearColor(0.03f, 0.06f, 0.09f, 1.f);
 	shaders::InitShaders();
 	cameras::MakeCameras();
-	prevPointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
-	pointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
-	frameBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+	//prevPointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+	//pointBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+	//frameBuffer.Init(Engine::ScreenParams::Width(), Engine::ScreenParams::Height());
+
+	Engine::DrawBuffer::InitPostDraw();
+	pointBuffer.Create();
+	bufferA.Create();
+	bufferB.Create();
 }
 
 void GravityRender::Update(double deltaTime)
@@ -122,13 +127,13 @@ void GravityRender::RenderPoints()
 
 	prevPointBuffer.Swap(frameBuffer);*/
 
-	static bool _bbb_ = false;
+	/*static bool _bbb_ = false;
 	if (!_bbb_) {
 		DrawBuffer::InitPostDraw();
 		_bbb_ = true;
 	}
-	else {
-		auto fun = []() {
+	else */{
+		/*auto fun = []() {
 			std::vector<float> points;
 			points.reserve(_renderBodies.size());
 
@@ -148,12 +153,60 @@ void GravityRender::RenderPoints()
 		};
 		
 		DrawBuffer::PostDraw(fun);
+		*/
+
+		{
+			pointBuffer.Bind();
+
+			std::vector<float> points;
+			points.reserve(_renderBodies.size());
+
+			for (const auto& body : _renderBodies) {
+				points.emplace_back(body.pos.x);
+				points.emplace_back(body.pos.y);
+				points.emplace_back(body.pos.z);
+			}
+
+			std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.0f };
+			const auto& shader = shaders::LineShaderSingle::Instance();
+			shader.UseProgram();
+			shader.SetColor(color.data());
+
+			Draw::SetPointSize(2.f);
+			Draw::RenderPoints(points.data(), points.size() / 3);
+
+			//DrawBuffer::PostDraw(pointBuffer.GetTexture(), bufferA, bufferB);
+		}
+
+		{
+			bufferB.Bind();
+			//glClear(GL_COLOR_BUFFER_BIT);
+			Draw::ClearColor();
+
+			//accumShader.UseProgram();
+			shaders::AccumShaderSingle::Instance().UseProgram();
+
+			Draw::ActiveTexture(0);
+			Draw::BindTexture(bufferA.GetTexture());
+
+			Draw::ActiveTexture(1);
+			Draw::BindTexture(pointBuffer.GetTexture());
+
+			//accumShader.GetLocation();
+			shaders::AccumShaderSingle::Instance().GetLocation();
+
+			Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
+
+			std::swap(bufferA, bufferB);
+		}
+
+		DrawBuffer::Draw(bufferA);
 	}
 }
 
 void GravityRender::ClearPointBuffer()
 {
-	pointBuffer.Clear();
+	//pointBuffer.Clear();
 }
 
 void GravityRender::RenderSprite()
