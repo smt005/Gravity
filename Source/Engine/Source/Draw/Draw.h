@@ -37,14 +37,6 @@ namespace Engine
 			Render(mesh.Vao(), mesh.Count());
 		}
 
-		// TODO:
-		static void DrawToScreen();
-
-		static void InitTraceBuffers();
-		static void RenderTrace(std::function<void()> fun);
-
-		static void PostDraw();
-
 	private:
 		inline static float clearColor;
 	};

@@ -4,6 +4,7 @@
 #include <Files/Settings.h>
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
+#include <Draw/DrawBuffer.h>
 #include <Object/Shape.h>
 #include <Object/Texture.h>
 #include "../Shaders/GravityShader.h"
@@ -123,7 +124,7 @@ void GravityRender::RenderPoints()
 
 	static bool _bbb_ = false;
 	if (!_bbb_) {
-		Draw::InitTraceBuffers();
+		DrawBuffer::InitPostDraw();
 		_bbb_ = true;
 	}
 	else {
@@ -146,7 +147,7 @@ void GravityRender::RenderPoints()
 			Draw::RenderPoints(points.data(), points.size() / 3);
 		};
 		
-		Draw::RenderTrace(fun);
+		DrawBuffer::PostDraw(fun);
 	}
 }
 
