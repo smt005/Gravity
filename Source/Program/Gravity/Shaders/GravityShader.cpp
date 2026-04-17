@@ -11,25 +11,6 @@
 
 using namespace shaders;
 
-// SimpleShader
-
-bool SimpleShader::UseProgram() const
-{
-	if (!_program) {
-		return false;
-	}
-
-	glUseProgram(_program);
-	glDisable(GL_DEPTH_TEST);
-
-	return true;
-}
-
-bool SimpleShader::GetLocation()
-{
-	return _program;
-}
-
 // BaseShader
 
 bool BaseShader::UseProgram() const
@@ -172,13 +153,35 @@ void LineShader::SetColor(const float* const color) const
 	}
 }
 
+// AccumShader
+bool AccumShader::GetLocation()
+{
+	uPrev = glGetUniformLocation(_program, "uPrev");
+	uCurrent = glGetUniformLocation(_program, "uCurrent");
+	uDecay = glGetUniformLocation(_program, "uDecay");
+	return true;
+}
+
+bool AccumShader::UseProgram(float decay, unsigned int uPrevTexture, unsigned int uCurrentTexture) const {
+	if (Shader::UseProgram()) {
+		glUniform1i(uPrev, 0);
+		glUniform1i(uCurrent, 1);
+		glUniform1f(uDecay, decay);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, uPrevTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, uCurrentTexture);
+
+		return true;
+	}
+
+	return false;
+}
+
 // InitShaders
 void shaders::InitShaders()
 {
-	{
-		shaders::SimpleShaderSingle::Instance().LoadByName("Simple");
-	}
-
 	{
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.LoadByName("Texture");
@@ -210,5 +213,10 @@ void shaders::InitShaders()
 
 		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
 		shader.SetColor(glm::value_ptr(color));
+	}
+
+	{
+		AccumShaderSingle::Instance().LoadByName("Post/Accumulate");
+		DisplayShaderSingle::Instance().LoadByName("Post/Display");
 	}
 }

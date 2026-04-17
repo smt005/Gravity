@@ -10,12 +10,29 @@ using namespace Engine;
 
 GLuint VBO, VAO;
 
+void Draw::SetClearColor(float* color)
+{
+	if (color) {
+		glClearColor(color[0], color[1], color[2], color[3]);
+	}
+}
+
+void Draw::SetClearColor(const Color& color)
+{
+	SetClearColor(color);
+}
+
 void Draw::SetClearColor(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
 }
 
 void Draw::ClearColor() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Draw::ClearColor(float r, float g, float b, float a) {
+	glClearColor(r, g, b, a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Draw::ClearDepth() {
@@ -75,6 +92,11 @@ void Draw::SetPointSize(const float sizePoint)
 	}
 }
 
+void Draw::BindTexture(Texture& texture)
+{
+	BindTexture(texture.Id());
+}
+
 void Draw::BindTexture(unsigned int textureId) {
 	glBindTexture(GL_TEXTURE_2D, textureId);
 }
@@ -83,6 +105,12 @@ void Draw::Render(unsigned int vao, int count)
 {
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, count);
+}
+
+void Draw::RenderTriangleFun(unsigned int vao, int count)
+{
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, count);
 }
 
 void Draw::RenderLines(const float* vertexes, unsigned int count)
@@ -99,65 +127,14 @@ void Draw::RenderPoints(const float* vertexes, unsigned int count)
 	glDrawArrays(GL_POINTS, 0, count);
 }
 
-// TODO:
-void Draw::DrawToScreen()
+void Draw::ActiveTexture(unsigned int texture)
 {
-	/*static const float vertices[] = {
-		// Позиции        // Текстурные координаты
-		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-		0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-		0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f,  0.0f, 1.0f
-	};*/
-
-	static const float vertices[] = {
-		-1.f, -1.f, 0.0f,  0.0f, 0.0f,
-		1.f, -1.f, 0.0f,  1.0f, 0.0f,
-		1.f,  1.f, 0.0f,  1.0f, 1.0f,
-		-1.f,  1.f, 0.0f,  0.0f, 1.0f
+	switch (texture) {
+		case 0: glActiveTexture(GL_TEXTURE0); break;
+		case 1: glActiveTexture(GL_TEXTURE1); break;
+		case 2: glActiveTexture(GL_TEXTURE2); break;
+		default: {
+			throw "ERROR";
+		};
 	};
-
-	static const unsigned int indices[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	static GLuint VBO;
-	static GLuint VAO;
-	static GLuint EBO;
-	static bool inited = false;
-
-	if (!inited) {
-		// Настройка VAO/VBO/EBO
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
-
-		glBindVertexArray(VAO);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-		// Позиции вершин: 3 float
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		// Текстурные координаты: 2 float
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-
-		glBindVertexArray(0);
-	
-		inited = true;
-	}
-
-	// Draw ...
-	if (inited) {
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-	}
 }

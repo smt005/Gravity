@@ -12,7 +12,6 @@ namespace cameras
 	{
 		camera = Engine::Camera::MakeAndSet<CameraControl>();
 
-
 		if (!camera->Load()) {
 			camera->SetPos({ 2.f, 2.f, 1.f });
 			camera->SetDirect({ -0.524f, -0.514f, -0.679f });

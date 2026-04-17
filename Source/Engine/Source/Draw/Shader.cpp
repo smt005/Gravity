@@ -13,6 +13,21 @@ Shader::~Shader()
     glDeleteProgram(_program);
 }
 
+bool Shader::GetLocation()
+{
+    return true;
+}
+
+bool Shader::UseProgram() const
+{
+    if (!_program) {
+        return false;
+    }
+
+    glUseProgram(_program);
+    return true;
+}
+
 void Shader::Load(const std::string& vertexFilePath, const std::string& fragmentFilePath)
 {
     glDeleteProgram(_program);

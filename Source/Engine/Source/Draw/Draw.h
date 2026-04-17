@@ -2,8 +2,10 @@
 #pragma once
 
 #include <string>
-#include "Shader.h"
-#include "Object/Mesh.h"
+#include <functional>
+#include <Draw/Shader.h>
+#include <Object/Mesh.h>
+#include <Object/Texture.h>
 
 namespace Engine
 {
@@ -16,27 +18,53 @@ namespace Engine
 		FRONT_RIGHT
 	};
 
+	struct Color final {
+		Color() = default;
+		Color(float _r, float _g, float _b, float _a)
+			: r(_r), g(_g), b(_b), a(_a)
+		{}
+
+		union {
+			struct {
+				float r, g, b, a;
+			};
+			float data[4] = { 0.f, 0.f, 0.f, 0.f };
+		};
+		
+		operator float* () {
+			return data;
+		}
+
+		operator const float* const  () const {
+			return data;
+		}
+	};
+
 	class Draw final {
 	public:
+		static void SetClearColor(float* color);
+		static void SetClearColor(const Color& color);
 		static void SetClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearColor();
+		static void ClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearDepth();
 		static void DepthTest(bool enable);
 		static void CullFace(CullFaceType type);
 		static void Viewport();
 		static void SetPointSize(const float sizePoint);
+		static void BindTexture(Texture& texture);
 		static void BindTexture(unsigned int textureId);
 		static void Render(unsigned int vao, int count);
+		static void RenderTriangleFun(unsigned int vao, int count);
 		static void RenderLines(const float* vertexes, unsigned int count);
 		static void RenderPoints(const float* vertexes, unsigned int count);
 
+		static void ActiveTexture(unsigned int texture);
+		
 		template <typename T>
 		static void Render(const T& mesh) {
 			Render(mesh.Vao(), mesh.Count());
 		}
-
-		// TODO:
-		static void DrawToScreen();
 
 	private:
 		inline static float clearColor;

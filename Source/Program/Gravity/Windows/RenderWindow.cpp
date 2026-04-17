@@ -36,10 +36,16 @@ void RenderWindow::Render()
 	ImGui::SliderFloat("Масштаб тела", &GravityRender::scaleBody, 1.f, 10.f);
 	ImGui::Dummy(ImVec2(0.f, 10.f));
 
-	ImGui::Checkbox("отображать точки", &GravityRender::typeDraw.point);
+	ImGui::Checkbox("Oтображать точки", &GravityRender::typeDraw.point);
+	ImGui::Dummy(ImVec2(0.f, 0.f));
+
+	if (ImGui::SliderFloat("Затухание следа", &GravityRender::trace, 0.f, 1.f)) {
+		GravityRender::typeDraw.point = true;
+	}
 	ImGui::Dummy(ImVec2(0.f, 10.f));
 
 	if (ImGui::Button("Шрифты##fonts_button")) {
 		Engine::GuiWindows::SwitchVisibleWindow<Windows::DrawFontWindow>();
 	}
+	ImGui::Dummy(ImVec2(0.f, 10.f));	
 }

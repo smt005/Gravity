@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <glm/vec3.hpp>
-#include <Object/Framebuffer.h>
+#include <Draw/Draw.h>
+#include <Object/FrameBuffer.h>
 #include "../Spaces/BodyData.h"
 
 class GravityRender final
@@ -25,15 +26,25 @@ public:
 
 public:
 	static void Init();
+	static void Update(double deltaTime);
 	static void Render();
-	static void RenderToBuffer();
-	static void RenderToScreen();
+	static void PrepareRender();
+	static void RenderPoints();
+	static void RenderSprite();
+	static void ClearPointBuffer();
 
 public:
 	inline static TypeDraw typeDraw;
 	inline static float scaleBody = 1.f;
+	inline static float trace = 1.f;
+	inline static Engine::Color clearColor = Engine::Color(0.1f, 0.2f, 0.3f, 1.f);
 
 private:
 	inline static std::vector<Body> _renderBodies;
-	inline static Framebuffer framebuffer;
+
+	inline static Engine::FrameBuffer pointBuffer;
+	inline static Engine::FrameBuffer bufferA;
+	inline static Engine::FrameBuffer bufferB;
+	inline static float traceDecayTime = 0.f;
+	inline static float traceDecay = 0.002f;
 };
