@@ -83,22 +83,13 @@ void GravityRender::RenderPoints()
 	}
 
 	{
-		Color clearColor(0.1f, 0.2f, 0.3f, 1.f);
 		bufferB.Bind(true, true, clearColor);
-
-		shaders::AccumShaderSingle::Instance().GetLocation();
 		shaders::AccumShaderSingle::Instance().UseProgram(traceDecay, bufferA.GetTexture(), pointBuffer.GetTexture());
-
 		Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
-
 		std::swap(bufferA, bufferB);
 	}
 
 	DrawBuffer::Draw(bufferA);
-
-	pointBuffer.UnBind();
-	bufferA.UnBind();
-	bufferB.UnBind();
 }
 
 void GravityRender::ClearPointBuffer()

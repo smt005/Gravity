@@ -100,7 +100,7 @@ public:
 	}
 
 public:
-	inline static std::atomic<float> offsetIteration = 1.f;
+	inline static std::atomic<float> offsetIteration = 5000.f;
 	inline static std::atomic<float> countOfIteration = 1.f;
 
 private:

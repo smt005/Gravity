@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <glm/vec3.hpp>
+#include <Draw/Draw.h>
 #include <Object/FrameBuffer.h>
 #include "../Spaces/BodyData.h"
 
@@ -36,6 +37,7 @@ public:
 	inline static TypeDraw typeDraw;
 	inline static float scaleBody = 1.f;
 	inline static float trace = 1.f;
+	inline static Engine::Color clearColor = Engine::Color(0.1f, 0.2f, 0.3f, 1.f);
 
 private:
 	inline static std::vector<Body> _renderBodies;

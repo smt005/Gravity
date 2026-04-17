@@ -28,7 +28,7 @@ namespace Engine
 			struct {
 				float r, g, b, a;
 			};
-			float data[4] = { 0.f ,0.f ,0.f ,1.f };
+			float data[4] = { 0.f, 0.f, 0.f, 0.f };
 		};
 		
 		operator float* () {
