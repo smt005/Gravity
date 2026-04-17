@@ -55,16 +55,29 @@ void FrameBuffer::Create()
 	}
 }
 
-void FrameBuffer::Clear()
+void FrameBuffer::Clear() const
 {
-	this->~FrameBuffer();
+	Bind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::Bind() const
+void FrameBuffer::Bind(bool clearColor, bool clearDepth, float* color) const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (color) {
+		glClearColor(color[0], color[1], color[2], color[3]);
+	}
+
+	if (clearColor && clearDepth) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	else if (clearColor) {
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+	else if (clearDepth) {
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 }
 
 void FrameBuffer::UnBind() const

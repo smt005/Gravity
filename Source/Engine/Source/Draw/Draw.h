@@ -18,6 +18,18 @@ namespace Engine
 		FRONT_RIGHT
 	};
 
+	struct Color {
+		union {
+			struct {
+				float r, g, b, a;
+			};
+			float data[4] = { 0.f ,0.f ,0.f ,1.f };
+		};
+		operator float* () {
+			return data;
+		}
+	};
+
 	class Draw final {
 	public:
 		static void SetClearColor(float r, float g, float b, float a = 1.f);

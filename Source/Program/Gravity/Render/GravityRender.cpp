@@ -25,7 +25,7 @@ void GravityRender::Init()
 
 void GravityRender::Update(double deltaTime)
 {
-	static float timerOffset = 0.f;
+	/*static float timerOffset = 0.f;
 
 	if (deltaAlphaTime > 1.f) {
 		deltaAlphaTime = 0.f;
@@ -34,7 +34,7 @@ void GravityRender::Update(double deltaTime)
 	else {
 		deltaAlphaTime += timerOffset;
 		alpha = 0.f;
-	}
+	}*/
 }
 
 void GravityRender::Render()
@@ -48,17 +48,15 @@ void GravityRender::Render()
 
 void GravityRender::PrepareRender()
 {
-	using namespace Engine;
-
-	Draw::ClearColor();
-	const glm::vec3 camPos = Camera::GetLink().Pos();
 	SpaceManager::Current().Bodies(_renderBodies);
 
-	std::sort(_renderBodies.begin(), _renderBodies.end(), [&camPos](const auto& leftBody, const auto& rightBody) {
+	std::sort(_renderBodies.begin(), _renderBodies.end(), [&camPos = Engine::Camera::GetLink().Pos()](const auto& leftBody, const auto& rightBody) {
 		const float leftDist = glm::distance(camPos, leftBody.pos);
 		const float rightDist = glm::distance(camPos, rightBody.pos);
 		return leftDist > rightDist;
 		});
+
+	Engine::Draw::ClearColor();
 }
 
 void GravityRender::RenderPoints()
@@ -69,8 +67,10 @@ void GravityRender::RenderPoints()
 		return;
 	}
 
+	Color clearColor;
+
 	{
-		pointBuffer.Bind();
+		pointBuffer.Bind(true, true, clearColor.data);
 
 		std::vector<float> points;
 		points.reserve(_renderBodies.size());
@@ -81,18 +81,18 @@ void GravityRender::RenderPoints()
 			points.emplace_back(body.pos.z);
 		}
 
-		std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.0f };
+		float color[4] = { 1.f, 1.f, 1.f, 1.0f };
 		const auto& shader = shaders::LineShaderSingle::Instance();
 		shader.UseProgram();
-		shader.SetColor(color.data());
+		shader.SetColor(color);
 
 		Draw::SetPointSize(2.f);
 		Draw::RenderPoints(points.data(), points.size() / 3);
 	}
 
 	{
-		bufferB.Bind();
-		Draw::ClearColor();
+		bufferB.Bind(true, true, clearColor.data);
+		//Draw::ClearColor();
 
 		shaders::AccumShaderSingle::Instance().UseProgram();
 
@@ -110,6 +110,10 @@ void GravityRender::RenderPoints()
 	}
 
 	DrawBuffer::Draw(bufferA);
+
+	pointBuffer.UnBind();
+	bufferA.UnBind();
+	bufferB.UnBind();
 }
 
 void GravityRender::ClearPointBuffer()
@@ -128,14 +132,16 @@ void GravityRender::RenderSprite()
 	auto& shader = shaders::BaseShaderSingle::Instance();
 	shader.UseProgram();
 
+	Draw::ClearDepth();
 	Draw::DepthTest(true);
+	Draw::ActiveTexture(0);
 	Draw::BindTexture(Texture::GetRef("Star.png").Id());
 
 	const glm::vec3 camPos = Camera::GetLink().Pos();
-	float farDist= glm::distance(camPos, _renderBodies.front().pos);
+	float farDist = glm::distance(camPos, _renderBodies.front().pos);
 	float nearDist = glm::distance(camPos, _renderBodies.back().pos);
 	float spaceDist = farDist - nearDist;
-	std::array<float, 4> color = { 1.f, 1.f, 1.f, 1.f };
+	float color[4] = { 1.f, 1.f, 1.f, 1.f };
 
 	for (const auto& body : _renderBodies) {
 		glm::vec3 to = glm::normalize(Engine::Camera::GetLink().Pos() - body.pos);
@@ -163,7 +169,7 @@ void GravityRender::RenderSprite()
 		color[1] = 1.f - distFactor;
 		color[2] = 1.f - distFactor;
 
-		shader.SetColor(color.data());
+		shader.SetColor(color);
 
 		Draw::Render(SHAPES["Sprite", true, true].mesh);
 	}
