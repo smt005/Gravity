@@ -11,42 +11,6 @@
 
 using namespace shaders;
 
-// SimpleShader
-
-bool SimpleShader::UseProgram() const
-{
-	if (!_program) {
-		return false;
-	}
-
-	glUseProgram(_program);
-	glDisable(GL_DEPTH_TEST);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_TEXTURE_2D);
-
-	return true;
-}
-
-bool SimpleShader::GetLocation()
-{
-	return _program;
-}
-
-// SimpleAlphaShader
-
-bool SimpleAlphaShader::GetLocation()
-{
-	uAlpha = glGetUniformLocation(_program, "uAlpha");
-	return true;
-}
-
-void SimpleAlphaShader::SetAlpha(float value) const
-{
-	glUniform1f(uAlpha, value);
-}
-
 // BaseShader
 
 bool BaseShader::UseProgram() const
@@ -195,35 +159,29 @@ bool AccumShader::GetLocation()
 	uPrev = glGetUniformLocation(_program, "uPrev");
 	uCurrent = glGetUniformLocation(_program, "uCurrent");
 	uDecay = glGetUniformLocation(_program, "uDecay");
-	uOffset = glGetUniformLocation(_program, "uOffset");
 	return true;
 }
 
-bool AccumShader::UseProgram() const {
+bool AccumShader::UseProgram(float decay, unsigned int uPrevTexture, unsigned int uCurrentTexture) const {
 	if (Shader::UseProgram()) {
 		glUniform1i(uPrev, 0);
 		glUniform1i(uCurrent, 1);
-		glUniform1f(uDecay, 1.f);
-		glUniform1f(uOffset, 0.002f);
+		glUniform1f(uDecay, decay);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, uPrevTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, uCurrentTexture);
+
 		return true;
 	}
+
 	return false;
 }
 
 // InitShaders
 void shaders::InitShaders()
 {
-	{
-		auto& shader = shaders::SimpleShaderSingle::Instance();
-		shader.LoadByName("Simple");
-	}
-
-	{
-		auto& shader = shaders::SimpleAlphaShaderSingle::Instance();
-		shader.LoadByName("post/Alpha");
-		shader.SetAlpha(0.99f);
-	}
-
 	{
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.LoadByName("Texture");

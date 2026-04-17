@@ -18,20 +18,32 @@ namespace Engine
 		FRONT_RIGHT
 	};
 
-	struct Color {
+	struct Color final {
+		Color() = default;
+		Color(float _r, float _g, float _b, float _a)
+			: r(_r), g(_g), b(_b), a(_a)
+		{}
+
 		union {
 			struct {
 				float r, g, b, a;
 			};
 			float data[4] = { 0.f ,0.f ,0.f ,1.f };
 		};
+		
 		operator float* () {
+			return data;
+		}
+
+		operator const float* const  () const {
 			return data;
 		}
 	};
 
 	class Draw final {
 	public:
+		static void SetClearColor(float* color);
+		static void SetClearColor(const Color& color);
 		static void SetClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearColor();
 		static void ClearColor(float r, float g, float b, float a = 1.f);

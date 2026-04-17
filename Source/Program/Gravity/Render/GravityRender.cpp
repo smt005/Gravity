@@ -25,22 +25,18 @@ void GravityRender::Init()
 
 void GravityRender::Update(double deltaTime)
 {
-	/*static float timerOffset = 0.f;
-
-	if (deltaAlphaTime > 1.f) {
-		deltaAlphaTime = 0.f;
-		alpha = 0.002f;
+	if (traceDecayTime >= 1.f) {
+		traceDecayTime = 0.f;
+		traceDecay = 0.002f;
 	}
 	else {
-		deltaAlphaTime += timerOffset;
-		alpha = 0.f;
-	}*/
+		traceDecayTime += trace;
+		traceDecay = 0.f;
+	}
 }
 
 void GravityRender::Render()
 {
-	using namespace Engine;
-
 	PrepareRender();
 	RenderPoints();
 	RenderSprite();
@@ -55,8 +51,6 @@ void GravityRender::PrepareRender()
 		const float rightDist = glm::distance(camPos, rightBody.pos);
 		return leftDist > rightDist;
 		});
-
-	Engine::Draw::ClearColor();
 }
 
 void GravityRender::RenderPoints()
@@ -66,11 +60,9 @@ void GravityRender::RenderPoints()
 	if (!typeDraw.point || _renderBodies.empty()) {
 		return;
 	}
-
-	Color clearColor;
-
+	
 	{
-		pointBuffer.Bind(true, true, clearColor.data);
+		pointBuffer.Bind(true, true, Color());
 
 		std::vector<float> points;
 		points.reserve(_renderBodies.size());
@@ -91,18 +83,11 @@ void GravityRender::RenderPoints()
 	}
 
 	{
-		bufferB.Bind(true, true, clearColor.data);
-		//Draw::ClearColor();
-
-		shaders::AccumShaderSingle::Instance().UseProgram();
-
-		Draw::ActiveTexture(0);
-		Draw::BindTexture(bufferA.GetTexture());
-
-		Draw::ActiveTexture(1);
-		Draw::BindTexture(pointBuffer.GetTexture());
+		Color clearColor(0.1f, 0.2f, 0.3f, 1.f);
+		bufferB.Bind(true, true, clearColor);
 
 		shaders::AccumShaderSingle::Instance().GetLocation();
+		shaders::AccumShaderSingle::Instance().UseProgram(traceDecay, bufferA.GetTexture(), pointBuffer.GetTexture());
 
 		Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
 

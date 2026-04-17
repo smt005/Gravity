@@ -35,14 +35,14 @@ public:
 public:
 	inline static TypeDraw typeDraw;
 	inline static float scaleBody = 1.f;
+	inline static float trace = 1.f;
 
 private:
 	inline static std::vector<Body> _renderBodies;
+
 	inline static Engine::FrameBuffer pointBuffer;
 	inline static Engine::FrameBuffer bufferA;
 	inline static Engine::FrameBuffer bufferB;
-
-public:
-	inline static float alpha = 0.f;
-	inline static float deltaAlphaTime = 0.f;
+	inline static float traceDecayTime = 0.f;
+	inline static float traceDecay = 0.002f;
 };

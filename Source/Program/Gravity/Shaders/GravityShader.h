@@ -8,26 +8,6 @@
 
 namespace shaders
 {
-	class SimpleShader : public Engine::Shader
-	{
-	public:
-		bool UseProgram() const override;
-		bool GetLocation() override;
-
-	protected:
-		unsigned int uAlpha = 0;
-	};
-
-	class SimpleAlphaShader : public SimpleShader
-	{
-	public:
-		bool GetLocation() override;
-		void SetAlpha(float value) const;
-
-	protected:
-		unsigned int uAlpha = 0;
-	};
-
 	class BaseShader : public Engine::Shader
 	{
 	public:
@@ -84,7 +64,7 @@ namespace shaders
 	{
 	public:
 		bool GetLocation() override;
-		bool UseProgram() const;
+		bool UseProgram(float decay, unsigned int uPrevTexture, unsigned int uCurrentTexture) const;
 
 		unsigned int uPrev = 0;
 		unsigned int uCurrent = 0;
@@ -92,8 +72,6 @@ namespace shaders
 		unsigned int uOffset = 0;
 	};
 
-	class SimpleShaderSingle : public SimpleShader, public mystd::Singletone<SimpleShaderSingle> {};
-	class SimpleAlphaShaderSingle : public SimpleAlphaShader, public mystd::Singletone<SimpleAlphaShaderSingle> {};
 	class BaseShaderSingle : public BaseShader, public mystd::Singletone<BaseShaderSingle> {};
 	class ForwardShaderSingle : public ForwardShader, public mystd::Singletone<ForwardShaderSingle> {};
 	class LineShaderSingle : public LineShader, public mystd::Singletone<LineShaderSingle> {};

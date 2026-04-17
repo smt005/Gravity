@@ -10,6 +10,18 @@ using namespace Engine;
 
 GLuint VBO, VAO;
 
+void Draw::SetClearColor(float* color)
+{
+	if (color) {
+		glClearColor(color[0], color[1], color[2], color[3]);
+	}
+}
+
+void Draw::SetClearColor(const Color& color)
+{
+	SetClearColor(color);
+}
+
 void Draw::SetClearColor(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
 }
