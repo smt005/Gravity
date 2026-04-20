@@ -63,49 +63,6 @@ void BaseShader::SetModelMatrix(const glm::mat4x4&  mat) const
 	glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-
-// ForwardShader
-
-bool ForwardShader::UseProgram() const
-{
-	if (!BaseShader::UseProgram()) {
-		return false;
-	}
-
-	glDisable(GL_DEPTH_TEST);
-
-	glUniform3fv(uCameraPos, 1, glm::value_ptr(Engine::Camera::GetLink().Pos()));
-
-	return true;
-}
-
-bool ForwardShader::GetLocation()
-{
-	if (!_program) {
-		return false;
-	}
-
-	BaseShader::GetLocation();
-	uCameraPos = glGetUniformLocation(_program, "uCameraPos");
-	uPos = glGetUniformLocation(_program, "uPos");
-
-	return true;
-}
-
-void ForwardShader::SetModelPos(const glm::vec3& pos) const
-{
-	glm::mat4x4 mat = glm::translate(glm::mat4x4(1.f), pos);
-	glUniform3fv(uPos, 1, glm::value_ptr(pos));
-	glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, glm::value_ptr(mat));
-}
-
-void ForwardShader::SetModelMatrix(const glm::mat4x4& mat) const
-{
-	float pos[] = { mat[3][0], mat[3][1], mat[3][2] };
-	glUniform3fv(uPos, 1, pos);
-	glUniformMatrix4fv(uMatViewModel, 1, GL_FALSE, glm::value_ptr(mat));
-}
-
 // LineShader
 
 bool LineShader::UseProgram() const
@@ -185,18 +142,6 @@ void shaders::InitShaders()
 	{
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.LoadByName("Texture");
-		shader.UseProgram();
-
-		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
-		shader.SetColor(glm::value_ptr(color));
-
-		glm::mat4x4 mat{ 1.f };
-		shader.SetModelMatrix(mat);
-	}
-
-	{
-		auto& shader = shaders::ForwardShaderSingle::Instance();
-		shader.LoadByName("Forward");
 		shader.UseProgram();
 
 		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };

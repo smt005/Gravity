@@ -30,19 +30,6 @@ namespace shaders
 		unsigned int uColor = 0;
 	};
 
-	class ForwardShader : public BaseShader
-	{
-	public:
-		bool UseProgram() const override;
-		bool GetLocation() override;
-		void SetModelPos(const glm::vec3& pos) const override;
-		void SetModelMatrix(const glm::mat4x4& mat) const override;
-
-	protected:
-		unsigned int uCameraPos = 0;
-		unsigned int uPos = 0;
-	};
-
 	class LineShader : public Engine::Shader
 	{
 	public:
@@ -73,7 +60,6 @@ namespace shaders
 	};
 
 	class BaseShaderSingle : public BaseShader, public mystd::Singletone<BaseShaderSingle> {};
-	class ForwardShaderSingle : public ForwardShader, public mystd::Singletone<ForwardShaderSingle> {};
 	class LineShaderSingle : public LineShader, public mystd::Singletone<LineShaderSingle> {};
 	class AccumShaderSingle : public AccumShader, public mystd::Singletone<AccumShaderSingle> {};
 	class DisplayShaderSingle : public Engine::Shader, public mystd::Singletone<DisplayShaderSingle> {};

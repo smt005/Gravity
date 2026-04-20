@@ -30,6 +30,7 @@ public:
 	static void Render();
 	static void PrepareRender();
 	static void RenderPoints();
+	static void RenderCoordinateGrid();
 	static void RenderSprite();
 	static void ClearPointBuffer();
 

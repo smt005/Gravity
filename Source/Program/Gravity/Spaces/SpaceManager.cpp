@@ -61,6 +61,7 @@ void SpaceManager::Load()
 	else if (MakeSpace<MainThreadAllInBody>(className)) {}
 	else if (MakeSpace<ParalelThread>(className)) {}
 	else if (MakeSpace<MultiThread>(className)) {}
+	else if (MakeSpace<CudaSpace>(className)) {}
 	//else if (MakeSpace<XXX>(className)) {}
 	//else if (MakeSpace<XXX>(className)) {}
 	else {

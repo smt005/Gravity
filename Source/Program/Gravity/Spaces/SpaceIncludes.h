@@ -6,5 +6,6 @@
 #include "MainThreadAllInBodySpace.h"
 #include "ParalelThreadSpace.h"
 #include "MultiThreadSpace.h"
+#include "CudaSpace.h"
 //#include "XXX.h"
 //#include "XXX.h"

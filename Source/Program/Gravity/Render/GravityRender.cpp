@@ -10,7 +10,7 @@
 #include "../Shaders/GravityShader.h"
 #include "../Cameras/GravityCameras.h"
 #include "../Spaces/SpaceManager.h"
-
+#include "../Spaces/Common/SpatialGrid.h"
 
 void GravityRender::Init()
 {
@@ -39,6 +39,7 @@ void GravityRender::Render()
 {
 	PrepareRender();
 	RenderPoints();
+	RenderCoordinateGrid();
 	RenderSprite();
 }
 
@@ -88,8 +89,19 @@ void GravityRender::RenderPoints()
 		Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
 		std::swap(bufferA, bufferB);
 	}
-
+	
 	DrawBuffer::Draw(bufferA);
+	Draw::ClearDepth();
+}
+
+void GravityRender::RenderCoordinateGrid()
+{
+	using namespace Engine;
+	shaders::LineShaderSingle::Instance().UseProgram();
+	shaders::LineShaderSingle::Instance().SetColor(Color(1.f, 1.f, 1.f, 0.25f));
+
+	auto& spatialGrid = SpatialGrid::Instance();
+	Draw::RenderLines(spatialGrid.Data(), spatialGrid.Count() / 3);
 }
 
 void GravityRender::ClearPointBuffer()

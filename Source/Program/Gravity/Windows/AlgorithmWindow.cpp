@@ -76,6 +76,7 @@ void AlgorithmWindow::Render() {
 	ButtonRender<MainThreadAllInBody>();
 	ButtonRender<ParalelThread>();
 	ButtonRender<MultiThread>();
+	ButtonRender<CudaSpace>();
 	//ButtonRender<XXX>();
 	//ButtonRender<XXX>();
 }
