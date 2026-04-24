@@ -1,6 +1,8 @@
 // ◦ Xyz ◦
 #pragma once
 
+#include <string>
+
 namespace Engine
 {
 	class FrameBuffer final
@@ -18,9 +20,12 @@ namespace Engine
 		void Bind(bool clearColor = true, bool clearDepth = true, float* color = nullptr) const;
 		void UnBind() const;		
 		unsigned int GetTexture() const;
-		
+		void Save(std::string_view fileNamePath) const;
+
 	private:
 		unsigned int _fbo = 0;
 		unsigned int _tex = 0;
+		int _width;
+		int _height;
 	};
 }

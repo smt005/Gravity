@@ -16,6 +16,7 @@ namespace Engine
 
 		unsigned int Id();
 		bool Load();
+		void Save(std::string_view fileNamePath) const;
 
 	private:
 		unsigned int _id = 0;

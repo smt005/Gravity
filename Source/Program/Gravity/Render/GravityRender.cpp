@@ -19,8 +19,9 @@ void GravityRender::Init()
 	cameras::MakeCameras();
 
 	pointBuffer.Create();
-	bufferA.Create();
-	bufferB.Create();
+	traceBuffer.Create();
+	resultBuffer.Create();
+	tempBuffer.Create();
 }
 
 void GravityRender::Update(double deltaTime)
@@ -79,18 +80,36 @@ void GravityRender::RenderPoints()
 		shader.UseProgram();
 		shader.SetColor(color);
 
-		Draw::SetPointSize(1.f);
+		Draw::SetPointSize(5.f);
 		Draw::RenderPoints(points.data(), points.size() / 3);
+		pointBuffer.UnBind();
 	}
 
 	{
-		bufferB.Bind(true, true, clearColor);
-		shaders::AccumShaderSingle::Instance().UseProgram(traceDecay, bufferA.GetTexture(), pointBuffer.GetTexture());
+		//resultBuffer.Bind(true, true, Color());
+		resultBuffer.Bind(true, true, Color(0.1f, 0.2f, 0.3f, 1.f));
+		shaders::AccumShaderSingle::Instance().UseProgram(traceDecay, traceBuffer.GetTexture(), pointBuffer.GetTexture());
 		Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
-		std::swap(bufferA, bufferB);
+		resultBuffer.UnBind();
+		shaders::AccumShaderSingle::Instance().EndProgram();
+
+		if (saveBufferToFile) {
+			traceBuffer.Save("traceBuffer.png");
+			pointBuffer.Save("pointBuffer.png");
+			resultBuffer.Save("resultBuffer.png");
+			saveBufferToFile = false;
+		}
+
+		std::swap(traceBuffer, resultBuffer);
 	}
 	
-	DrawBuffer::Draw(bufferA);
+	{
+		tempBuffer.Bind();
+		tempBuffer.UnBind();
+	}
+
+	Draw::ClearColor(0.1f, 0.2f, 0.3f, 1.f);
+	DrawBuffer::Draw(resultBuffer);
 	Draw::ClearDepth();
 }
 
@@ -98,7 +117,7 @@ void GravityRender::RenderCoordinateGrid()
 {
 	using namespace Engine;
 	shaders::LineShaderSingle::Instance().UseProgram();
-	shaders::LineShaderSingle::Instance().SetColor(Color(1.f, 1.f, 1.f, 0.25f));
+	shaders::LineShaderSingle::Instance().SetColor(Color(1.f, 1.f, 1.f, 0.125f));
 
 	auto& spatialGrid = SpatialGrid::Instance();
 	Draw::RenderLines(spatialGrid.Data(), spatialGrid.Count() / 3);
@@ -106,7 +125,7 @@ void GravityRender::RenderCoordinateGrid()
 
 void GravityRender::ClearPointBuffer()
 {
-	bufferA.Clear();
+	traceBuffer.Clear();
 }
 
 void GravityRender::RenderSprite()

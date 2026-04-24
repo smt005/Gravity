@@ -39,13 +39,15 @@ public:
 	inline static float scaleBody = 1.f;
 	inline static float trace = 1.f;
 	inline static Engine::Color clearColor = Engine::Color(0.1f, 0.2f, 0.3f, 1.f);
+	inline volatile static bool saveBufferToFile = true;
 
 private:
 	inline static std::vector<Body> _renderBodies;
 
 	inline static Engine::FrameBuffer pointBuffer;
-	inline static Engine::FrameBuffer bufferA;
-	inline static Engine::FrameBuffer bufferB;
+	inline static Engine::FrameBuffer resultBuffer;
+	inline static Engine::FrameBuffer traceBuffer;
+	inline static Engine::FrameBuffer tempBuffer;
 	inline static float traceDecayTime = 0.f;
 	inline static float traceDecay = 0.002f;
 };

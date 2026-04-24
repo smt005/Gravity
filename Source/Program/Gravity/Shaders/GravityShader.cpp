@@ -136,6 +136,14 @@ bool AccumShader::UseProgram(float decay, unsigned int uPrevTexture, unsigned in
 	return false;
 }
 
+void AccumShader::EndProgram()
+{
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_TEXTURE_2D);
+}
+
 // InitShaders
 void shaders::InitShaders()
 {

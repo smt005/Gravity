@@ -52,6 +52,7 @@ namespace shaders
 	public:
 		bool GetLocation() override;
 		bool UseProgram(float decay, unsigned int uPrevTexture, unsigned int uCurrentTexture) const;
+		void EndProgram();
 
 		unsigned int uPrev = 0;
 		unsigned int uCurrent = 0;

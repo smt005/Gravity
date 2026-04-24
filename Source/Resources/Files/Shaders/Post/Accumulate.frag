@@ -1,4 +1,5 @@
 #version 330 core
+precision highp float;
 
 in vec2 vUV;
 out vec4 FragColor;
@@ -11,5 +12,5 @@ void main()
 {
     vec4 prev = texture(uPrev, vUV) - uDecay;
     vec4 curr = texture(uCurrent, vUV);
-    FragColor = prev + curr;
+	FragColor = prev + curr;
 }

@@ -40,7 +40,7 @@ bool Gravity::Init(std::string_view params)
 	SpaceManager::Load();
 	GravityRender::Init();
 
-	{
+	/*{
 		Cuda::ValueWrapper<float> valueW(10000);
 		Cuda::VectorWrapper<Cuda::Body> dataW = std::vector<Cuda::Body>{ {1.f, {1.f, 2.f, 3.f}, {1.f, 2.f, 3.f}}, {2.f, {10.f, 20.f, 30.f}, {11.f, 22.f, 33.f}} };
 
@@ -51,8 +51,7 @@ bool Gravity::Init(std::string_view params)
 		std::vector<BodyData> bodies = BodyData::Copy(dataW.GetValue());
 
 		LOG("BEFORE: valueW: '{}' dataW: {} : bodies: {}", valueW, dataW, bodies);
-	}
-
+	}*/
 
 	return true;
 }
@@ -154,6 +153,12 @@ void Gravity::InitCallback()
 			if (data.key == VirtualKey::VK_4) {
 				GravityRender::typeDraw.spriteShader = !GravityRender::typeDraw.spriteShader;
 			}
+		}
+	});
+
+	Callback::Add(Callback::Type::RELEASE_KEY, [this](const Callback::EventData& data) {
+		if (data.key == 'P') {
+			GravityRender::saveBufferToFile = true;
 		}
 	});
 }
