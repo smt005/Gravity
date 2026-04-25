@@ -47,6 +47,16 @@ namespace shaders
 		unsigned int uColor = 0;
 	};
 
+	class DisplayShader : public Engine::Shader
+	{
+	public:
+		bool GetLocation() override;
+		bool UseProgram(unsigned int uTexture) const;
+		void EndProgram();
+
+		unsigned int uTex = 0;
+	};
+
 	class AccumShader : public Engine::Shader
 	{
 	public:
@@ -63,7 +73,7 @@ namespace shaders
 	class BaseShaderSingle : public BaseShader, public mystd::Singletone<BaseShaderSingle> {};
 	class LineShaderSingle : public LineShader, public mystd::Singletone<LineShaderSingle> {};
 	class AccumShaderSingle : public AccumShader, public mystd::Singletone<AccumShaderSingle> {};
-	class DisplayShaderSingle : public Engine::Shader, public mystd::Singletone<DisplayShaderSingle> {};
+	class DisplayShaderSingle : public DisplayShader, public mystd::Singletone<DisplayShaderSingle> {};
 
 	void InitShaders();
 }

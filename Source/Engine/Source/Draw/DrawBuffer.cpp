@@ -41,9 +41,16 @@ void DrawBuffer::Draw(const FrameBuffer& buffer)
 void DrawBuffer::Draw(unsigned int idTexture)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    shaders::DisplayShaderSingle::Instance().GetLocation();
+    auto& shader = shaders::DisplayShaderSingle::Instance();
+    shader.GetLocation();
+    shader.UseProgram(idTexture);
+    
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, idTexture);
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, idTexture);
+    
+    glBindVertexArray(QuadVAO());
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    shader.UnuseProgram();
 }

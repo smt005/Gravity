@@ -155,12 +155,6 @@ void Gravity::InitCallback()
 			}
 		}
 	});
-
-	Callback::Add(Callback::Type::RELEASE_KEY, [this](const Callback::EventData& data) {
-		if (data.key == 'P') {
-			GravityRender::saveBufferToFile = true;
-		}
-	});
 }
 
 template <typename Twindow>

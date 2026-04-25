@@ -12,5 +12,7 @@ void main()
 {
     vec4 prev = texture(uPrev, vUV) - uDecay;
     vec4 curr = texture(uCurrent, vUV);
-	FragColor = prev + curr;
+	vec4 color = prev + curr;
+	color.a = 1.0;
+	FragColor = color;
 }

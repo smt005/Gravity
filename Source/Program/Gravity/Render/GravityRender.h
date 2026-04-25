@@ -33,21 +33,23 @@ public:
 	static void RenderCoordinateGrid();
 	static void RenderSprite();
 	static void ClearPointBuffer();
+	static void SaveScreenshot();
 
 public:
 	inline static TypeDraw typeDraw;
-	inline static float scaleBody = 1.f;
+	inline static float scaleBody = 2.f;
 	inline static float trace = 1.f;
-	inline static Engine::Color clearColor = Engine::Color(0.1f, 0.2f, 0.3f, 1.f);
-	inline volatile static bool saveBufferToFile = true;
 
 private:
+	//inline static Engine::Color clearColor = Engine::Color(0.1f, 0.2f, 0.3f, 1.f);
+	inline static Engine::Color clearColor = Engine::Color(0.f, 0.f, 0.f, 1.f);
 	inline static std::vector<Body> _renderBodies;
 
 	inline static Engine::FrameBuffer pointBuffer;
 	inline static Engine::FrameBuffer resultBuffer;
 	inline static Engine::FrameBuffer traceBuffer;
-	inline static Engine::FrameBuffer tempBuffer;
+	inline static Engine::FrameBuffer mainBuffer;
 	inline static float traceDecayTime = 0.f;
 	inline static float traceDecay = 0.002f;
+	inline static bool saveBuffersToFile = false;
 };
