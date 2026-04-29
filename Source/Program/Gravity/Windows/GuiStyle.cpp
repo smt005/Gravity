@@ -11,6 +11,7 @@ void Windows::LoadGuiStyle()
     bool styleColorsDark = true;
     std::string fontFileName = "Default.ttf";
     float sizeFont = 14.f;
+    float spaceX = 1.f;
 
     if (const Json* guiWindowsSettings = Engine::Settings::Instance().JsonData("GuiWindows")) {
         const std::string style = Engine::GetJsonValue("style", guiWindowsSettings, std::string("Dark")); // Light Dark
@@ -21,6 +22,10 @@ void Windows::LoadGuiStyle()
         if (sizeFont < 1.f) {
             sizeFont = 10.f;
         }
+        spaceX = Engine::GetJsonValue("spaceX", guiWindowsSettings, 1.f);
+        if (spaceX < 0.f) {
+            spaceX = 0.f;
+        }
     }
 
     auto& fileManager = Engine::FileManager::Get("base");
@@ -29,6 +34,7 @@ void Windows::LoadGuiStyle()
     if (std::filesystem::exists(fontFileNamePath)) {
         ImGuiIO& io = ImGui::GetIO();
         ImFontConfig fontConfig;
+        fontConfig.GlyphExtraAdvanceX = spaceX;
         io.Fonts->AddFontFromFileTTF(fontFileNamePath.string().c_str(), sizeFont, &fontConfig, io.Fonts->GetGlyphRangesCyrillic());
 
         LOG("[GuiWindows::Init] load font: {} size: {}", fontFileName, sizeFont);
