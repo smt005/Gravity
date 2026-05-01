@@ -45,17 +45,6 @@ void GravityRender::Render()
 	RenderCoordinateGrid();
 	RenderSprite();
 
-	{
-		//mainBuffer.Bind(false, false);
-		mainBuffer.Bind();
-		Draw::DepthTest(false);
-		DrawBuffer::Draw(traceBuffer);
-		mainBuffer.UnBind();
-	}
-
-
-
-	Engine::Draw::ClearColor();	
 	Engine::DrawBuffer::Draw(mainBuffer);
 }
 
@@ -70,7 +59,7 @@ void GravityRender::PrepareRender()
 		});
 
 	Engine::Draw::ClearColor();
-	//mainBuffer.Clear(clearColor);
+	mainBuffer.Clear(clearColor);
 }
 
 void GravityRender::RenderPoints()
@@ -110,31 +99,12 @@ void GravityRender::RenderPoints()
 		resultBuffer.UnBind();
 		shaders::AccumShaderSingle::Instance().EndProgram();
 
-		if (saveBuffersToFile) {
-			traceBuffer.Save("Buffers/traceBuffer.png");
-			pointBuffer.Save("Buffers/pointBuffer.png");
-			//resultBuffer.Save("Buffers/resultBuffer.png");
-		}
-
 		std::swap(traceBuffer, resultBuffer);
 	}
-	
-	/*{
-		mainBuffer.Bind(true, true, clearColor);
-		//mainBuffer.Bind(false, false);
-		//DrawBuffer::Draw(traceBuffer);
-		DrawBuffer::Draw(Texture::GetRef("Star.png").Id());
-		Draw::ClearDepth();
-		Draw::DepthTest(false);
-		mainBuffer.UnBind();
-	}*/
 
-	if (saveBuffersToFile) {
-		traceBuffer.Save("Buffers/resultBuffer.png");
-		//mainBuffer.Save("Buffers/mainBuffer.png");
-	}
-
-	saveBuffersToFile = false;
+	mainBuffer.Bind(false, false);
+	Engine::DrawBuffer::Draw(traceBuffer);
+	mainBuffer.UnBind();
 }
 
 void GravityRender::RenderCoordinateGrid()
@@ -142,13 +112,12 @@ void GravityRender::RenderCoordinateGrid()
 	using namespace Engine;
 	shaders::LineShaderSingle::Instance().UseProgram();
 	shaders::LineShaderSingle::Instance().SetColor(Color(1.f, 1.f, 1.f, 0.125f));
-	//shaders::LineShaderSingle::Instance().SetColor(Color(1.f, 1.f, 1.f, 0.0625f));
 
 	auto& spatialGrid = SpatialGrid::Instance();
 
-	//mainBuffer.Bind(false, false);
+	mainBuffer.Bind(false, false);
 	Draw::RenderLines(spatialGrid.Data(), spatialGrid.Count() / 3);
-	//mainBuffer.UnBind();
+	mainBuffer.UnBind();
 }
 
 void GravityRender::ClearPointBuffer()
@@ -158,8 +127,6 @@ void GravityRender::ClearPointBuffer()
 
 void GravityRender::SaveScreenshot()
 {
-	saveBuffersToFile = true;
-
 	using namespace std::chrono;
 	auto now = system_clock::now();
 	auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;

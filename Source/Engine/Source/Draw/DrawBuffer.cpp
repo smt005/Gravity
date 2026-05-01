@@ -40,7 +40,6 @@ void DrawBuffer::Draw(const FrameBuffer& buffer)
 
 void DrawBuffer::Draw(unsigned int idTexture)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     auto& shader = shaders::DisplayShaderSingle::Instance();
     shader.GetLocation();
     shader.UseProgram(idTexture);

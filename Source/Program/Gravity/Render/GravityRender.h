@@ -41,7 +41,6 @@ public:
 	inline static float trace = 1.f;
 
 private:
-	//inline static Engine::Color clearColor = Engine::Color(0.1f, 0.2f, 0.3f, 1.f);
 	inline static Engine::Color clearColor = Engine::Color(0.f, 0.f, 0.f, 1.f);
 	inline static std::vector<Body> _renderBodies;
 
@@ -51,5 +50,4 @@ private:
 	inline static Engine::FrameBuffer mainBuffer;
 	inline static float traceDecayTime = 0.f;
 	inline static float traceDecay = 0.002f;
-	inline static bool saveBuffersToFile = false;
 };
