@@ -64,10 +64,10 @@ void FrameBuffer::Create()
 	_height = Engine::ScreenParams::Height();
 }
 
-void FrameBuffer::Clear() const
+void FrameBuffer::Clear(float* color) const
 {
-	Bind();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Bind(true, true, color);
+	UnBind();
 }
 
 void FrameBuffer::Bind(bool clearColor, bool clearDepth, float* color) const
@@ -106,7 +106,7 @@ void FrameBuffer::Save(std::string_view fileNamePath) const
 		return;
 	}
 
-	const std::filesystem::path fullFileName = Engine::FileManager::Get("write").GetRoot() / "Screenshots" / fileNamePath;
+	const std::filesystem::path fullFileName = Engine::FileManager::Get("write").GetRoot() / fileNamePath;
 
 	// Определяем формат по расширению
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFIFFromFilename(fullFileName.string().c_str());

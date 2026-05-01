@@ -110,6 +110,32 @@ void LineShader::SetColor(const float* const color) const
 	}
 }
 
+// DisplayShader
+bool DisplayShader::GetLocation()
+{
+	uTex = glGetUniformLocation(_program, "uTex");
+	return true;
+}
+
+bool DisplayShader::UseProgram(unsigned int uTexture) const {
+	if (Shader::UseProgram()) {
+		glUniform1i(uTex, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, uTexture);
+
+		return true;
+	}
+
+	return false;
+}
+
+void DisplayShader::EndProgram()
+{
+	glActiveTexture(GL_TEXTURE0);
+	glDisable(GL_TEXTURE_2D);
+}
+
+
 // AccumShader
 bool AccumShader::GetLocation()
 {
@@ -150,7 +176,7 @@ void shaders::InitShaders()
 	{
 		auto& shader = shaders::BaseShaderSingle::Instance();
 		shader.LoadByName("Texture");
-		shader.UseProgram();
+		//shader.UseProgram();
 
 		glm::vec4 color{ 1.f, 1.f, 1.f, 1.f };
 		shader.SetColor(glm::value_ptr(color));

@@ -21,7 +21,7 @@ void GravityRender::Init()
 	pointBuffer.Create();
 	traceBuffer.Create();
 	resultBuffer.Create();
-	tempBuffer.Create();
+	mainBuffer.Create();
 }
 
 void GravityRender::Update(double deltaTime)
@@ -38,10 +38,14 @@ void GravityRender::Update(double deltaTime)
 
 void GravityRender::Render()
 {
+	using namespace Engine;
+
 	PrepareRender();
 	RenderPoints();
 	RenderCoordinateGrid();
 	RenderSprite();
+
+	Engine::DrawBuffer::Draw(mainBuffer);
 }
 
 void GravityRender::PrepareRender()
@@ -53,6 +57,9 @@ void GravityRender::PrepareRender()
 		const float rightDist = glm::distance(camPos, rightBody.pos);
 		return leftDist > rightDist;
 		});
+
+	Engine::Draw::ClearColor();
+	mainBuffer.Clear(clearColor);
 }
 
 void GravityRender::RenderPoints()
@@ -64,7 +71,7 @@ void GravityRender::RenderPoints()
 	}
 	
 	{
-		pointBuffer.Bind(true, true, Color());
+		pointBuffer.Bind(true, true, clearColor);
 
 		std::vector<float> points;
 		points.reserve(_renderBodies.size());
@@ -80,37 +87,24 @@ void GravityRender::RenderPoints()
 		shader.UseProgram();
 		shader.SetColor(color);
 
-		Draw::SetPointSize(5.f);
+		Draw::SetPointSize(1.f);
 		Draw::RenderPoints(points.data(), points.size() / 3);
 		pointBuffer.UnBind();
 	}
 
 	{
-		//resultBuffer.Bind(true, true, Color());
-		resultBuffer.Bind(true, true, Color(0.1f, 0.2f, 0.3f, 1.f));
+		resultBuffer.Bind(true, true, clearColor);
 		shaders::AccumShaderSingle::Instance().UseProgram(traceDecay, traceBuffer.GetTexture(), pointBuffer.GetTexture());
 		Draw::RenderTriangleFun(DrawBuffer::QuadVAO(), 4);
 		resultBuffer.UnBind();
 		shaders::AccumShaderSingle::Instance().EndProgram();
 
-		if (saveBufferToFile) {
-			traceBuffer.Save("traceBuffer.png");
-			pointBuffer.Save("pointBuffer.png");
-			resultBuffer.Save("resultBuffer.png");
-			saveBufferToFile = false;
-		}
-
 		std::swap(traceBuffer, resultBuffer);
 	}
-	
-	{
-		tempBuffer.Bind();
-		tempBuffer.UnBind();
-	}
 
-	Draw::ClearColor(0.1f, 0.2f, 0.3f, 1.f);
-	DrawBuffer::Draw(resultBuffer);
-	Draw::ClearDepth();
+	mainBuffer.Bind(false, false);
+	Engine::DrawBuffer::Draw(traceBuffer);
+	mainBuffer.UnBind();
 }
 
 void GravityRender::RenderCoordinateGrid()
@@ -120,12 +114,26 @@ void GravityRender::RenderCoordinateGrid()
 	shaders::LineShaderSingle::Instance().SetColor(Color(1.f, 1.f, 1.f, 0.125f));
 
 	auto& spatialGrid = SpatialGrid::Instance();
+
+	mainBuffer.Bind(false, false);
 	Draw::RenderLines(spatialGrid.Data(), spatialGrid.Count() / 3);
+	mainBuffer.UnBind();
 }
 
 void GravityRender::ClearPointBuffer()
 {
 	traceBuffer.Clear();
+}
+
+void GravityRender::SaveScreenshot()
+{
+	using namespace std::chrono;
+	auto now = system_clock::now();
+	auto ms = duration_cast<milliseconds>(now.time_since_epoch()) % 1000;
+	const std::string timeStr = std::format("{:%d_%m_%Y_%H_%M_%S}", now);
+	const std::string fileNamePath = TO_STRING("Screenshots/Screenshot_{}.space.png", timeStr);
+
+	mainBuffer.Save(fileNamePath);
 }
 
 void GravityRender::RenderSprite()
@@ -136,10 +144,7 @@ void GravityRender::RenderSprite()
 		return;
 	}
 
-	// TODO:
-	if (!typeDraw.point) {
-		Draw::ClearColor(0.1f, 0.2f, 0.3f, 1.f);
-	}
+	mainBuffer.Bind(false, false);
 
 	auto& shader = shaders::BaseShaderSingle::Instance();
 	shader.UseProgram();
@@ -183,6 +188,7 @@ void GravityRender::RenderSprite()
 
 		shader.SetColor(color);
 
+		// TODO:
 		Draw::Render(SHAPES["Sprite", true, true].mesh);
 	}
 
@@ -214,4 +220,6 @@ void GravityRender::RenderSprite()
 			Draw::Render(SHAPES["Sphere", true, true].mesh);
 		}
 	}*/
+
+	mainBuffer.UnBind();
 }

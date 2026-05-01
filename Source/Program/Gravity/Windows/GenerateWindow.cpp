@@ -113,11 +113,6 @@ void GenerateWindow::Render()
 	if (ImGui::Button("Load space", buttonSize)) {
 		SpaceManager::LoadSpace();
 	}
-
-	ImGui::Separator();
-	if (ImGui::Button("Reset camera", buttonSize)) {
-		cameras::ResetCamera();
-	}
 }
 
 void GenerateWindow::FixSize()

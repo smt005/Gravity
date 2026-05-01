@@ -27,7 +27,7 @@ public:
 		return 0x0003; // GL_LINE_STRIP 0x0003
 	}
 
-	const float* const const Color() const {
+	const float* const Color() const {
 		return _color;
 	}
 

@@ -12,6 +12,7 @@
 #include <Common/JsonHelper.h>
 #include <Common/Common.h>
 #include <Logs.h>
+#include "../Render/GravityRender.h"
 #include "DrawFontWindow.h"
 #include "../Cameras/GravityCameras.h"
 #include "../Render/GravityRender.h"
@@ -31,10 +32,21 @@ RenderWindow::RenderWindow(std::string_view name)
 
 void RenderWindow::Render()
 {
+	const static ImVec2 buttonSize(200.f, 20.f);
 	ImGuiWidthHandler width(100.f);
 
-	ImGui::SliderFloat("Масштаб тела", &GravityRender::scaleBody, 1.f, 10.f);
+	if (ImGui::Button("Сброс камеры", buttonSize)) {
+		cameras::ResetCamera();
+	}
+	ImGui::Dummy(ImVec2(0.f, 0.f));
+
+	if (ImGui::Button("Скриншот", buttonSize)) {
+		GravityRender::SaveScreenshot();
+	}
 	ImGui::Dummy(ImVec2(0.f, 10.f));
+
+	ImGui::SliderFloat("Масштаб тела", &GravityRender::scaleBody, 1.f, 10.f);
+	ImGui::Dummy(ImVec2(0.f, 0.f));
 
 	ImGui::Checkbox("Oтображать точки", &GravityRender::typeDraw.point);
 	ImGui::Dummy(ImVec2(0.f, 0.f));

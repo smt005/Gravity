@@ -12,7 +12,7 @@ SpatialGrid::SpatialGrid() {
 void SpatialGrid::Make() {
 
 	{
-		float distans = 1000.f;
+		float distans = 100.f;
 		float count = 10;
 
 		for (float index = 1; index < count; index += 1.f) {
@@ -32,7 +32,7 @@ void SpatialGrid::Make() {
 
 	//...
 	{
-		float distans = 10000.f;
+		float distans = 1000.f;
 		float count = 10;
 
 		for (float index = 1; index < count; index += 1.f) {

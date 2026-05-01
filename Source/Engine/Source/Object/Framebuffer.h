@@ -16,7 +16,7 @@ namespace Engine
 		FrameBuffer& operator = (FrameBuffer&& buffer);
 
 		void Create();
-		void Clear() const;
+		void Clear(float* color = nullptr) const;
 		void Bind(bool clearColor = true, bool clearDepth = true, float* color = nullptr) const;
 		void UnBind() const;		
 		unsigned int GetTexture() const;
