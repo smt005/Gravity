@@ -25,7 +25,7 @@ else()
 
 	file(GLOB_RECURSE SOURCES ${CUDA_SOURCE}/*.cpp)
 	source_group(TREE ${CUDA_SOURCE} TREE PREFIX "" FILES ${INCLUDES} ${SOURCES})
-	add_library(${CUDA_NAME} STATIC ${INCLUDES})
+	add_library(${CUDA_NAME} STATIC ${INCLUDES} ${SOURCES})
 endif()
 
 message("End generate CUDA. . . . . . . . . . . . . . . .")
