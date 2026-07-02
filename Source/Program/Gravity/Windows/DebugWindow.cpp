@@ -69,14 +69,15 @@ void DebugWindow::Render() {
 
 	if (ImGui::CollapsingHeader("Progress")) {
 		ImGuiColorScopeHandler colorhandlers(ImGuiCol_FrameBg, ImVec4(0.1f, 0.1f, 0.1f, 1.0f),
-		ImGuiCol_PlotHistogram, ImVec4(0.2f, 0.2f, 0.2f, 1.0f),
-		ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+			ImGuiCol_PlotHistogram, ImVec4(0.2f, 0.2f, 0.2f, 1.0f),
+			ImGuiCol_Text, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 
 		if (debugContext.subProgress >= 0) {
 			char buf[32];
 			sprintf(buf, "sub: %d/%d", (int)(debugContext.subProgress * 100), 100);
 			ImGui::ProgressBar(debugContext.subProgress, ImVec2(0.f, 0.f), buf);
 		}
+
 		if (debugContext.progress >= 0) {
 			char buf[32];
 			sprintf(buf, "%d/%d", (int)(debugContext.progress * 100), 100);
@@ -95,6 +96,11 @@ void DebugWindow::Render() {
 				text = TO_STRING("{}: {} ({}), ", i, Engine::ValueToString(debugContext.deltaTimes[i]), Engine::ValueToString(1 / debugContext.deltaTimes[i] * 1000));
 			}
 			ImGui::Text(text.c_str());
+		}
+
+		if (debugContext.fpsGraph.Count() > 0) {
+			const auto& fpsGraph = debugContext.fpsGraph;
+			ImGui::PlotHistogram("fps##fps", fpsGraph.Data(), fpsGraph.Count(), 0, NULL, 0.0f, fpsGraph.MaxValue(), ImVec2(0, 100.0f));
 		}
 	}
 }

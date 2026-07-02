@@ -85,6 +85,10 @@ void TopPanel::Render() {
 }
 
 void TopPanel::Update(double deltaTime) {
+	if (deltaTime == 0) {
+		return;
+	}
+
 	_fps = 1 / deltaTime;
 
 	_sumTimeFps += deltaTime;
@@ -94,5 +98,7 @@ void TopPanel::Update(double deltaTime) {
 		_roundFps = _countFrame;
 		_countFrame = 0;
 		_sumTimeFps = 0;
+	
+		DebugContext::Inst().fpsGraph.Add(_roundFps);
 	}
 }

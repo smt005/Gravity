@@ -8,6 +8,40 @@
 class DebugContext : public mystd::Singletone<DebugContext>
 {
 public:
+	class FpsGraph
+	{
+	public:
+		FpsGraph() {
+			_values.resize(_maxSize, 0.f);
+		}
+
+		int Count() const{
+			return static_cast<int>(_values.size());
+		}
+
+		const float* Data() const {
+			return _values.data();
+		}
+	
+		float MaxValue() const {
+			return _maxValue;
+		}
+
+		void Add(float value) {
+			if (_values.size() >= _maxSize) {
+				_values.erase(_values.begin());
+			}
+			_values.emplace_back(value);
+			_maxValue = std::max(value, _maxValue);
+		}
+	
+	private:
+		float _maxValue = 0.f;
+		size_t _maxSize = 100;
+		std::vector<float> _values;
+
+	};
+
 	DebugContext() = default;
 
 	int countObject = 0;
@@ -27,6 +61,7 @@ public:
 	float deltaTime = 0.f;
 	float subProgress = 0.f;
 	float progress = 0.f;
+	FpsGraph fpsGraph;
 
 	void Clean() {
 		countObject = 0.f;
