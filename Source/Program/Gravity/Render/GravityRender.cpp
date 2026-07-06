@@ -55,6 +55,13 @@ void GravityRender::PrepareRender()
 
 	SpaceManager::Current().Bodies(_renderBodies);
 
+	const size_t selectBodyIndex = SpaceManager::Current().SelectBodyIndex();
+	if (selectBodyIndex != std::numeric_limits<size_t>::max() && selectBodyIndex < _renderBodies.size()) {
+		const glm::vec3 bodyPos = _renderBodies[SpaceManager::Current().SelectBodyIndex()].pos;
+		//LOG("index: {} bodyPos: {}", SpaceManager::Current().SelectBodyIndex(), bodyPos);
+		Engine::Camera::GetLink().SetPos(bodyPos);
+	}
+
 	static double timer = 10;
 	timer += Engine::Callback::GetDeltaTime();
 	if (timer >= 10) {
@@ -70,7 +77,7 @@ void GravityRender::PrepareRender()
 			return leftDist > rightDist;
 			});
 	}
-
+	
 	Engine::Draw::ClearColor();
 	mainBuffer.Clear(clearColor);
 }

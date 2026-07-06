@@ -9,6 +9,7 @@
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
 #include "Spaces/SpaceManager.h"
+#include "Callback/SelectBody.h"
 #include "Windows/TopPanel.h"
 #include "Windows/DebugWindow.h"
 #include "Windows/GenerateWindow.h"
@@ -92,6 +93,15 @@ void Gravity::Draw()
 void Gravity::InitCallback()
 {
 	using namespace Engine;
+
+	Callback::Add(Callback::Type::RELEASE_TAP, [](const Callback::EventData& data) {
+		if (data.mouseButton == 0) {
+			std::vector<GravityRender::Body> bodies;
+			SpaceManager::Current().Bodies(bodies);
+			size_t bodyIndex = SelectBodyIndex(bodies);
+			SpaceManager::Current().SetSelectBodyIndex(bodyIndex);
+		}
+	});
 
 	Callback::Add(Callback::Type::PRESS_KEY, [this](const Callback::EventData& data) {
 		if (data.key == VirtualKey::ESCAPE) {

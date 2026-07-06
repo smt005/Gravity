@@ -15,7 +15,6 @@
 #include "../Render/GravityRender.h"
 #include "DrawFontWindow.h"
 #include "../Cameras/GravityCameras.h"
-#include "../Render/GravityRender.h"
 #include "../Spaces/SpaceManager.h"
 #include "../Spaces/Generators/Generetors.h"
 
@@ -59,8 +58,13 @@ void RenderWindow::Render()
 	}
 	ImGui::Dummy(ImVec2(0.f, 10.f));
 
-	if (ImGui::Button("Шрифты##fonts_button")) {
+	if (ImGui::Button("Открепить камеру##detuch_camera")) {
+		SpaceManager::Current().SetSelectBodyIndex(std::numeric_limits<size_t>::max());
+	}
+	ImGui::Dummy(ImVec2(0.f, 10.f));
+
+	/*if (ImGui::Button("Шрифты##fonts_button")) {
 		Engine::GuiWindows::SwitchVisibleWindow<Windows::DrawFontWindow>();
 	}
-	ImGui::Dummy(ImVec2(0.f, 10.f));	
+	ImGui::Dummy(ImVec2(0.f, 10.f));*/	
 }
