@@ -39,6 +39,7 @@ public:
 	inline static TypeDraw typeDraw;
 	inline static float scaleBody = 2.f;
 	inline static float trace = 1.f;
+	inline static bool showDepth = true;
 
 private:
 	inline static Engine::Color clearColor = Engine::Color(0.f, 0.f, 0.f, 1.f);

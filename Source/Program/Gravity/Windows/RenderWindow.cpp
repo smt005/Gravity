@@ -48,6 +48,9 @@ void RenderWindow::Render()
 	ImGui::SliderFloat("Масштаб тела", &GravityRender::scaleBody, 1.f, 10.f);
 	ImGui::Dummy(ImVec2(0.f, 0.f));
 
+	ImGui::Checkbox("Глубина", &GravityRender::showDepth);
+	ImGui::Dummy(ImVec2(0.f, 0.f));
+
 	ImGui::Checkbox("Oтображать точки", &GravityRender::typeDraw.point);
 	ImGui::Dummy(ImVec2(0.f, 0.f));
 

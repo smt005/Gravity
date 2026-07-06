@@ -156,6 +156,7 @@ void MultiThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size)
 				if (!colapcePtr) {
 					colapcePtr = &_colapses.emplace_back(i);
 				}
+
 				if (!_colapseOfBodies[i]) {
 					_colapseOfBodies[i] = colapcePtr;
 					const auto& body = _bodies[i];
@@ -163,12 +164,17 @@ void MultiThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size)
 					colapcePtr->sumMass += body.mass;
 					colapcePtr->sumVelocity += body.velocity * body.mass;
 				}
+
 				if (!_colapseOfBodies[j]) {
 					_colapseOfBodies[j] = colapcePtr;
 					const auto& body = _bodies[j];
 					colapcePtr->sumPos += body.pos * body.mass;
 					colapcePtr->sumMass += body.mass;
 					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+
+				if (_selectBodyIndex == j) {
+					_selectBodyIndex = i;
 				}
 			}
 			else {
@@ -199,6 +205,7 @@ void MultiThread::UpdateForceHalf(size_t iBegin, size_t iEnd, size_t size)
 				if (!colapcePtr) {
 					colapcePtr = &_colapses.emplace_back(i);
 				}
+
 				if (!_colapseOfBodies[i]) {
 					_colapseOfBodies[i] = colapcePtr;
 					const auto& body = _bodies[i];
@@ -206,12 +213,17 @@ void MultiThread::UpdateForceHalf(size_t iBegin, size_t iEnd, size_t size)
 					colapcePtr->sumMass += body.mass;
 					colapcePtr->sumVelocity += body.velocity * body.mass;
 				}
+
 				if (!_colapseOfBodies[j]) {
 					_colapseOfBodies[j] = colapcePtr;
 					const auto& body = _bodies[j];
 					colapcePtr->sumPos += body.pos * body.mass;
 					colapcePtr->sumMass += body.mass;
 					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+
+				if (_selectBodyIndex == j) {
+					_selectBodyIndex = i;
 				}
 			}
 			else {
@@ -246,6 +258,7 @@ void MultiThread::UpdateForceHalfNoMutex(size_t iBegin, size_t iEnd, size_t size
 				if (!colapcePtr) {
 					colapcePtr = &_colapses.emplace_back(i);
 				}
+
 				if (!_colapseOfBodies[i]) {
 					_colapseOfBodies[i] = colapcePtr;
 					const auto& body = _bodies[i];
@@ -253,12 +266,17 @@ void MultiThread::UpdateForceHalfNoMutex(size_t iBegin, size_t iEnd, size_t size
 					colapcePtr->sumMass += body.mass;
 					colapcePtr->sumVelocity += body.velocity * body.mass;
 				}
+
 				if (!_colapseOfBodies[j]) {
 					_colapseOfBodies[j] = colapcePtr;
 					const auto& body = _bodies[j];
 					colapcePtr->sumPos += body.pos * body.mass;
 					colapcePtr->sumMass += body.mass;
 					colapcePtr->sumVelocity += body.velocity * body.mass;
+				}
+
+				if (_selectBodyIndex == j) {
+					_selectBodyIndex = i;
 				}
 			}
 			else {

@@ -85,7 +85,7 @@ void DebugWindow::Render() {
 		}
 	}
 
-	if (ImGui::CollapsingHeader("Time")) {
+	if (ImGui::CollapsingHeader("Время")) {
 		const size_t size = debugContext.deltaTimes.size();
 		for (size_t i = 0; i < size; ++i) {
 			std::string text;
@@ -97,10 +97,25 @@ void DebugWindow::Render() {
 			}
 			ImGui::Text(text.c_str());
 		}
+	}
 
+	if (ImGui::CollapsingHeader("Графики")) {
 		if (debugContext.fpsGraph.Count() > 0) {
 			const auto& fpsGraph = debugContext.fpsGraph;
-			ImGui::PlotHistogram("fps##fps", fpsGraph.Data(), fpsGraph.Count(), 0, NULL, 0.0f, fpsGraph.MaxValue(), ImVec2(0, 100.0f));
+			ImGui::Text(TO_STRING("max fps: {}", fpsGraph.MaxValue()).c_str());
+			ImGui::PlotHistogram("##fps", fpsGraph.Data(), fpsGraph.Count(), 0, NULL, 0.0f, fpsGraph.MaxValue(), ImVec2(0, 100.0f));
+		}
+
+		if (debugContext.cpsGraph.Count() > 0) {
+			const auto& cpsGraph = debugContext.cpsGraph;
+			ImGui::Text(TO_STRING("max fps: {}", cpsGraph.MaxValue()).c_str());
+			ImGui::PlotHistogram("##cps", cpsGraph.Data(), cpsGraph.Count(), 0, NULL, 0.0f, cpsGraph.MaxValue(), ImVec2(0, 100.0f));
+		}
+
+		if (debugContext.cpsGraph.Count() > 0) {
+			const auto& countObjectGraph = debugContext.countObjectGraph;
+			ImGui::Text(TO_STRING("max obj: {}", countObjectGraph.MaxValue()).c_str());
+			ImGui::PlotHistogram("##cobj", countObjectGraph.Data(), countObjectGraph.Count(), 0, NULL, 0.0f, countObjectGraph.MaxValue(), ImVec2(0, 100.0f));
 		}
 	}
 }

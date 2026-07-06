@@ -40,6 +40,15 @@ namespace Spaces
 		virtual void Bodies(std::vector<GravityRender::Body>& bodies) = 0;
 		virtual std::vector<BodyData> GetBodies() = 0;
 
+		virtual void SetSelectBodyIndex(size_t index)
+		{
+			_selectBodyIndex = index;
+		}
+		virtual size_t SelectBodyIndex()
+		{
+			return _selectBodyIndex;
+		}
+		
 		const std::string& GetName() const;
 
 		static float Radius(float mass);
@@ -48,6 +57,9 @@ namespace Spaces
 	public:
 		const ThreadType type = ThreadType::IN_MAIN;
 		std::vector<std::pair<bool, std::string>> params;
+
+	protected:
+		size_t _selectBodyIndex = -1;
 
 	private:
 		mutable std::string _name;

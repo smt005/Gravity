@@ -99,6 +99,11 @@ void TopPanel::Update(double deltaTime) {
 		_countFrame = 0;
 		_sumTimeFps = 0;
 	
-		DebugContext::Inst().fpsGraph.Add(_roundFps);
+		auto& debugContext = DebugContext::Inst();
+		debugContext.fpsGraph.Add(_roundFps);
+
+		if (debugContext.deltaTimes[0] > 0) {
+			debugContext.cpsGraph.Add(1 / debugContext.deltaTimes[0] * 1000);
+		}
 	}
 }

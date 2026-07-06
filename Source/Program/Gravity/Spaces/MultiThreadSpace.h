@@ -48,6 +48,15 @@ namespace Spaces
 		void Bodies(std::vector<GravityRender::Body>& bodies) override;
 		std::vector<BodyData> GetBodies() override;
 
+		void SetSelectBodyIndex(size_t index) override
+		{
+			_selectBodyIndex = index;
+		}
+		size_t SelectBodyIndex() override
+		{
+			return _selectBodyIndex;
+		}
+
 	private:
 		void UpdateForce(size_t iBegin, size_t iEnd, size_t size);
 		void UpdateForceHalf(size_t iBegin, size_t iEnd, size_t size);

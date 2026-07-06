@@ -82,7 +82,7 @@ void MainThread::Update()
 	ColapceBodies(forces, colapses, colapseOfBodies);
 	UpdatePositions(forces);
 	
-	debugContext.countObject = _bodies.size();
+	//debugContext.countObject = _bodies.size();
 }
 
 void MainThread::UpdateForce(size_t iBegin, size_t iEnd, size_t size, std::vector<mystd::Vec3>& forces, std::deque<Colapce>& colapses, std::vector<Colapce*>& colapseOfBodies)

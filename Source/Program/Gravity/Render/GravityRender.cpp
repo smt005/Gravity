@@ -9,6 +9,7 @@
 #include <Object/Texture.h>
 #include "../Shaders/GravityShader.h"
 #include "../Cameras/GravityCameras.h"
+#include "../DebugContext.h"
 #include "../Spaces/SpaceManager.h"
 #include "../Spaces/Common/SpatialGrid.h"
 
@@ -50,13 +51,25 @@ void GravityRender::Render()
 
 void GravityRender::PrepareRender()
 {
+	auto& debugContext = DebugContext::Inst();
+
 	SpaceManager::Current().Bodies(_renderBodies);
 
-	std::sort(_renderBodies.begin(), _renderBodies.end(), [&camPos = Engine::Camera::GetLink().Pos()](const auto& leftBody, const auto& rightBody) {
-		const float leftDist = glm::distance(camPos, leftBody.pos);
-		const float rightDist = glm::distance(camPos, rightBody.pos);
-		return leftDist > rightDist;
-		});
+	static double timer = 10;
+	timer += Engine::Callback::GetDeltaTime();
+	if (timer >= 10) {
+		timer = 0;
+		debugContext.countObject = _renderBodies.size();
+		debugContext.countObjectGraph.Add(debugContext.countObject);
+	}
+
+	if (showDepth) {
+		std::sort(_renderBodies.begin(), _renderBodies.end(), [&camPos = Engine::Camera::GetLink().Pos()](const auto& leftBody, const auto& rightBody) {
+			const float leftDist = glm::distance(camPos, leftBody.pos);
+			const float rightDist = glm::distance(camPos, rightBody.pos);
+			return leftDist > rightDist;
+			});
+	}
 
 	Engine::Draw::ClearColor();
 	mainBuffer.Clear(clearColor);
@@ -179,12 +192,14 @@ void GravityRender::RenderSprite()
 		mat = glm::scale(mat, glm::vec3(scale));
 		shader.SetModelMatrix(mat);
 
-		float distFactor = glm::distance(camPos, body.pos);
-		distFactor -= nearDist;
-		distFactor /= spaceDist;
+		if (showDepth) {
+			float distFactor = glm::distance(camPos, body.pos);
+			distFactor -= nearDist;
+			distFactor /= spaceDist;
 
-		color[1] = 1.f - distFactor;
-		color[2] = 1.f - distFactor;
+			color[1] = 1.f - distFactor;
+			color[2] = 1.f - distFactor;
+		}
 
 		shader.SetColor(color);
 

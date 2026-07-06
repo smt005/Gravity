@@ -8,14 +8,36 @@
 class DebugContext : public mystd::Singletone<DebugContext>
 {
 public:
-	class FpsGraph
+	class ValueGraph
 	{
 	public:
-		FpsGraph() {
+		ValueGraph() {
 			_values.resize(_maxSize, 0.f);
 		}
 
-		int Count() const{
+		ValueGraph(size_t maxSize, short int resetMax)
+			: _resetMax(resetMax)
+			, _maxSize(maxSize){
+			_values.resize(_maxSize, 0.f);
+		}
+
+		ValueGraph(ValueGraph&& valueGraph) noexcept
+		{
+			std::swap(_resetMax, valueGraph._resetMax);
+			std::swap(_maxValue, valueGraph._maxValue);
+			std::swap(_maxSize, valueGraph._maxSize);
+			std::swap(_values, valueGraph._values);
+		}
+
+		void operator = (ValueGraph&& valueGraph) noexcept
+		{
+			std::swap(_resetMax, valueGraph._resetMax);
+			std::swap(_maxValue, valueGraph._maxValue);
+			std::swap(_maxSize, valueGraph._maxSize);
+			std::swap(_values, valueGraph._values);
+		}
+
+		int Count() const {
 			return static_cast<int>(_values.size());
 		}
 
@@ -28,14 +50,21 @@ public:
 		}
 
 		void Add(float value) {
-			if (_values.size() >= _maxSize) {
-				_values.erase(_values.begin());
-			}
+			_values.erase(_values.begin());
 			_values.emplace_back(value);
-			_maxValue = std::max(value, _maxValue);
+
+			if (_resetMax-- == 0) {
+				_resetMax = 10;
+				_maxValue = *std::max_element(_values.begin(), _values.end());
+
+			}
+			else {
+				_maxValue = std::max(value, _maxValue);
+			}
 		}
 	
 	private:
+		short int _resetMax = 10;
 		float _maxValue = 0.f;
 		size_t _maxSize = 100;
 		std::vector<float> _values;
@@ -61,7 +90,9 @@ public:
 	float deltaTime = 0.f;
 	float subProgress = 0.f;
 	float progress = 0.f;
-	FpsGraph fpsGraph;
+	ValueGraph fpsGraph;
+	ValueGraph cpsGraph;
+	ValueGraph countObjectGraph = ValueGraph(100, -1);
 
 	void Clean() {
 		countObject = 0.f;
