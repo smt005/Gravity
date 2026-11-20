@@ -8,9 +8,9 @@ namespace Engine
 	class Texture final : public Resource<Texture>
 	{
 	public:
-		using Ptr = std::shared_ptr<Texture>;
+		using Ptr = mystd::shared_ptr<Texture>;
 
-		Texture() = delete;
+		Texture() = default;
 		Texture(std::string_view name, bool needLoad = true);
 		~Texture();
 
@@ -25,3 +25,5 @@ namespace Engine
 
 	};
 }
+
+#define TEXTURES Engine::Texture::Instance()

@@ -13,7 +13,7 @@ namespace Engine
 	public:
 		using Ptr = mystd::shared_ptr<Model>;
 
-		Model() = default;
+		Model() = delete;
 		Model(std::string_view name, bool load = true, bool bindVao = false);
 		Model(std::string_view name, std::string_view fileNamePath, bool load = false, bool bindVao = false);
 		~Model() = default;
@@ -23,8 +23,8 @@ namespace Engine
 
 	private:
 	public:
-		Shape shape;
-		Texture texture;
+		Shape::Ptr _shape;
+		Texture::Ptr _texture;
 	};
 }
 

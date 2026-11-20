@@ -10,7 +10,7 @@ using namespace Engine;
 
 GLuint VBO, VAO;
 
-void Draw::SetClearColor(float* color)
+void Draw::SetClearColor(const float* const color)
 {
 	if (color) {
 		glClearColor(color[0], color[1], color[2], color[3]);
@@ -19,7 +19,7 @@ void Draw::SetClearColor(float* color)
 
 void Draw::SetClearColor(const Color& color)
 {
-	SetClearColor(color);
+	SetClearColor(static_cast<const float* const>(color));
 }
 
 void Draw::SetClearColor(float r, float g, float b, float a) {

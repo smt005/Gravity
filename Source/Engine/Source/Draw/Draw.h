@@ -42,7 +42,7 @@ namespace Engine
 
 	class Draw final {
 	public:
-		static void SetClearColor(float* color);
+		static void SetClearColor(const float* const color);
 		static void SetClearColor(const Color& color);
 		static void SetClearColor(float r, float g, float b, float a = 1.f);
 		static void ClearColor();

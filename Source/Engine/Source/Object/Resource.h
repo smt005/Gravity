@@ -28,10 +28,10 @@ namespace Engine
 		friend mystd::Singletone<Resource<T>>;
 
 		Resource() = default;
-		Resource(const Resource&) = delete;
-		Resource(Resource&&) = delete;
-		Resource& operator = (const Resource&) = delete;
-		Resource& operator = (Resource&&) = delete;
+		//Resource(const Resource&) = delete;
+		//Resource(Resource&&) = delete;
+		//Resource& operator = (const Resource&) = delete;
+		//Resource& operator = (Resource&&) = delete;
 
 	protected:
 		Resource(std::string_view name) : _name(name) {}

@@ -6,5 +6,10 @@
   "Sphere": {
     "shape": "Sphere",
 	"texture": "orange_star.jpg"
+  },
+  "NLO100": {
+    "shape": "NLO/NLO100",
+	"texture": "metallic_circle.jpg"
   }
 }
+
