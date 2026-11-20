@@ -22,5 +22,5 @@ private:
 	void InitCallback();
 
 private:
-	Engine::Model::Ptr _modelPtr;
+	//Engine::Model::Ptr _modelPtr;
 };

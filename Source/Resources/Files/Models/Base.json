@@ -9,7 +9,28 @@
   },
   "NLO100": {
     "shape": "NLO/NLO100",
-	"texture": "metallic_circle.jpg"
+	"texture": "NLO/metallic_circle.jpg"
+  },
+  "Plane_100": {
+    "shape": "Location/Plane_100",
+	"texture": "Location/tileable-texture.png"
+  },
+  "Plane_12_100": {
+    "shape": "Location/Plane_12_100",
+	"texture": "Location/tileable-texture.png"
+  },
+  "Plane_25_100": {
+    "shape": "Location/Plane_25_100",
+	"texture": "Location/tileable-texture.png"
+  },
+  "Plane_50_100": {
+    "shape": "Location/Plane_50_100",
+	"_texture": "NLO/metallic_circle.jpg",
+	"texture": "Location/tileable-texture.png"
+  },
+  "Plane_100_100": {
+    "shape": "Location/Plane_100_100",
+	"texture": "Location/tileable-texture.png"
   }
 }
 

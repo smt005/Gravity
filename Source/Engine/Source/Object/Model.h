@@ -15,11 +15,11 @@ namespace Engine
 
 		Model() = delete;
 		Model(std::string_view name, bool load = true, bool bindVao = false);
-		Model(std::string_view name, std::string_view fileNamePath, bool load = false, bool bindVao = false);
+		//Model(std::string_view name, std::string_view fileNamePath, bool load = false, bool bindVao = false);
 		~Model() = default;
 
 		bool Load(bool createBuffer = false);
-		bool Load(std::string_view fileNamePath, bool createBuffer = false);
+		//bool Load(std::string_view fileNamePath, bool createBuffer = false);
 
 	private:
 	public:

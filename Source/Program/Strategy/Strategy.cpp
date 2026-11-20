@@ -5,6 +5,7 @@
 #include <Files/FileManager.h>
 #include <Callback/VirtualKey.h>
 #include <Object/Model.h>
+#include <Object/Location.h>
 #include <Draw/Camera.h>
 #include <Draw/Draw.h>
 #include <Common/JsonHelper.h>
@@ -31,12 +32,10 @@ bool Strategy::Init(std::string_view params)
 		cameras::MakeCameras();
 	}
 
-	{
-		// Sphere
-		_modelPtr = MODELS.Get("NLO100", true, true);
-	
+	/*{
+		_modelPtr = MODELS.Get("Plane_25_100", true, true);
 		Engine::Draw::SetClearColor({0.3f, 0.6f, 0.9f, 1.f});
-	}
+	}*/
 
 	return true;
 }
@@ -61,37 +60,36 @@ void Strategy::Draw()
 	using namespace Engine;
 
 	{
+		Draw::ClearColor();
+		Draw::ClearDepth();
+		Draw::DepthTest(true);
+		Draw::ActiveTexture(0);
+	}
+
+	auto& shader = shaders::BaseShaderSingle::Instance();
+	shader.UseProgram();
+	
+	Engine::Color color({ 1.f, 1.f, 1.f, 1.f });
+	shader.SetColor(color);
+
+	for (auto& obj : LOCATIONS["First"]._objects) {
+		shader.SetModelMatrix(obj.mat);
+
+		Draw::BindTexture(obj.model->_texture->Id());
+
+		Engine::Draw::Render(obj.model->_shape->mesh);
+	}
+
+	/*{
 		if (_modelPtr && _modelPtr->_shape) {
-			auto& shader = shaders::BaseShaderSingle::Instance();
-			shader.UseProgram();
-
-			//...
 			glm::mat4 mat(1.f);
-
-			//const float scale = 10.f;
-			//mat = glm::translate(mat, body.pos);
-			/*if (glm::length(axis)) {
-				mat = glm::rotate(mat, angle, axis);
-			}*/
-
-			//mat = glm::scale(mat, glm::vec3(scale));
-
 			shader.SetModelMatrix(mat);
-			
-			//...
-			Draw::ClearColor();
-			Draw::ClearDepth();
-			Draw::DepthTest(true);
-			Draw::ActiveTexture(0);
-			//Draw::BindTexture(Texture::GetRef("NLO/metallic_circle.jpg").Id());
-			Draw::BindTexture(_modelPtr->_texture->Id());
-			//...
 
-			Engine::Color color({ 1.f, 1.f, 1.f, 1.f });
-			shader.SetColor(color);
+			Draw::BindTexture(_modelPtr->_texture->Id());
+			
 			Engine::Draw::Render(_modelPtr->_shape->mesh);
 		}
-	}
+	}*/
 }
 
 void Strategy::InitCallback()
