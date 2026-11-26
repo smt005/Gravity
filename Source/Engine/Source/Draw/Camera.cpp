@@ -76,7 +76,7 @@ void Camera::Save()
 	}
 }
 
-bool Camera::Load(const Json& data) {
+bool Camera::Load(const nlohmann::json& data) {
 	if (data.empty()) {
 		return false;
 	}
@@ -145,7 +145,7 @@ bool Camera::Load(const Json& data) {
 	return true;
 }
 
-void Camera::Save(Json& data) {
+void Camera::Save(nlohmann::json& data) {
 	data["type"] = _type == Type::PERSPECTIVE ? "perspective" : "ortho";
 
 	if (_pos.length() == 0.f) {

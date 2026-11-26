@@ -11,6 +11,14 @@
     "shape": "NLO/NLO100",
 	"texture": "NLO/metallic_circle.jpg"
   },
+  "Glider00": {
+    "shape": "Gliders/Glider00",
+	"texture": "Gliders/Glider_00.jpg"
+  },
+  "Glider01": {
+    "shape": "Gliders/Glider00",
+	"texture": "Gliders/Glider_01.png"
+  },
   "Plane_100": {
     "shape": "Location/Plane_100",
 	"texture": "Location/tileable-texture.png"

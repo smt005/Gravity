@@ -60,7 +60,7 @@ void Gravity::OnClose()
 {
 	if (auto* data = Engine::Settings::Instance().JsonData("openWindows", true)) {
 		data->clear();
-		(*data) = Json::array();
+		(*data) = nlohmann::json::array();
 		
 		for (const auto& [name, _] : Engine::GuiWindows::GetWindows())  {
 			data->emplace_back(name);

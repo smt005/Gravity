@@ -27,9 +27,9 @@ void Location::Load()
 
 	for (size_t iX = 0; iX < sizeLocation; ++iX) {
 		for (size_t iY = 0; iY < sizeLocation; ++iY) {
-			size_t indexModelName = std::rand() % (countModeNames - 0);
+			size_t indexModelName = std::rand() % countModeNames;
 			
-			if (std::rand() % 2 > 0) {
+			if (std::rand() % 3 > 0) {
 				indexModelName = 0;
 			}
 
@@ -46,6 +46,35 @@ void Location::Load()
 			_objects.emplace_back().model = MODELS.Get(nameModel, true, true);
 			glm::mat mat = glm::translate(_objects.back().mat, glm::vec3((static_cast<float>(iX) * sizePlane - offset), (static_cast<float>(iY) * sizePlane - offset), 0.f));
 			_objects.back().mat = mat;
+		}
+	}
+
+	{
+		_gliders.reserve(4);
+
+		{
+			_gliders.emplace_back().model = MODELS.Get("Glider00", true, true);
+			_gliders.back().mat[3][0] += 200;
+			_gliders.back().mat[3][1] += 200;
+			_gliders.back().mat[3][2] += 10;
+		}
+		{
+			_gliders.emplace_back().model = MODELS.Get("Glider00", true, true);
+			_gliders.back().mat[3][0] += 300;
+			_gliders.back().mat[3][1] += 400;
+			_gliders.back().mat[3][2] += 10;
+		}
+		{
+			_gliders.emplace_back().model = MODELS.Get("Glider01", true, true);
+			_gliders.back().mat[3][0] -= 200;
+			_gliders.back().mat[3][1] -= 200;
+			_gliders.back().mat[3][2] += 10;
+		}
+		{
+			_gliders.emplace_back().model = MODELS.Get("Glider01", true, true);
+			_gliders.back().mat[3][0] -= 300;
+			_gliders.back().mat[3][1] -= 400;
+			_gliders.back().mat[3][2] += 10;
 		}
 	}
 

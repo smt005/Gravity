@@ -13,6 +13,12 @@ namespace Engine
 		Model::Ptr model;
 	};
 
+	struct Glider
+	{
+		glm::mat4x4 mat = glm::mat4x4(1.f);
+		Model::Ptr model;
+	};
+
 	class Location : public Engine::Resource<Location>
 	{
 	public:
@@ -27,6 +33,7 @@ namespace Engine
 	private:
 	public:
 		std::vector<Object> _objects;
+		std::vector<Glider> _gliders;
 	};
 }
 

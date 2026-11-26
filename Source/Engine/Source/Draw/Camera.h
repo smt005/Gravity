@@ -118,8 +118,8 @@ namespace Engine
 
 		virtual bool Load();
 		virtual void Save();
-		virtual bool Load(const Json& data);
-		virtual void Save(Json& data);
+		virtual bool Load(const nlohmann::json& data);
+		virtual void Save(nlohmann::json& data);
 
 	protected:
 

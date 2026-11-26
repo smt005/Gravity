@@ -74,9 +74,13 @@ void Strategy::Draw()
 
 	for (auto& obj : LOCATIONS["First"]._objects) {
 		shader.SetModelMatrix(obj.mat);
-
 		Draw::BindTexture(obj.model->_texture->Id());
+		Engine::Draw::Render(obj.model->_shape->mesh);
+	}
 
+	for (auto& obj : LOCATIONS["First"]._gliders) {
+		shader.SetModelMatrix(obj.mat);
+		Draw::BindTexture(obj.model->_texture->Id());
 		Engine::Draw::Render(obj.model->_shape->mesh);
 	}
 

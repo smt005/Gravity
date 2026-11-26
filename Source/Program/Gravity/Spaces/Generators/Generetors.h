@@ -39,7 +39,7 @@ namespace GeneratorSpace
 	};
 	
 	std::string_view NameData();
-	Json& GetData();
+	nlohmann::json& GetData();
 	void Load();
 
 	glm::vec3 GetVelocityOnOrbit(BodyData& body, const BodyData& mainBody);

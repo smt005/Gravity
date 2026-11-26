@@ -5,10 +5,10 @@
 
 using namespace Engine;
 
-Json& Settings::LoadSettings()
+nlohmann::json& Settings::LoadSettings()
 {
 	try {
-		Json jsonData = Engine::LoadJson(std::string(settingsFileName), "write");
+		nlohmann::json jsonData = Engine::LoadJson(std::string(settingsFileName), "write");
 
 		if (jsonData.contains("width")) {
 			width = jsonData["width"].get<int>();
@@ -40,19 +40,19 @@ void Settings::SaveSettings()
 	Engine::SaveJson(_jsonData, std::string(settingsFileName), "write");
 }
 
-Json& Settings::JsonData()
+nlohmann::json& Settings::JsonData()
 {
 	return _jsonData;
 }
 
-const Json& Settings::JsonData() const
+const nlohmann::json& Settings::JsonData() const
 {
 	return _jsonData;
 }
 
-const Json* Settings::JsonData(std::string_view path) const
+const nlohmann::json* Settings::JsonData(std::string_view path) const
 {
-	const Json* jsonData = &_jsonData;
+	const nlohmann::json* jsonData = &_jsonData;
 
 	for (std::string_view key : mystd::SplitString(path, '/')) {
 		if (jsonData->contains(key)) {
@@ -67,16 +67,16 @@ const Json* Settings::JsonData(std::string_view path) const
 }
 
 
-Json* Settings::JsonData(std::string_view path, bool create)
+nlohmann::json* Settings::JsonData(std::string_view path, bool create)
 {
-	Json* jsonData = &_jsonData;
+	nlohmann::json* jsonData = &_jsonData;
 
 	for (std::string_view key : mystd::SplitString(path, '/')) {
 		if (jsonData->contains(key)) {
 			jsonData = &(*jsonData)[key];
 		}
 		else if (create) {
-			(*jsonData)[key] = Json();
+			(*jsonData)[key] = nlohmann::json();
 			jsonData = &(*jsonData)[key];
 		}
 		else {
@@ -87,8 +87,8 @@ Json* Settings::JsonData(std::string_view path, bool create)
 	return jsonData;
 }
 
-Json Settings::operator [](std::string_view keys)
+nlohmann::json Settings::operator [](std::string_view keys)
 {
 	auto* jsonData = JsonData(keys);
-	return jsonData ? *jsonData : Json();
+	return jsonData ? *jsonData : nlohmann::json();
 }

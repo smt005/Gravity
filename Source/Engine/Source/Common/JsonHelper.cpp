@@ -3,14 +3,19 @@
 #include "JsonHelper.h"
 #include <Files/FileManager.h>
 
-Json Engine::LoadJson(const std::string& fileName, const std::string& fileSystemName)
+nlohmann::json Engine::LoadJson(const std::string& fileName, const std::string& fileSystemName)
+{
+	return LoadJson(std::filesystem::path(fileName));
+}
+
+nlohmann::json Engine::LoadJson(const std::filesystem::path& fileName, const std::string& fileSystemName)
 {
 	const std::string jsonText = FileManager::Get(fileSystemName).ReadTextFile(fileName);
-	Json jsonData = Json::parse(jsonText);
+	nlohmann::json jsonData = nlohmann::json::parse(jsonText);
 	return jsonData;
 }
 
-bool Engine::SaveJson(const Json& jsonData, const std::string& fileName, const std::string& fileSystemName)
+bool Engine::SaveJson(const nlohmann::json& jsonData, const std::string& fileName, const std::string& fileSystemName)
 {
 #ifdef _DEBUG
 	constexpr unsigned int indentStep = 2;

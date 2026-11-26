@@ -111,7 +111,7 @@ void SpaceManager::SaveSpace(bool addTimeToName)
 	}
 }
 
-Json& SpaceManager::GetSettingData(std::string_view path, bool create)
+nlohmann::json& SpaceManager::GetSettingData(std::string_view path, bool create)
 {
 	const std::string className = Engine::GetClassName<SpaceManager>();
 	auto& settings = Engine::Settings::Instance();
@@ -125,7 +125,7 @@ Json& SpaceManager::GetSettingData(std::string_view path, bool create)
 		}
 	}
 
-	static Json defaultJsonData;
+	static nlohmann::json defaultJsonData;
 	return defaultJsonData;
 }
 

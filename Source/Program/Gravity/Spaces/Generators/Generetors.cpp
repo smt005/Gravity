@@ -30,7 +30,7 @@ std::string_view GeneratorSpace::NameData()
 	return nameData;
 }
 
-Json& GeneratorSpace::GetData()
+nlohmann::json& GeneratorSpace::GetData()
 {
 	auto* jsonData = Engine::Settings::Instance().JsonData(NameData(), true);
 	if (!jsonData) {

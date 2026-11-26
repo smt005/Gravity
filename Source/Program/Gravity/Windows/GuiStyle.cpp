@@ -13,7 +13,7 @@ void Windows::LoadGuiStyle()
     float sizeFont = 14.f;
     float spaceX = 1.f;
 
-    if (const Json* guiWindowsSettings = Engine::Settings::Instance().JsonData("GuiWindows")) {
+    if (const nlohmann::json* guiWindowsSettings = Engine::Settings::Instance().JsonData("GuiWindows")) {
         const std::string style = Engine::GetJsonValue("style", guiWindowsSettings, std::string("Dark")); // Light Dark
         styleColorsDark = style == "Dark";
 
