@@ -5,7 +5,7 @@
 
 nlohmann::json Engine::LoadJson(const std::string& fileName, const std::string& fileSystemName)
 {
-	return LoadJson(std::filesystem::path(fileName));
+	return LoadJson(std::filesystem::path(fileName), fileSystemName);
 }
 
 nlohmann::json Engine::LoadJson(const std::filesystem::path& fileName, const std::string& fileSystemName)

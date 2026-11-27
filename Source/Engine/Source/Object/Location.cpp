@@ -1,9 +1,11 @@
 // ◦ Xyz ◦
 
 #include "Location.h"
+#include <filesystem>
+#include <nlohmann/json.hpp>
 #include <glm/ext/matrix_transform.hpp>
-
-#include <Common/Common.h>
+#include <Common/Json.h>
+#include <Logs.h>
 
 using namespace Engine;
 
@@ -17,6 +19,22 @@ Location::Location(std::string_view name, bool needLoad)
 
 void Location::Load()
 {
+	const std::filesystem::path fileNamePath = "Locations/" + GetName() + ".json";
+	const Json jsonData(fileNamePath);
+
+	const nlohmann::json& objects = jsonData["objects"];
+
+	if (objects.is_array()) {
+		for (const auto& obj : objects) {
+			if (obj.is_object()) {
+				const std::string modelStr = obj["model"];
+				//PRINT("Location::Load {}", modelStr);
+			}
+
+
+		}
+	}
+
 	constexpr size_t sizeLocation = 100;
 	constexpr float sizePlane = 100.f;
 	constexpr float offset = static_cast<float>(sizeLocation) / 2.f * sizePlane / 2.f;

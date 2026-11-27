@@ -12,6 +12,7 @@
 #include <Logs.h>
 #include "../Gravity/Shaders/GravityShader.h"
 #include "../Gravity/Cameras/GravityCameras.h"
+#include <MyJson.h>
 
 Engine::Program::Uptr instanceProgram = Engine::Program::MakeProgram<Strategy>();
 
@@ -24,6 +25,10 @@ bool Strategy::InitFileManagers(std::string_view params)
 
 bool Strategy::Init(std::string_view params)
 {
+	{
+		mystd::TestJsonMystd();
+	}
+
 	InitCallback();
 
 	{
